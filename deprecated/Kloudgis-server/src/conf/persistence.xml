@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+  <persistence-unit name="adminPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <class>org.kloudgis.admin.store.UserRoleDbEntity</class>
+    <class>org.kloudgis.admin.store.SandboxDbEntity</class>
+    <class>org.kloudgis.admin.store.BaseLayerDbEntity</class>
+    <class>org.kloudgis.admin.store.BaseLayerModeDbEntity</class>
+    <class>org.kloudgis.admin.store.FeedDbEntity</class>
+    <class>org.kloudgis.admin.store.DatasourceDbEntity</class>
+    <class>org.kloudgis.admin.store.SourceColumnsDbEntity</class>
+    <class>org.kloudgis.admin.synch.store.SparkFileVersion</class>
+    <class>org.kloudgis.admin.store.UserDbEntity</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="hibernate.connection.username" value="kloudgis"/>
+      <property name="hibernate.connection.password" value="kwadmin"/>
+      <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>
+      <property name="hibernate.connection.url" value="jdbc:postgresql_postGIS://localhost:5432/kg_admin"/>
+      <property name="hibernate.dialect" value="org.hibernatespatial.postgis.PostgisDialect"/>
+      <property name="hibernate.c3p0.min_size" value="0"/>
+      <property name="hibernate.c3p0.max_size" value="5"/>
+      <property name="hibernate.c3p0.timeout" value="60"/>
+      <property name="hibernate.c3p0.max_statements" value="10"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="sandboxPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <non-jta-data-source/>
+    <class>org.kloudgis.data.store.FeatureTypeDbEntity</class>
+    <class>org.kloudgis.data.store.PoiDbEntity</class>
+    <class>org.kloudgis.data.store.PathDbEntity</class>
+    <class>org.kloudgis.data.store.ZoneDbEntity</class>
+    <class>org.kloudgis.data.store.PoiTagDbEntity</class>
+    <class>org.kloudgis.data.store.PathTagDbEntity</class>
+    <class>org.kloudgis.data.store.ZoneTagDbEntity</class>
+    <class>org.kloudgis.data.store.LayerDbEntity</class>
+    <class>org.kloudgis.data.store.MemberDbEntity</class>
+    <class>org.kloudgis.data.store.NoteDbEntity</class>
+    <class>org.kloudgis.data.store.FeatureTypeClassDbEntity</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      
+      <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>
+  <!--<property name="hibernate.connection.url" value="jdbc:postgresql_postGIS://localhost:5432/default_sandbox"/>
+      <property name="hibernate.connection.username" value="kloudgis"/>
+      <property name="hibernate.connection.password" value="kwadmin"/>-->
+      <property name="hibernate.jdbc.batch_size" value="20"/>
+      <property name="hibernate.c3p0.min_size" value="0"/>
+      <property name="hibernate.c3p0.max_size" value="2"/>
+      <property name="hibernate.c3p0.timeout" value="60"/>
+      <property name="hibernate.c3p0.max_statements" value="0"/>
+      <property name="hibernate.dialect" value="org.hibernatespatial.postgis.PostgisDialect"/>
+      <property name="hibernate.show_sql" value="false"/>
+     <!-- <property name="hibernate.format_sql" value="true"/>
+      <property name="hibernate.use_sql_comments" value="true"/>-->
+      <property name="hibernate.search.default.indexBase" value="/tmp/search_index"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+    </properties>
+  </persistence-unit>
+</persistence>
