@@ -5,13 +5,12 @@
 package org.kloudgis.admin.bean;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import org.kloudgis.LoginFactory;
+import org.kloudgis.admin.pojo.Message;
 import org.kloudgis.admin.pojo.SignupUser;
 import org.kloudgis.admin.store.UserDbEntity;
 
@@ -28,18 +27,23 @@ public class RegisterResourceBean {
      * @param email
      * @return "Accepted" if OK, message otherwise
      */
-    @Path("test_email/{val}")
-    @GET
+    @Path("test_email")
+    @POST
     @Produces({"application/json"})
-    public Response testEmail(@PathParam("val") String email) {
-        if (email == null || email.length() == 0) {
-            return Response.ok("Not Accepted - Empty").build();
+    public Response testEmail(String email) {
+        Message message = new Message();
+        if (email == null || email.length() == 0) {       
+            message.content = "_Empty";           
+        }else if (!email.contains("@")) {
+            message.content = "_invalid";
         } else if (email.equals("admin@kloudgis.org")) {
-            return Response.ok("Not Accepted - Reserved").build();
+            message.content = "_Reserved";
         } else if (!LoginFactory.isUnique(email)) {
-            return Response.ok("Not Accepted - In use").build();
+            message.content = "_InUse";
+        }else{
+            message.content = "Accepted";
         }
-        return Response.ok("Accepted").build();
+        return Response.ok(message).build();
     }
     
      /**
