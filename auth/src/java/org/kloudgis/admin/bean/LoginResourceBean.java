@@ -29,7 +29,6 @@ import javax.ws.rs.core.Response;
 import org.kloudgis.AuthorizationManager;
 import org.kloudgis.LoginFactory;
 import org.kloudgis.admin.pojo.Credential;
-import org.kloudgis.admin.pojo.LoginResponse;
 import org.kloudgis.admin.pojo.Message;
 import org.kloudgis.admin.pojo.SignupUser;
 import org.kloudgis.admin.store.UserDbEntity;
@@ -64,7 +63,7 @@ public class LoginResourceBean {
             //create a session
             HttpSession session = req.getSession(true);
             session.setAttribute("timeout", Calendar.getInstance().getTimeInMillis());
-            return Response.ok(new LoginResponse(hashed_token, u.toSimpleUser())).build();
+            return Response.ok(new Message(hashed_token)).build();
         }
         em.close();
         return Response.status(Response.Status.UNAUTHORIZED).build();
