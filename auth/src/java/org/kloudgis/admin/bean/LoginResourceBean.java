@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 import org.kloudgis.AuthorizationManager;
 import org.kloudgis.LoginFactory;
 import org.kloudgis.admin.pojo.Credential;
+import org.kloudgis.admin.pojo.LoginResponse;
 import org.kloudgis.admin.pojo.Message;
 import org.kloudgis.admin.pojo.SignupUser;
 import org.kloudgis.admin.store.UserDbEntity;
@@ -53,17 +54,27 @@ public class LoginResourceBean {
         EntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
         UserDbEntity u = authenticate(em, crd.user, crd.pwd);
         if (u != null) {
-            //unique token for this users
-            String token = Calendar.getInstance().getTimeInMillis() + u.getSalt() + u.getEmail();
-            String hashed_token = LoginFactory.hashString(token, "SHA-512");
-            em.getTransaction().begin();
-            u.setAuthToken(hashed_token);
-            em.getTransaction().commit();
-            em.close();
+            String hashed_token = null;
+            if (crd.user != null) {
+                //unique token for this users
+                String token = Calendar.getInstance().getTimeInMillis() + u.getSalt() + u.getEmail();
+                hashed_token = LoginFactory.hashString(token, "SHA-512");
+                em.getTransaction().begin();
+                u.setAuthToken(hashed_token);
+                System.out.println("user:" + crd.user + " pass:" + crd.pwd);
+                System.out.println("New token is " + hashed_token);
+                em.getTransaction().commit();
+                em.close();
+            }else{
+                hashed_token = crd.pwd;
+            }
             //create a session
             HttpSession session = req.getSession(true);
             session.setAttribute("timeout", Calendar.getInstance().getTimeInMillis());
-            return Response.ok(new Message(hashed_token)).build();
+            LoginResponse response = new LoginResponse();
+            response.token = hashed_token;
+            response.user = u.toSimpleUser();
+            return Response.ok(response).build();
         }
         em.close();
         return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -109,7 +120,7 @@ public class LoginResourceBean {
         SignupUser pojo = null;
         if (auth_token != null) {
             EntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
-            UserDbEntity u = new AuthorizationManager().getUserFromAuthToken(auth_token, em);         
+            UserDbEntity u = new AuthorizationManager().getUserFromAuthToken(auth_token, em);
             if (u != null) {
                 pojo = u.toSimpleUser();
             }
@@ -127,6 +138,7 @@ public class LoginResourceBean {
                     if (expectedPass != null && expectedPass.equals(u.getPasswordHash())) {
                         return u;
                     }
+                    System.out.println("Auth failed");
                 }
             } else if (password_hash != null) {
                 return new AuthorizationManager().getUserFromAuthToken(password_hash, em);
