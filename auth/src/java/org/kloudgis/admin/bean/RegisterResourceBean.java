@@ -19,6 +19,7 @@ import org.kloudgis.admin.store.UserDbEntity;
  * @author jeanfelixg
  */
 @Path("/public/register")
+@Produces({"application/json"})
 public class RegisterResourceBean {
  
     
@@ -28,8 +29,7 @@ public class RegisterResourceBean {
      * @return "Accepted" if OK, message otherwise
      */
     @Path("test_email")
-    @POST
-    @Produces({"application/json"})
+    @POST 
     public Response testEmail(String email) {
         Message message = new Message();
         if (email == null || email.length() == 0) {       
@@ -52,8 +52,6 @@ public class RegisterResourceBean {
      * @return  message: success or rejected
      */
     @POST
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
     public Response register(SignupUser user_try) {
         return Response.ok(LoginFactory.register(user_try, UserDbEntity.ROLE_USER)).build();
     }

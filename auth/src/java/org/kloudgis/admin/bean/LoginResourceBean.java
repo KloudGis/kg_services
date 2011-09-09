@@ -40,6 +40,7 @@ import org.kloudgis.persistence.PersistenceManager;
  * @author jeanfelixg
  */
 @Path("/public/login")
+@Produces({"application/json"})
 public class LoginResourceBean {
 
     /**
@@ -48,8 +49,7 @@ public class LoginResourceBean {
      * @param crd   the credentials to test
      * @return  the auth token if successful
      */
-    @POST
-    @Produces({"application/json"})
+    @POST   
     public Response login(@Context HttpServletRequest req, Credential crd) {
         EntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
         UserDbEntity u = authenticate(em, crd.user, crd.pwd);
@@ -61,8 +61,8 @@ public class LoginResourceBean {
                 hashed_token = LoginFactory.hashString(token, "SHA-512");
                 em.getTransaction().begin();
                 u.setAuthToken(hashed_token);
-                System.out.println("user:" + crd.user + " pass:" + crd.pwd);
-                System.out.println("New token is " + hashed_token);
+                //System.out.println("user:" + crd.user + " pass:" + crd.pwd);
+               // System.out.println("New token is " + hashed_token);
                 em.getTransaction().commit();
                 em.close();
             }else{
@@ -87,7 +87,6 @@ public class LoginResourceBean {
      */
     @Path("logout")
     @POST
-    @Produces({"application/json"})
     public Response logout(@Context HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session != null) {
@@ -104,7 +103,6 @@ public class LoginResourceBean {
      */
     @Path("ping")
     @GET
-    @Produces({"application/json"})
     public Response pingServer() {
         return Response.ok(new Message("ping")).build();
     }
@@ -115,7 +113,6 @@ public class LoginResourceBean {
      */
     @Path("logged_user")
     @GET
-    @Produces({"application/json"})
     public SignupUser loggedUser(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token) {
         SignupUser pojo = null;
         if (auth_token != null) {
