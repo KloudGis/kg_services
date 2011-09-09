@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<StyledLayerDescriptor version="1.0.0" 
+		xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" 
+		xmlns="http://www.opengis.net/sld" 
+		xmlns:ogc="http://www.opengis.net/ogc" 
+		xmlns:xlink="http://www.w3.org/1999/xlink" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<NamedLayer>	
+		<Name>City</Name>
+		<UserStyle>
+			<Name>city</Name>
+			<FeatureTypeStyle>		
+                <!-- VILLE -->
+				<Rule>
+                    <ogc:Filter>
+							<ogc:PropertyIsEqualTo>
+								<ogc:PropertyName>category</ogc:PropertyName>
+								<ogc:Literal>ville</ogc:Literal>
+							</ogc:PropertyIsEqualTo>
+					</ogc:Filter>
+					<PolygonSymbolizer>
+						    <Stroke>
+						      <CssParameter name="stroke">#111109</CssParameter>
+						      <CssParameter name="stroke-width">0.5</CssParameter>
+                              <CssParameter name="stroke-opacity">1.0</CssParameter>
+						    </Stroke>
+					</PolygonSymbolizer>
+				</Rule>
+                <!-- MRC -->
+                <Rule>
+                    <ogc:Filter>
+							<ogc:PropertyIsEqualTo>
+								<ogc:PropertyName>category</ogc:PropertyName>
+								<ogc:Literal>mrc</ogc:Literal>
+							</ogc:PropertyIsEqualTo>
+					</ogc:Filter>
+					<PolygonSymbolizer>
+						    <Stroke>
+						      <CssParameter name="stroke">#313131</CssParameter>
+						      <CssParameter name="stroke-width">1.5</CssParameter>
+						    </Stroke>
+					</PolygonSymbolizer>
+				</Rule>
+                <!-- CIR_FONC -->
+                <Rule>
+                    <ogc:Filter>
+							<ogc:PropertyIsEqualTo>
+								<ogc:PropertyName>category</ogc:PropertyName>
+								<ogc:Literal>cir_fonc</ogc:Literal>
+							</ogc:PropertyIsEqualTo>
+					</ogc:Filter>
+					<PolygonSymbolizer>
+						    <Stroke>
+						      <CssParameter name="stroke">#8B8377</CssParameter>
+						      <CssParameter name="stroke-width">3.0</CssParameter>
+						    </Stroke>
+						  </PolygonSymbolizer>					
+				</Rule>
+                <!-- REGION -->
+                 <Rule>
+                    <ogc:Filter>
+							<ogc:PropertyIsEqualTo>
+								<ogc:PropertyName>category</ogc:PropertyName>
+								<ogc:Literal>region_admin</ogc:Literal>
+							</ogc:PropertyIsEqualTo>
+					</ogc:Filter>
+					<PolygonSymbolizer>
+						    <Stroke>
+						      <CssParameter name="stroke">#307BC1</CssParameter>
+						      <CssParameter name="stroke-width">5.0</CssParameter>
+                              <CssParameter name="stroke-opacity">1.0</CssParameter>
+						    </Stroke>
+						  </PolygonSymbolizer>
+					<TextSymbolizer>						
+						<Label>
+							<ogc:PropertyName>title</ogc:PropertyName>
+						</Label>
+						<Font>
+							<CssParameter name="font-family">Arial</CssParameter>
+							<CssParameter name="font-style">Normal</CssParameter>
+							<CssParameter name="font-size">16</CssParameter>
+							<CssParameter name="font-weight">bold</CssParameter>
+						</Font>
+						<LabelPlacement>
+							<PointPlacement>
+								<AnchorPoint>
+									<AnchorPointX>0.5</AnchorPointX>
+									<AnchorPointY>0.5</AnchorPointY>
+								</AnchorPoint>
+							</PointPlacement>
+						</LabelPlacement>                        
+						<Halo>
+							<Radius>
+								<ogc:Literal>2</ogc:Literal>
+							</Radius>
+                            <!-- HALO COLOR -->
+							<Fill>
+								<CssParameter name="fill">#FFFFFF</CssParameter>
+								<CssParameter name="fill-opacity">0.8</CssParameter>				
+							</Fill>
+						</Halo>
+                        <!-- FONT COLOR -->
+						<Fill>
+							<CssParameter name="fill">#307BC1</CssParameter>
+						</Fill>
+					</TextSymbolizer>				
+                    </Rule>
+            </FeatureTypeStyle>
+		</UserStyle>
+	</NamedLayer>
+</StyledLayerDescriptor>
+

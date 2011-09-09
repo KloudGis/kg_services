@@ -1,0 +1,64 @@
+<VirtualHost *:80>
+	ServerAdmin jean-felix.girard@xyzcivitas.com
+
+	DocumentRoot /var/www/
+
+	ExpiresActive On
+
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /var/www/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+		ExpiresDefault "access plus 10 minutes"
+	</Directory>
+
+	<Directory /var/www/static/>
+	 	ExpiresDefault "access plus 1 years"
+		SetOutputFilter DEFLATE
+	</Directory>
+
+	ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+	<Directory "/usr/lib/cgi-bin">
+		AllowOverride None
+		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+	ErrorLog /var/log/apache2/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog /var/log/apache2/access.log combined
+
+    Alias /doc/ "/usr/share/doc/"
+    <Directory "/usr/share/doc/">
+        Options Indexes MultiViews FollowSymLinks
+        AllowOverride None
+        Order deny,allow
+        Deny from all
+        Allow from 127.0.0.0/255.0.0.0 ::1/128
+    </Directory>
+
+    ProxyRequests On
+    <Proxy *>
+    	Order deny,allow
+    	Allow from all
+    </Proxy>
+
+    ProxyPass /la_server ajp://localhost:8009/la_server
+    ProxyPassReverse /la_server ajp://localhost:8009/la_server
+
+    ProxyPass /geoserver ajp://localhost:8009/geoserver
+    ProxyPassReverse /geoserver ajp://localhost:8009/geoserver
+    
+    ProxyPass /maps http://maps.googleapis.com/maps
+    ProxyPassReverse /maps http://maps.googleapis.com/maps
+</VirtualHost>

@@ -1,0 +1,197 @@
+
+/* Dark Buttons - Square */
+
+/* Regular */
+
+.sc-theme .sc-button-view.sc-regular-size.square.dark {
+  background: static_url('images/buttons/dark/regular-r.png') no-repeat right;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.dark .sc-button-inner {
+  background: static_url('images/buttons/dark/regular-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.dark .sc-button-label {
+  background: static_url('images/buttons/dark/regular-m.png') repeat-x;
+  margin-left: 5px;
+  margin-right: 5px;
+  color: #fff;
+  text-shadow: 0 1px 0 #242424;
+}
+
+/* Active */
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark {
+  background: static_url('images/buttons/dark/active-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark .sc-button-inner {
+  background: static_url('images/buttons/dark/active-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark .sc-button-label {
+  background: static_url('images/buttons/dark/active-m.png') repeat-x;
+  color: #d0d0d0;
+  text-shadow: 0 -1px 0 #242424;
+}
+
+/* Disabled */
+.sc-theme .sc-button-view.sc-regular-size.square.disabled.dark {
+  background: static_url('images/buttons/dark/disabled-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.disabled.dark .sc-button-inner {
+  background: static_url('images/buttons/dark/disabled-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.disabled.dark .sc-button-label {
+  background: static_url('images/buttons/dark/disabled-m.png') repeat-x;
+  color: #d0d0d0;
+  margin-left: 5px;
+  margin-right: 5px;
+  text-shadow: 0 -1px 0 #242424;
+}
+
+/*back button*/
+
+.sc-theme .sc-button-view.sc-regular-size.square.dark.back .sc-button-inner {
+  background: static_url('images/buttons/dark/regular-back-l.png') no-repeat;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.dark.back .sc-button-label {
+  background: static_url('images/buttons/dark/regular-m.png') repeat-x;
+  margin-left: 12px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark.back .sc-button-inner {
+  background: static_url('images/buttons/dark/active-back-l.png') no-repeat;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark.back .sc-button-label {
+  background: static_url('images/buttons/dark/active-m.png') repeat-x;
+  margin-left: 12px;
+}
+
+/*next button*/
+
+.sc-theme .sc-button-view.sc-regular-size.square.dark.next {
+  background: static_url('images/buttons/dark/regular-next-r.png') no-repeat right;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.dark.next .sc-button-label {
+  background: static_url('images/buttons/dark/regular-m.png') repeat-x;
+  margin-right: 12px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark.next {
+  background: static_url('images/buttons/dark/active-next-r.png') no-repeat right;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.active.dark.next .sc-button-label {
+  background: static_url('images/buttons/dark/active-m.png') repeat-x;
+  margin-right: 12px;
+}
+
+
+/* Toolbar Button */
+/* kill normal */
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square {
+	background: none;
+}
+
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square .sc-button-label {
+	background: none;
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square .sc-button-inner{
+	background: none;
+}
+
+/* kill sel*/
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.sel,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.active,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.sel.active,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.def {
+	background: none;
+}
+
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.sel .sc-button-label,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.active .sc-button-label,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.sel.active .sc-button-label,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.def .sc-button-label {
+	background: none;
+}
+
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.sel .sc-button-inner,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.active .sc-button-inner,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.sel.active .sc-button-inner,
+.sc-theme .sc-view.sc-button-view.toolbar-button-view.square.def .sc-button-inner{
+	background: none;
+}
+
+.sc-theme .sc-button-view.toolbar-button-view.close-button img.icon{
+height: 30px;
+margin-right: 0px;
+margin-left: 0px;
+position: absolute;
+top: 0px;
+width: 30px;
+overflow: visible;
+}
+
+.sc-theme .sc-button-view.toolbar-button-view.close-button .sc-button-label{
+overflow: visible;
+}
+
+.sc-theme .sc-button-view.toolbar-button-view.info-disclose-button img.icon{
+height: 30px;
+margin-right: 0px;
+margin-left: 0px;
+position: absolute;
+top: 0px;
+width: 30px;
+overflow: visible;
+}
+
+.sc-theme .sc-button-view.toolbar-button-view.info-disclose-button .sc-button-label{
+overflow: visible;
+}
+
+.sc-theme .sc-view.sc-button-view.button-24 img.icon{
+	width: 24px;
+    height: 24px;
+}
+
+/* delete */
+.sc-theme .sc-button-view.sc-regular-size.square.delete-button-view {
+  background: static_url('images/buttons/delete/delete-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.delete-button-view  .sc-button-inner {
+  background: static_url('images/buttons/delete/delete-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.delete-button-view  .sc-button-label {
+  background: static_url('images/buttons/delete/delete-m.png') repeat-x;
+  margin-left: 5px;
+  margin-right: 5px;
+  color: #fff;
+  text-shadow: 0 1px 0 #242424;
+}
+
+.sc-theme .sc-view.sc-button-view.img-centered img.icon{
+	left:0px;
+	margin-left:0px;
+	margin-right:0px;
+}
+
+.rotate-image img{
+	  -webkit-animation-name: rotateImage;
+	  -webkit-animation-duration:2s;
+	  -webkit-animation-iteration-count:infinite;
+	  -webkit-animation-timing-function:linear;	
+}
+
+@-webkit-keyframes rotateImage {
+  from {-webkit-transform: rotate(0deg);}
+  to {-webkit-transform: rotate(360deg);}
+}
+
+
+
+
+

@@ -1,0 +1,28 @@
+Parameter list for main()
+
+-m = path to the sdm file
+-p = path to the place where the project will be created
+-d = path to the sds file (optional, if not provided then there will be no feedback display from db but the project will still be generated)
+-f = the name of the feature type that will provide the rows from the database (optional, if not provided, a random feature type will be picked)
+-l = the size of the resultset that will be displayed (optional, by default shows the entire table. Negative values show the entire table.)
+Here is an example: -m "/home/corneliu/bgjlr_trunk/model/RENO_L3.sdm" -p "/home/corneliu/test/new_proj" -d "/home/corneliu/bgjlr_trunk/datastore/P1647_L3.sds" -f LOT_OCCUPE -l 10
+
+What the program does:
+
+1. Create the classes. 
+For each feature type there will by a pojo class and an entity class.
+A Main class will be created for feedback purposes only.
+The pojo classes are in package org.kloudgis.model.pojos
+The entity classes are in package org.kloudgis.model.entities
+The main class is in package org.kloudgis.model
+2. Create hibernate.cfg.xml in src folder to enable a db connection.
+3. Create an ant script to compile the project. The ant script is called build.xml and resides in the project folder.
+4. Copy the dependency jars from gen_libs folder to the lib folder of the new project so and can compile.
+5. Compile the new project
+6. Load the new jar in memory.
+7. Load the Main class of the new project and execute method displayResultSet() which outputs the result set on the screen.
+
+Setting up the project:
+
+include jars: postgres and jdom in the project
+include libraries: Hibernate and Persistence in the project

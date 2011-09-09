@@ -1,0 +1,15 @@
+<% content_for :loading do %>
+<% # Any HTML in this file will be visible on screen while your page loads
+   # its application JavaScript.  SproutCore applications are optimized for 
+   # caching and startup very fast, so your users will often only see this 
+   # content for a brief moment on their first app load, if at all.
+%>
+<p class="loading">Loading...<p>
+
+<script type="text/javascript" src="http://www.google.com/jsapi?key=ABCDEFG"></script>
+<script type="text/javascript">
+  google.load("maps", "2");
+</script>
+<!--<script type="text/javascript" src='http://openlayers.org/api/OpenLayers.js'></script>-->
+<script type="text/javascript" src='http://openlayers.org/dev/OpenLayers.js'></script>
+<% end %>

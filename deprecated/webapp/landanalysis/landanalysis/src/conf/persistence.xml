@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+  <persistence-unit name="adminPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <class>org.kloudgis.core.persistence.security.GroupDbEntity</class>
+    <class>org.kloudgis.core.persistence.security.PrivilegeDbEntity</class>
+    <class>org.kloudgis.core.persistence.security.UserDbEntity</class>
+    <class>org.kloudgis.core.persistence.feature.FeatureTypeDbEntity</class>
+    <class>org.kloudgis.core.persistence.feature.AttrTypeDbEntity</class>
+    <class>org.kloudgis.core.persistence.security.UserRoleDbEntity</class>
+    <class>org.kloudgis.core.persistence.feature.PriorityDbEntity</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="hibernate.connection.username" value="webappusr"/>
+      <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+      <property name="hibernate.connection.password" value="xyz123ABC"/>
+      <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/landanalysis"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+      <property name="hibernate.c3p0.min_size" value="1"/>
+      <property name="hibernate.c3p0.max_size" value="15"/>
+      <property name="hibernate.c3p0.timeout" value="10000"/>
+      <property name="hibernate.c3p0.max_statements" value="10"/>
+      <property name="hibernate.show_sql" value="true"/>
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="dataPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <non-jta-data-source/>
+    <class>org.kloudgis.persistence.NoteDbEntity</class>
+    <class>org.kloudgis.persistence.RoadDbEntity</class>
+    <class>org.kloudgis.persistence.HydroDbEntity</class>
+    <class>org.kloudgis.persistence.LimitDbEntity</class>
+    <class>org.kloudgis.persistence.ArpenteurDbEntity</class>
+    <class>org.kloudgis.persistence.LotDbEntity</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="hibernate.connection.username" value="bgjlr"/>
+      <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>
+      <property name="hibernate.connection.password" value="qwerty"/>
+      <property name="hibernate.connection.url" value="jdbc:postgresql_postGIS://192.168.12.36:5432/landanalysis"/>
+      <property name="hibernate.c3p0.min_size" value="1"/>
+      <property name="hibernate.c3p0.max_size" value="20"/>
+      <property name="hibernate.c3p0.timeout" value="5000"/>
+      <property name="hibernate.c3p0.max_statements" value="20"/>
+      <property name="hibernate.dialect" value="org.hibernatespatial.postgis.PostgisDialect"/>
+      <property name="hibernate.show_sql" value="true"/>
+      <property name="hibernate.search.default.indexBase" value="/tmp/search_index"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+    </properties>
+  </persistence-unit>
+</persistence>

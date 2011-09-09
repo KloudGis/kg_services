@@ -1,0 +1,25 @@
+body {
+  overflow: hidden;
+}
+
+.sc-view.main-container {
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -webkit-box-shadow: #000 1px 3px 40px ;
+  -moz-box-shadow: #000 1px 3px 40px ;
+  color: black;
+  background-color: #dedede;
+}
+
+.labels {
+  color: #6c6d72;
+  font-weight: bold !important;	
+}
+
+.messages{
+	color: black;
+}
+
+.error-messages {
+  color: red;
+}

@@ -1,0 +1,67 @@
+/*
+	set round corners for a view.  Make it white to match list color.
+*/
+.sc-view.round-edges-for-list{
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	background: white;
+}
+
+.sc-view.round-edges-for-list .sc-view.sc-gray-border{
+	border: none;
+}
+
+#user-count{
+	text-align: right;
+	white-space: nowrap;
+	overflow: hidden;
+  	text-overflow: ellipsis;
+  	-o-text-overflow: ellipsis;
+  	-ms-text-overflow: ellipsis;
+	vertical-align: middle;
+}
+
+#selected-category-label{
+	color: darkgray;
+	font-size: 10px;
+	font-family: arial;
+}
+
+#user-selected-message-label{
+	color: darkgray;
+	font-size: 20px;
+	font-family: arial;
+}
+
+#user-selected-message-label label{
+	position: absolute;
+	left:30px;
+	top: 10px;
+}
+
+/*
+ Align the right icon properly
+*/
+.sc-list-item-view img.right-icon {
+    position: absolute ;
+    right: 5px;
+    top: 50%;
+    margin-top: -10px;
+}
+
+.sc-list-view.category-list-view{
+	background:none;
+}
+
+.sc-list-item-view.category-list-item-view{
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+.sc-list-item-view.category-list-item-view label{
+	text-align: center;
+}
+
+.sc-list-item-view.category-list-item-view:hover{
+	background: rgba(255,255,255,0.2);
+}

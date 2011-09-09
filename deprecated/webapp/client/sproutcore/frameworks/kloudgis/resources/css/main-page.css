@@ -1,0 +1,138 @@
+
+/*
+	label in the top toolbar pickers
+*/
+.sc-label-view.tools-view-labels,
+.sc-label-view.tools-view-labels-join {
+  	font-family: helvetica, arial;	
+  	font-weight: bold;	
+}
+
+.sc-label-view.tools-view-labels {
+  	color: #FFFFFF;
+  	font-size: 16px;		
+}
+
+ .sc-label-view.tools-view-labels-join {
+	color: black;
+	font-size: 13px;	
+}
+
+/*
+ Alternate the color in the lists
+	Even rows are blue.
+*/
+.sc-list-item-view.odd {
+  background-color: #F1F5FA;
+}
+
+/*
+	The featuretype right icon positionning (in list)
+*/
+.featuretype-right-icon {
+	padding-top:7px;
+	float:right;
+}
+
+/*
+	The feature right icon positionning (in list)
+*/
+
+.feature-right-icon {
+	padding-top:2px;
+	float:right;
+}
+
+/*
+	Bump the icon if become active
+*/
+.feature-right-icon.active{
+	padding-top:0px;
+	float:right;
+}
+
+/*
+	set round corners for a view.  Make it white to match list color.
+*/
+.sc-view.round-edges-for-list{
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	background: white;
+}
+
+/*
+Override the label element inside the list-item-view to list the features
+*/
+
+.sc-list-item-view.list-feature-label label{
+	right:18px;
+	white-space: nowrap;
+  	overflow: hidden;
+  	text-overflow: ellipsis;
+  	-o-text-overflow: ellipsis;
+  	-ms-text-overflow: ellipsis;
+}
+
+/*
+	Main toolbar background: BLACK
+*/
+.sc-toolbar-view.toolbar {
+  /*background: static_url('images/toolbar-bg.png') repeat-x;*/
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#8E8E8E),color-stop(0.5, #000000), color-stop(0.5, #000000), to(#000000));
+}
+
+.mozilla .sc-toolbar-view.toolbar {
+ 	background: -moz-linear-gradient(top, #8E8E8E 0%, #000000 50%, #000000 50%, #000000 100%);
+}
+
+/*
+ Info tool popup
+*/
+.sc-label-view.info-main-label,
+.sc-label-view.info-sub-label {
+	color: #FFFFFF;
+  	font-family: helvetica, arial;	
+  	font-weight: bold;	
+  	vertical-align: center;
+  	text-align: center;
+  	white-space: nowrap;
+  	overflow: hidden;
+  	text-overflow: ellipsis;
+  	-o-text-overflow: ellipsis;
+  	-ms-text-overflow: ellipsis;
+}
+.sc-label-view.info-main-label{	
+  	font-size: 12px;	
+}
+
+.sc-label-view.info-sub-label{
+  	font-size: 10px;	
+}
+
+/*  lists */
+
+/* Offset for the label in the featuretype lists with a checkbox*/
+.sc-list-item-view.has-checkbox.featuretype-item label{
+	left:28px;
+}
+
+/* Offset for the label in the featuretype lists*/
+.sc-list-item-view.featuretype-item label{
+	left:5px;
+}
+
+.sc-view.sc-list-item-view.no-alternate {
+  background: none;
+}
+
+.sc-view.sc-collection-view.sc-list-view.menu,
+.sc-view.sc-collection-view.sc-list-view.menu.sel
+{
+	background: none;
+}
+
+.sc-view.sc-progress-view.map-progress{
+	z-index: 1500;
+	border-bottom: 1px solid #666;
+}
+

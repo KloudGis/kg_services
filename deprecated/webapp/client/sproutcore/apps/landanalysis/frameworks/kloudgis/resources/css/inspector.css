@@ -1,0 +1,156 @@
+
+/*
+	Boolean renderer TRUE/FALSE positionning
+*/
+.sc-segmented-view.bool-renderer-segmented-view {
+	text-align: left;
+	padding-left: 3px;
+}
+
+/*
+	main scroll view in the inspector
+*/
+.sc-view.inspector-feature-view {
+  background:none;
+  border-width: 0px;
+  border-radius: 6px;
+  -moz-border-radius: 6px;//all corner only
+}
+
+.sc-view.inspector-feature-view {
+  background:rgba(220,220,220, 0.8);
+  border-width: 0px;
+  border-radius: 6px;
+  -moz-border-radius: 6px;//all corner only
+}
+
+.sc-view.inspector-feature-view
+
+/*
+	scroll view for sub view (joins)
+*/
+.sc-view.inspector-feature-view.inspector-feature-join.sc-gray-border {	
+  background:none
+  border: solid;
+  border-width: 1px;
+  border-color: darkgray;
+}
+
+.sc-theme .sc-view.picker-main-view,
+.sc-theme .sc-view.picker-control-bar{
+	overflow: visible;
+}
+
+.sc-label-view.label-inspector-position-master{
+	color: white;
+}
+
+.sc-label-view.label-inspector-position-join{
+	color: black;
+}
+
+
+/*
+	abstract renderer super view
+	-round borders with white backgroud
+*/
+
+.sc-view.inspector-renderer{
+	border-radius: 10px;	
+	border: solid;
+	border-width: 1px;
+	border-color: gray;
+	background: white;
+}
+
+.mozilla .sc-view.inspector-renderer{
+	-moz-border-radius: 10px;//all corner only
+}
+
+/* top corner round*/
+.sc-view.inspector-renderer.top{
+	border-radius: 0px;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;	
+	border-width: 1px;
+	border-bottom-width: 0px;
+}
+
+.mozilla .sc-view.inspector-renderer.top{
+	-moz-border-radius: 0px;
+	-moz-border-radius-topleft: 10px;
+	-moz-border-radius-topright: 10px;	
+	-moz-border-width: 1px;
+	-moz-border-bottom-width: 0px;
+}
+
+/* squared corner*/
+.sc-view.inspector-renderer.middle{
+	border-radius: 0px;
+	border-width: 1px;
+	border-bottom-width: 0px;
+}
+
+.mozilla .sc-view.inspector-renderer.middle{
+	-moz-border-radius: 0px;
+	-moz-border-width: 1px;
+	-moz-border-bottom-width: 0px;
+}
+
+/* bottom corner round*/
+.sc-view.inspector-renderer.bottom{
+	border-radius: 0px;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+	border-width: 1px;
+}
+
+.mozilla .sc-view.inspector-renderer.bottom{
+	-moz-border-radius: 0px;
+	-moz-border-radius-bottomleft: 10px;
+	-moz-border-radius-bottomright: 10px;
+	-moz-border-width: 1px;
+}
+
+/*
+	label for renderers
+	blue
+*/
+.sc-view .sc-label-view.inspector-text-renderer.sc-regular-size {
+	color: rgb(47,106,186);
+	font-size: 10px;
+}
+
+/*
+	textfield for renderers
+	no borders nor outline nor shadow
+*/
+.sc-view .sc-text-field-view.inspector-text-renderer {
+  border: none;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.sc-view.sc-text-field-view.inspector-text-renderer.focus {
+  border-color: none;
+  outline: 0;
+}
+
+.msie .sc-view.sc-text-field-view.inspector-text-renderer input {
+  margin-top: 5px;
+}
+
+
+.safari .sc-view  .sc-text-field-view.inspector-text-renderer .border {
+  -webkit-appearance: none;
+}
+
+.mozilla .sc-view  .sc-text-field-view.inspector-text-renderer .border {
+  -moz-appearance: none;
+}
+
+.msie .sc-view .sc-text-field-view.inspector-text-renderer .border {
+  border: 0;
+}
+

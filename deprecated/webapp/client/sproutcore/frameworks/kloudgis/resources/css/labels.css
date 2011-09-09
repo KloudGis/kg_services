@@ -1,0 +1,19 @@
+.sc-label-view.label-centered {	
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+  	text-overflow: ellipsis;
+  	-o-text-overflow: ellipsis;
+  	-ms-text-overflow: ellipsis;
+	vertical-align: middle;
+}
+
+.sc-label-view.label-gray {	
+	color: rgb(110,110,110);
+	text-shadow: rgba(210, 210, 210, 0.7) 1px 1px 2px;
+}
+
+.sc-label-view.label-error {	
+	color: rgb(255,110,110);
+	text-shadow: rgba(255, 210, 210, 0.7) 1px 1px 2px;
+}

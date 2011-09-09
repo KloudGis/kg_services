@@ -1,0 +1,39 @@
+<!--
+* EchoSphere - Spatial Platform for Application and Communication Extensions.
+ *
+ * http://www.echospheretechnologies.com
+ *
+ * Copyright (c) 2003 Echosphere Technologies, Inc.
+ * All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Echosphere Technologies, Inc. ("Confidential Information"). You shall not
+ * disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Echosphere Technologies, Inc.
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <META http-equiv="Content-Style-Type" content="text/css">
+        <link href="/la_server/style.css" rel="stylesheet" type="text/css">
+        <title>Login</title>
+    </head>
+    <body onLoad="document.log_form.j_username.focus()">
+        <div class="backgroundImgForError">
+            <img alt=""  src="/la_server/images/xyz.jpg">
+        </div>
+        <form class="login_form" name="log_form" method="POST" action="/la_server/j_security_check">
+            <label class="welcome_label">Analyse du territoire</label>
+            <label class="name_label">Nom:</label>
+            <input class="name_field" type="text" name="j_username">
+            <label class="pwd_label">Mot de passe:</label>
+            <input class="pwd_field" type="password" name="j_password">
+            <input class="login_button" type="submit" value="Connextion">
+            <label class="error_label">The user and password don't match.</label>
+        </form>
+    </body>
+</html>
+
