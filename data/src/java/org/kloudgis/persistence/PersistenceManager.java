@@ -57,7 +57,7 @@ public class PersistenceManager {
     protected synchronized EntityManagerFactory createSandboxManagerFactory(String key) {
         Map prop = new HashMap();
         String url = KGConfig.getConfiguration().db_url;
-        prop.put("hibernate.connection.url", url);
+        prop.put("hibernate.connection.url", url + "/" + key);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(DATA_PU, prop);
         return emf;
     }

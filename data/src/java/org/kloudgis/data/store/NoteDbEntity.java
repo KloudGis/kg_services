@@ -16,7 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
-import org.kloudgis.data.pojo.Coordinate;
+import org.kloudgis.pojo.Coordinate;
 import org.kloudgis.data.pojo.Note;
 
 /**

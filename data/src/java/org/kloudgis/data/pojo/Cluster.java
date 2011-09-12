@@ -4,6 +4,7 @@
  */
 package org.kloudgis.data.pojo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,5 +17,5 @@ public class Cluster {
     public Double lat;
     public Double lon;
     
-    public List features;
+    public List features = new ArrayList();
 }

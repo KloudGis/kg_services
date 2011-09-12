@@ -22,7 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
-import org.kloudgis.admin.pojo.Records;
+import org.kloudgis.pojo.Records;
 import org.kloudgis.admin.pojo.Sandbox;
 import org.kloudgis.admin.store.SandboxDbEntity;
 import org.kloudgis.persistence.PersistenceManager;

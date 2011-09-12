@@ -4,6 +4,7 @@
  */
 package org.kloudgis.data.pojo;
 
+import org.kloudgis.pojo.Coordinate;
 import java.sql.Date;
 
 /**

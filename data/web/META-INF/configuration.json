@@ -2,5 +2,5 @@
 {
     "api_key": "Kl0uDg1S-@p1-|aCCe33|",
     "auth_url": "localhost:8080/kg_auth/api",
-    "db_url" : "jdbc:postgresql_postGIS://localhost:5432/"
+    "db_url" : "jdbc:postgresql_postGIS://localhost:5432"
 }

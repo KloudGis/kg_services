@@ -30,10 +30,10 @@ import org.kloudgis.AuthorizationManager;
 import org.kloudgis.LoginFactory;
 import org.kloudgis.admin.pojo.Credential;
 import org.kloudgis.admin.pojo.LoginResponse;
-import org.kloudgis.admin.pojo.Message;
 import org.kloudgis.admin.pojo.SignupUser;
 import org.kloudgis.admin.store.UserDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
+import org.kloudgis.pojo.Message;
 
 /**
  *

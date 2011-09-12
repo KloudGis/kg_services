@@ -6,11 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import org.kloudgis.admin.pojo.Message;
 import org.kloudgis.admin.pojo.SignupUser;
 import org.kloudgis.admin.store.UserDbEntity;
 import org.kloudgis.admin.store.UserRoleDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
+import org.kloudgis.pojo.Message;
 
 public class LoginFactory {
 
