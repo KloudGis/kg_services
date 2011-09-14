@@ -1,0 +1,6 @@
+
+{
+    "api_key": "Kl0uDg1S-@p1-|aCCe33|",
+    "auth_url": "localhost:8080/kg_auth/api",
+    "geoserver_url" : "http://localhost:8090/geoserver/wms"
+}
