@@ -75,15 +75,6 @@ public class WmsProxy extends HttpServlet {
                 throw new IllegalArgumentException("missing server");
             }
 
-            //remove geowebcache from the url for getfeatureinfo
-            if (getHttpParam("REQUEST", request).equalsIgnoreCase("GETFEATUREINFO")) {
-                int loc = server.indexOf("gwc/service/wms");
-                if (loc != -1) {
-                    server = server.substring(0, loc) + "wms";
-                    //System.out.println("GETFEATUREINFO server is: " + server);
-                }
-            }
-
             PostMethod postMethod = new PostMethod(server);
 
             Enumeration paramNames = request.getParameterNames();
