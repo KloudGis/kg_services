@@ -81,23 +81,6 @@ public class LoginResourceBean {
     }
 
     /**
-     * Logout the current user
-     * @param req
-     * @return 
-     */
-    @Path("logout")
-    @POST
-    public Response logout(@Context HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        //TODO destroy the auth token from the DB(value in the cookie).
-
-        return Response.ok().build();
-    }
-
-    /**
      * Ping GET to test if the server is UP
      * @return 
      */

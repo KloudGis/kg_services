@@ -33,6 +33,8 @@ public class SandboxDbEntity implements Serializable {
     @Index(name = "sandboxe_key_index")
     @Column(length = 100)
     private String unique_key;
+    @Column
+    private Long user_id;
     
     public Sandbox toPojo(){
         Sandbox pojo = new Sandbox();

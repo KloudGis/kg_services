@@ -27,6 +27,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.kloudgis.KGConfig;
+import org.kloudgis.api.ApiFactory;
 
 /**
  * Proxy request to the geoserver mathching the project.
@@ -39,7 +40,6 @@ public class WmsProxy extends HttpServlet {
     public static final String KG_SANDBOX = "kg_sandbox";
     //session attributes
     public static final String KG_TIMEOUT = "!kg_timeout!";
-    public static final String KG_GEOSERVER = "kg_geoserver";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -49,32 +49,57 @@ public class WmsProxy extends HttpServlet {
         try {
             // System.out.print("Process wms request...");
             HttpSession session = request.getSession(true);
+            Boolean bAccess = (Boolean) session.getAttribute("kg_map_access");
             String server = KGConfig.getConfiguration().geoserver_url;
             //authenticate with the auth token
-            String auth = getAuthToken(request);
+            String auth_token = getAuthToken(request);
             // System.out.println("Auth token:" + auth);
-            if (auth != null && auth.length() > 0) {
+            if (auth_token != null && auth_token.length() > 0) {
                 Long timeout = (Long) session.getAttribute(KG_TIMEOUT);
                 Long time = Calendar.getInstance().getTimeInMillis();
                 if (server != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
                     //ok
                     //System.out.println("Auth token still valid, " + (time - timeout.longValue()) / 1000 + " sec.");
                 } else {
-                    System.out.println("Auth token:" + auth);
-                    System.out.println(Calendar.getInstance().getTime() + "- Auth token Revalidate");
-                    //todo validate token
-                    //...
+                    String sandbox = getHttpParam(KG_SANDBOX, request);
+                    if (sandbox != null && sandbox.length() > 0) {
+                        try {
+                            Long user_id = (Long) session.getAttribute("kg_user_id");
+                            if (user_id == null) {
+                                String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().auth_url + "/user_id", KGConfig.getConfiguration().api_key);
+                                if (body != null && body.length() > 0) {
+                                    user_id = Long.parseLong(body);
+                                    session.setAttribute("kg_user_id", user_id);
+                                }
+                            }
+                            String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/map_access?sandbox=" + sandbox + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
+                            if (body != null && body.equals("true")) {
+                                session.setAttribute("kg_map_access", true);
+                                bAccess = true;
+                            } else {
+                                session.setAttribute("kg_map_access", false);
+                                bAccess = false;
+                            }
+                            session.setAttribute(KG_TIMEOUT, Calendar.getInstance().getTimeInMillis());
+                        } catch (Exception ex) {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                            return;
+                        }
+                    } else {
+                        bAccess = false;
+                    }
                 }
-
             } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                bAccess = false;
             }
 
             if (server == null) {
                 throw new IllegalArgumentException("missing server");
             }
-
+            if (bAccess == null || bAccess.booleanValue() == false) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
             PostMethod postMethod = new PostMethod(server);
 
             Enumeration paramNames = request.getParameterNames();
