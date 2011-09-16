@@ -62,7 +62,7 @@ public class SandboxResourceBean {
         }
         if (id != null) {         
             HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
-            List<SandboxDbEntity> sandboxes = em.getSession().createCriteria(SandboxDbEntity.class).add(Restrictions.eq("user_id", id)).addOrder(Order.asc("name")).list();
+            List<SandboxDbEntity> sandboxes = em.getSession().createCriteria(SandboxDbEntity.class).addOrder(Order.asc("name")).createCriteria("users").add(Restrictions.eq("user_id", id)).list();
             List<Sandbox> list = new ArrayList();
             for (SandboxDbEntity db : sandboxes) {
                 list.add(db.toPojo());

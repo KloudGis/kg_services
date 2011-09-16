@@ -39,7 +39,8 @@ public class WmsProxy extends HttpServlet {
     //query params
     public static final String KG_SANDBOX = "kg_sandbox";
     //session attributes
-    public static final String KG_TIMEOUT = "!kg_timeout!";
+    private static final String SESSION_TIMEOUT = "!kg_timeout!";
+    private static final String SESSION_MAP_ACCESS = "!kg_map_access!";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -49,38 +50,33 @@ public class WmsProxy extends HttpServlet {
         try {
             // System.out.print("Process wms request...");
             HttpSession session = request.getSession(true);
-            Boolean bAccess = (Boolean) session.getAttribute("kg_map_access");
+            String sandbox = getHttpParam(KG_SANDBOX, request);
+            String access_key = sandbox + "_" + SESSION_MAP_ACCESS;
+            Boolean bAccess = (Boolean) session.getAttribute(access_key);
             String server = KGConfig.getConfiguration().geoserver_url;
-            //authenticate with the auth token
             String auth_token = getAuthToken(request);
-            // System.out.println("Auth token:" + auth);
             if (auth_token != null && auth_token.length() > 0) {
-                Long timeout = (Long) session.getAttribute(KG_TIMEOUT);
+                Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT);
                 Long time = Calendar.getInstance().getTimeInMillis();
                 if (server != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
                     //ok
                     //System.out.println("Auth token still valid, " + (time - timeout.longValue()) / 1000 + " sec.");
                 } else {
-                    String sandbox = getHttpParam(KG_SANDBOX, request);
+                    System.out.println("Validate security for " + access_key);
                     if (sandbox != null && sandbox.length() > 0) {
                         try {
-                            Long user_id = (Long) session.getAttribute("kg_user_id");
-                            if (user_id == null) {
-                                String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().auth_url + "/user_id", KGConfig.getConfiguration().api_key);
-                                if (body != null && body.length() > 0) {
-                                    user_id = Long.parseLong(body);
-                                    session.setAttribute("kg_user_id", user_id);
+                            Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            if (user_id != null) {
+                                String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/map_access?sandbox=" + sandbox + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
+                                if (body != null && body.equals("true")) {
+                                    session.setAttribute(access_key, true);
+                                    bAccess = true;
+                                } else {
+                                    session.setAttribute(access_key, false);
+                                    bAccess = false;
                                 }
                             }
-                            String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/map_access?sandbox=" + sandbox + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
-                            if (body != null && body.equals("true")) {
-                                session.setAttribute("kg_map_access", true);
-                                bAccess = true;
-                            } else {
-                                session.setAttribute("kg_map_access", false);
-                                bAccess = false;
-                            }
-                            session.setAttribute(KG_TIMEOUT, Calendar.getInstance().getTimeInMillis());
+                            session.setAttribute(SESSION_TIMEOUT, Calendar.getInstance().getTimeInMillis());
                         } catch (Exception ex) {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             return;

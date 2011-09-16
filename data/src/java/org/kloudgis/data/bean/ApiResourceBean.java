@@ -4,18 +4,16 @@
  */
 package org.kloudgis.data.bean;
 
-import java.util.List;
+import java.io.IOException;
 import javassist.NotFoundException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.KGConfig;
-import org.kloudgis.data.store.LayerDbEntity;
-import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**
@@ -34,16 +32,16 @@ public class ApiResourceBean {
         if (!api_key.equals(KGConfig.getConfiguration().api_key)) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
         }
-        boolean bAccess = false;
-        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
-        if (em != null) {
-            List<LayerDbEntity> lstDb = em.getSession().createCriteria(MemberDbEntity.class).add(Restrictions.eq("user_id", user_id)).list();
-            if(lstDb.size() > 0){
-                bAccess = true;
-            }
+        HibernateEntityManager em = null;
+        try {
+            em = PersistenceManager.getInstance().getEntityManager(sandbox);         
+            boolean bAccess = AuthorizationFactory.isMember(em, user_id, sandbox, auth_token);
             return Response.ok(bAccess + "").build();
-        }else{
-            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
-        }           
+        } catch (Exception ex) {
+            if(em != null){
+                em.close();
+            }
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
     }
 }

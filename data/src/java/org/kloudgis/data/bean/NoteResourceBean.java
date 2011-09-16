@@ -14,24 +14,29 @@
  */
 package org.kloudgis.data.bean;
 
+import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernatespatial.criterion.SpatialRestrictions;
+import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.GeometryFactory;
 import org.kloudgis.data.pojo.Cluster;
 import org.kloudgis.data.pojo.Note;
@@ -46,30 +51,58 @@ import org.kloudgis.pojo.Records;
 @Path("/protected/notes")
 @Produces({"application/json"})
 public class NoteResourceBean {
-    
-    
+
     @GET
     @Path("{fId}")
     @Produces({"application/json"})
-    public Note getFeature(@PathParam("fId") Long fId,@QueryParam("sandbox") String sandbox) {
-        EntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
-        NoteDbEntity note = em.find(NoteDbEntity.class, fId);
-        if (note != null) {
-            Note pojo = note.toPojo();
-            em.close();
-            return pojo;
+    public Response getFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            HttpSession session = req.getSession(true);
+            boolean bMember = false;
+            try {
+                bMember = AuthorizationFactory.isMember(session, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (bMember) {
+                NoteDbEntity note = em.find(NoteDbEntity.class, fId);
+                if (note != null) {
+                    Note pojo = note.toPojo();
+                    em.close();
+                    return Response.ok(pojo).build();
+                }
+                em.close();
+                throw new EntityNotFoundException("Not found:" + fId);
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
-        em.close();
-        throw new EntityNotFoundException("Not found:" + fId);
     }
 
     @GET
     @Path("clusters")
-    public Response getNoteClusters(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sw_lat") Double swlat, @QueryParam("sw_lon") Double swlon, @QueryParam("ne_lat") Double nelat, @QueryParam("ne_lon") Double nelon, @QueryParam("distance") Double distance, @QueryParam("sandbox") String sandbox) {
-        //TODO validate the auth_token
-        if (auth_token != null && sandbox != null && sandbox.length() > 0) {
-            HibernateEntityManager em = (HibernateEntityManager) PersistenceManager.getInstance().getEntityManager(sandbox);
-            if (em != null) {
+    public Response getNoteClusters(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token,
+            @QueryParam("sw_lat") Double swlat,
+            @QueryParam("sw_lon") Double swlon,
+            @QueryParam("ne_lat") Double nelat,
+            @QueryParam("ne_lon") Double nelon,
+            @QueryParam("distance") Double distance,
+            @QueryParam("sandbox") String sandbox) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            HttpSession session = req.getSession(true);
+            boolean bMember = false;
+            try {
+                bMember = AuthorizationFactory.isMember(session, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (bMember) {
                 List<Cluster> clusters = new ArrayList();
                 Cluster cluster;
                 boolean clustered = false;
@@ -107,9 +140,12 @@ public class NoteResourceBean {
                 Records rec = new Records();
                 rec.records = clusters;
                 return Response.ok(rec).build();
+            }else{
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
-        return Response.noContent().build();
     }
 
     private boolean shouldCluster(Cluster cluster, NoteDbEntity feature, Double distance) {
@@ -125,7 +161,7 @@ public class NoteResourceBean {
     private Cluster createCluster(NoteDbEntity feature) {
         Cluster cluster = new Cluster();
         cluster.lon = feature.getGeometry().getX();
-        cluster.lat = feature.getGeometry().getY();       
+        cluster.lat = feature.getGeometry().getY();
         cluster.features.add(feature.getId());
         cluster.guid = feature.getId();
         return cluster;

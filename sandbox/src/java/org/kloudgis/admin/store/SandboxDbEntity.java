@@ -5,11 +5,14 @@
 package org.kloudgis.admin.store;
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Index;
@@ -33,8 +36,8 @@ public class SandboxDbEntity implements Serializable {
     @Index(name = "sandboxe_key_index")
     @Column(length = 100)
     private String unique_key;
-    @Column
-    private Long user_id;
+    @OneToMany(mappedBy="sandboxes", cascade = CascadeType.ALL)
+    List<UserSandboxDbEntity> users;
     
     public Sandbox toPojo(){
         Sandbox pojo = new Sandbox();

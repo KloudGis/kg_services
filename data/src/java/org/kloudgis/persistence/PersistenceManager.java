@@ -33,27 +33,28 @@ public class PersistenceManager {
         return instance;
     }
 
-
     public void closeEntityManagerFactories() {
-        for(EntityManagerFactory emf: mapEMF.values()){
+        for (EntityManagerFactory emf : mapEMF.values()) {
             emf.close();
         }
         mapEMF.clear();
     }
-    
-    public HibernateEntityManager getEntityManager(String key){
-        EntityManagerFactory emf = mapEMF.get(key);
-        if(emf == null){
-            emf = createSandboxManagerFactory(key);
-            mapEMF.put(key, emf);
+
+    public HibernateEntityManager getEntityManager(String key) {
+        EntityManagerFactory emf = null;
+        if (key != null) {
+            emf = mapEMF.get(key);
+            if (emf == null) {
+                emf = createSandboxManagerFactory(key);
+                mapEMF.put(key, emf);
+            }
         }
-        if(emf != null){
-           return (HibernateEntityManager) emf.createEntityManager(); 
+        if (emf != null) {
+            return (HibernateEntityManager) emf.createEntityManager();
         }
-        throw new WebApplicationException(new Throwable("Can't connect to "  + key), 500);
+        return null;
     }
-    
-    
+
     protected synchronized EntityManagerFactory createSandboxManagerFactory(String key) {
         Map prop = new HashMap();
         String url = KGConfig.getConfiguration().db_url;
@@ -61,5 +62,4 @@ public class PersistenceManager {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(DATA_PU, prop);
         return emf;
     }
-
 }

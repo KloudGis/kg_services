@@ -5,6 +5,7 @@
 package org.kloudgis;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import org.kloudgis.admin.store.UserDbEntity;
 
 /**
@@ -18,6 +19,9 @@ public final class AuthorizationManager {
             System.out.println("Attemp to find user with token " + password_hash);
             UserDbEntity u = em.createQuery("from UserDbEntity where auth_token=:token", UserDbEntity.class).setParameter("token", password_hash).getSingleResult();
             return u;
+        } catch (EntityNotFoundException e) {
+            System.out.println("Auth token invalid: " + password_hash);
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

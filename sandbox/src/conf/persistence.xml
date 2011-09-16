@@ -3,6 +3,7 @@
   <persistence-unit name="adminPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
     <class>org.kloudgis.admin.store.SandboxDbEntity</class>
+    <class>org.kloudgis.admin.store.UserSandboxDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="hibernate.connection.username" value="kloudgis"/>
