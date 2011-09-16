@@ -36,7 +36,7 @@ public class SandboxDbEntity implements Serializable {
     @Index(name = "sandboxe_key_index")
     @Column(length = 100)
     private String unique_key;
-    @OneToMany(mappedBy="sandboxes", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="sandboxe", cascade = CascadeType.ALL)
     List<UserSandboxDbEntity> users;
     
     public Sandbox toPojo(){
