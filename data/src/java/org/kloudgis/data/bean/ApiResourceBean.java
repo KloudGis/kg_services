@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.KGConfig;
+import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**
@@ -35,8 +36,8 @@ public class ApiResourceBean {
         HibernateEntityManager em = null;
         try {
             em = PersistenceManager.getInstance().getEntityManager(sandbox);         
-            boolean bAccess = AuthorizationFactory.isMember(em, user_id, sandbox, auth_token);
-            return Response.ok(bAccess + "").build();
+            MemberDbEntity lAccess = AuthorizationFactory.getMember(em, user_id, sandbox, auth_token);
+            return Response.ok((lAccess != null) + "").build();
         } catch (Exception ex) {
             if(em != null){
                 em.close();

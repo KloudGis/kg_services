@@ -32,5 +32,13 @@ public class MemberDbEntity implements Serializable {
     @Index (name="access_index")
     @Column
     private String access_type;
+    
+    public Long getId(){
+        return id;
+    }
+    
+    public Long getUserId(){
+        return user_id;
+    }
 
 }

@@ -19,13 +19,16 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -40,6 +43,7 @@ import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.GeometryFactory;
 import org.kloudgis.data.pojo.Cluster;
 import org.kloudgis.data.pojo.Note;
+import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 import org.kloudgis.pojo.Records;
@@ -59,14 +63,14 @@ public class NoteResourceBean {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             HttpSession session = req.getSession(true);
-            boolean bMember = false;
+            MemberDbEntity lMember = null;
             try {
-                bMember = AuthorizationFactory.isMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
             }
-            if (bMember) {
+            if (lMember != null) {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 if (note != null) {
                     Note pojo = note.toPojo();
@@ -75,6 +79,46 @@ public class NoteResourceBean {
                 }
                 em.close();
                 throw new EntityNotFoundException("Not found:" + fId);
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
+    @POST
+    @Produces({"application/json"})
+    public Response addFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Note in_note) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            HttpSession session = req.getSession(true);
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember != null) {
+                em.getTransaction().begin();
+                NoteDbEntity note = new NoteDbEntity();
+                note.fromPojo(in_note);
+                note.setAuthor(lMember.getUserId());
+                note.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                try{
+                    em.persist(note);
+                    em.getTransaction().commit();
+                }catch(Exception e){
+                    if(em.getTransaction().isActive()){
+                        em.getTransaction().rollback();
+                    }
+                    em.close();
+                    return Response.serverError().entity(e.getMessage()).build();
+                }
+                Note pojo = note.toPojo();
+                em.close();
+                return Response.ok(pojo).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
@@ -95,14 +139,14 @@ public class NoteResourceBean {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             HttpSession session = req.getSession(true);
-            boolean bMember = false;
+            MemberDbEntity lMember = null;
             try {
-                bMember = AuthorizationFactory.isMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
             }
-            if (bMember) {
+            if (lMember != null) {
                 List<Cluster> clusters = new ArrayList();
                 Cluster cluster;
                 boolean clustered = false;
@@ -140,7 +184,7 @@ public class NoteResourceBean {
                 Records rec = new Records();
                 rec.records = clusters;
                 return Response.ok(rec).build();
-            }else{
+            } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
         } else {

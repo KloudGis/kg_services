@@ -22,6 +22,7 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.data.pojo.Layer;
 import org.kloudgis.data.store.LayerDbEntity;
+import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 import org.kloudgis.pojo.Records;
 
@@ -38,14 +39,14 @@ public class LayerResourceBean {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             HttpSession session = req.getSession(true);
-            boolean bMember = false;
+           MemberDbEntity lMember = null;
             try {
-                bMember = AuthorizationFactory.isMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
             }
-            if (bMember) {
+            if (lMember != null) {
                 List<LayerDbEntity> lstDb = em.createQuery("from LayerDbEntity", LayerDbEntity.class).getResultList();
                 List<Layer> lstFT = new ArrayList(lstDb.size());
                 for (LayerDbEntity fDb : lstDb) {
@@ -70,14 +71,14 @@ public class LayerResourceBean {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             HttpSession session = req.getSession(true);
-            boolean bMember = false;
+            MemberDbEntity lMember = null;
             try {
-                bMember = AuthorizationFactory.isMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
             }
-            if (bMember) {
+            if (lMember != null) {
                 LayerDbEntity layDb = em.find(LayerDbEntity.class, layerId);
                 Layer pojo = null;
                 if (layDb != null) {

@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
+import org.kloudgis.GeometryFactory;
 import org.kloudgis.pojo.Coordinate;
 import org.kloudgis.data.pojo.Note;
 
@@ -35,9 +37,9 @@ public class NoteDbEntity implements Serializable{
     @Column
     private String description;    
     @Column
-    private String author;
+    private Long author;
     @Column
-    private Date   date_create;
+    private Timestamp   date_create;
     @Column
     @Type(type = "org.hibernatespatial.GeometryUserType")
     private Geometry geom;
@@ -61,8 +63,25 @@ public class NoteDbEntity implements Serializable{
         return pojo;
         
     }
+    
+    public void fromPojo(Note pojo) {
+        this.title = pojo.title;
+        this.description = pojo.description;
+        this.geom = GeometryFactory.createPoint(new com.vividsolutions.jts.geom.Coordinate(pojo.coordinate.x, pojo.coordinate.y));
+        this.geom.setSRID(4326);
+    }
 
     public Point getGeometry() {
         return (Point) geom;
     }
+
+    public void setAuthor(Long userId) {
+        this.author = userId;
+    }
+    
+    public void setDate(Timestamp time){
+        this.date_create = time;
+    }
+
+    
 }
