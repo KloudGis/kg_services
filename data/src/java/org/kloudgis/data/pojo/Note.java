@@ -4,7 +4,6 @@
  */
 package org.kloudgis.data.pojo;
 
-import java.sql.Timestamp;
 import org.kloudgis.pojo.Coordinate;
 
 /**
@@ -17,7 +16,8 @@ public class Note{
     public String   title;   
     public String   description;
     public Long     author;
+    public String   author_descriptor;
     public Coordinate coordinate;
-    public Timestamp     date;
+    public Long     date;
     
 }

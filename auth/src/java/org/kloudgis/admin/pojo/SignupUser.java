@@ -21,6 +21,7 @@ package org.kloudgis.admin.pojo;
  */
 public class SignupUser {
 
+        public Long   id;
         public String user;
         public String pwd;
         public String name;

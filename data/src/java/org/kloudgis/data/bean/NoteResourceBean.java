@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -87,6 +88,50 @@ public class NoteResourceBean {
         }
     }
 
+    @PUT
+    @Path("{fId}")
+    @Produces({"application/json"})
+    public Response updateFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox, Note in_note) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            HttpSession session = req.getSession(true);
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember != null) {
+                em.getTransaction().begin();
+                NoteDbEntity note = em.find(NoteDbEntity.class, fId);
+                try {
+                    if (note != null) {
+                        em.getTransaction().begin();
+                        Note pojo = note.toPojo();
+                        note.fromPojo(in_note);
+                        em.getTransaction().commit();
+                        em.close();
+                        return Response.ok(pojo).build();
+                    }                   
+                } catch (Exception e) {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    em.close();
+                    return Response.serverError().entity(e.getMessage()).build();
+                }
+                Note pojo = note.toPojo();
+                em.close();
+                return Response.ok(pojo).build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
     @POST
     @Produces({"application/json"})
     public Response addFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Note in_note) {
@@ -105,12 +150,13 @@ public class NoteResourceBean {
                 NoteDbEntity note = new NoteDbEntity();
                 note.fromPojo(in_note);
                 note.setAuthor(lMember.getUserId());
+                note.setAuthorDescriptor(lMember.getUserDescriptor());
                 note.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-                try{
+                try {
                     em.persist(note);
                     em.getTransaction().commit();
-                }catch(Exception e){
-                    if(em.getTransaction().isActive()){
+                } catch (Exception e) {
+                    if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
                     }
                     em.close();

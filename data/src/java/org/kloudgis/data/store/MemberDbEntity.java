@@ -29,6 +29,9 @@ public class MemberDbEntity implements Serializable {
     @Index (name="user_index")
     @Column
     private Long user_id;
+    @Index (name="user_descr_index")
+    @Column
+    private String user_descriptor;
     @Index (name="access_index")
     @Column
     private String access_type;
@@ -41,4 +44,7 @@ public class MemberDbEntity implements Serializable {
         return user_id;
     }
 
+    public String getUserDescriptor(){
+        return user_descriptor;
+    }
 }

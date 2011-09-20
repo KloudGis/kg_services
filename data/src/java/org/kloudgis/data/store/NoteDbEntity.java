@@ -39,6 +39,8 @@ public class NoteDbEntity implements Serializable{
     @Column
     private Long author;
     @Column
+    private String author_descriptor;
+    @Column
     private Timestamp   date_create;
     @Column
     @Type(type = "org.hibernatespatial.GeometryUserType")
@@ -59,7 +61,8 @@ public class NoteDbEntity implements Serializable{
         pojo.title = title;
         pojo.description = description;
         pojo.author = author;
-        pojo.date = date_create;
+        pojo.author_descriptor = author_descriptor;
+        pojo.date = date_create.getTime();
         return pojo;
         
     }
@@ -77,6 +80,10 @@ public class NoteDbEntity implements Serializable{
 
     public void setAuthor(Long userId) {
         this.author = userId;
+    }
+    
+    public void setAuthorDescriptor(String desc) {
+        this.author_descriptor = desc;
     }
     
     public void setDate(Timestamp time){
