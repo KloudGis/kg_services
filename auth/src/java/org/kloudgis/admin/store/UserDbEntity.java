@@ -259,6 +259,7 @@ public class UserDbEntity implements Serializable {
 
     public SignupUser toSimpleUser() {
         SignupUser pojo = new SignupUser();
+        pojo.id = id;
         pojo.user = email;
         pojo.name = fullName;
         pojo.company = company;

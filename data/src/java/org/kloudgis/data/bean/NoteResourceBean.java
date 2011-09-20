@@ -103,7 +103,6 @@ public class NoteResourceBean {
                 return Response.serverError().entity(ex.getMessage()).build();
             }
             if (lMember != null) {
-                em.getTransaction().begin();
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
