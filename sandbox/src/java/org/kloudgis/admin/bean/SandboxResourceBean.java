@@ -14,19 +14,24 @@
  */
 package org.kloudgis.admin.bean;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.KGConfig;
 import org.kloudgis.pojo.Records;
 import org.kloudgis.admin.pojo.Sandbox;
@@ -49,18 +54,14 @@ public class SandboxResourceBean {
         }
 
         HttpSession session = req.getSession(true);
-        Long id = (Long) session.getAttribute("kg_user_id");
-        String err = "?";
-        if (id == null) {
-            try {
-                String body = ApiFactory.apiGet(auth_token,KGConfig.getConfiguration().auth_url + "/user_id", KGConfig.getConfiguration().api_key);
-                id = Long.parseLong(body);
-                session.setAttribute("kg_user_id", id);
-            } catch (Exception ex) {
-                err = ex.getMessage();
-            } 
+        Long id = null;
+        String err = "Invalid token";
+        try {
+            id = AuthorizationFactory.getUserId(session, auth_token);
+        } catch (IOException ex) {
+            err = ex.getMessage();
         }
-        if (id != null) {         
+        if (id != null) {
             HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
             List<SandboxDbEntity> sandboxes = em.getSession().createCriteria(SandboxDbEntity.class).addOrder(Order.asc("name")).createCriteria("users").add(Restrictions.eq("user_id", id)).list();
             List<Sandbox> list = new ArrayList();
@@ -70,9 +71,38 @@ public class SandboxResourceBean {
             Records ret = new Records();
             ret.records = list;
             return Response.ok(ret).build();
-        }else{
-            return Response.serverError().entity(err).build(); 
+        } else {
+            return Response.serverError().entity(err).build();
         }
-        
+
+    }
+
+    @GET
+    @Path("{key}/meta")
+    public Response getSandboxMeta(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req, @PathParam("key") String key) {
+        if (auth_token == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        HttpSession session = req.getSession(true);
+        Long id = null;
+        String err = "Invalid token";
+        try {
+            id = AuthorizationFactory.getUserId(session, auth_token);
+        } catch (IOException ex) {
+            err = ex.getMessage();
+        }
+        if (id != null) {
+            HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
+            try {
+                SandboxDbEntity sandbox = (SandboxDbEntity) em.getSession().createCriteria(SandboxDbEntity.class).addOrder(Order.asc("name")).add(Restrictions.eq("unique_key", key)).createCriteria("users").add(Restrictions.eq("user_id", id)).uniqueResult();
+                em.close();
+                return Response.ok(sandbox.toPojo()).build();
+            } catch (Exception e) {
+                err = e.getMessage();
+            }
+            em.close();
+        }
+        return Response.serverError().entity(err).build();
     }
 }

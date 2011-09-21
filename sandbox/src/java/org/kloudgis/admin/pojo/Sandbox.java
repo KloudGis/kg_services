@@ -12,5 +12,6 @@ public class Sandbox {
     public String name;
     public Long guid;
     public String key;
+    public Long owner;
     
 }

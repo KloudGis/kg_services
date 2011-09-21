@@ -30,12 +30,15 @@ public class SandboxDbEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sandbox_seq_gen")
     private Long id;
-    @Index(name = "sandboxe_name_index")
+    @Index(name = "sandbox_name_index")
     @Column(length = 100)
     private String name;
-    @Index(name = "sandboxe_key_index")
+    @Index(name = "sandbox_key_index")
     @Column(length = 100)
     private String unique_key;
+    @Index(name = "sandbox_owner_index")
+    @Column()
+    private Long owner;
     @OneToMany(mappedBy="sandboxe", cascade = CascadeType.ALL)
     List<UserSandboxDbEntity> users;
     
@@ -44,6 +47,7 @@ public class SandboxDbEntity implements Serializable {
         pojo.guid = id;
         pojo.name = name;
         pojo.key = unique_key;
+        pojo.owner = owner;
         return pojo;
     }
    

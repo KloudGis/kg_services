@@ -62,7 +62,7 @@ public class NoteDbEntity implements Serializable{
         pojo.description = description;
         pojo.author = author;
         pojo.author_descriptor = author_descriptor;
-        pojo.date = date_create.getTime();
+        pojo.date = date_create == null ? null : date_create.getTime();
         return pojo;
         
     }
