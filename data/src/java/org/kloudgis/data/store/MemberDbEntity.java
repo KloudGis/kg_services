@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Index;
+import org.kloudgis.data.pojo.Member;
 
 /**
  *
@@ -46,5 +47,14 @@ public class MemberDbEntity implements Serializable {
 
     public String getUserDescriptor(){
         return user_descriptor;
+    }
+
+    public Member toPojo() {
+        Member pojo = new Member();
+        pojo.guid = id;
+        pojo.user_id = user_id;
+        pojo.user_descriptor = user_descriptor;
+        pojo.access_type = access_type;
+        return pojo;
     }
 }
