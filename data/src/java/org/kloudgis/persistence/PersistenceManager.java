@@ -7,9 +7,9 @@ package org.kloudgis.persistence;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.ws.rs.WebApplicationException;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.KGConfig;
 
@@ -60,6 +60,19 @@ public class PersistenceManager {
         String url = KGConfig.getConfiguration().db_url;
         prop.put("hibernate.connection.url", url + "/" + key);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(DATA_PU, prop);
+        if (emf != null) {
+            EntityManager em = emf.createEntityManager();
+            try {
+                em.getTransaction().begin();
+                em.createNativeQuery("CREATE INDEX note_gist_ix ON note USING gist(geo)").executeUpdate();
+                em.createNativeQuery("CREATE INDEX feature_gist_ix ON feature USING gist(geo)").executeUpdate();
+                em.getTransaction().commit();
+            } catch (Exception e) {
+                em.getTransaction().rollback();
+            } finally {
+                em.close();
+            }
+        }
         return emf;
     }
 }

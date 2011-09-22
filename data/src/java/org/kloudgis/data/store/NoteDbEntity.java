@@ -44,7 +44,7 @@ public class NoteDbEntity implements Serializable{
     private Timestamp   date_create;
     @Column
     @Type(type = "org.hibernatespatial.GeometryUserType")
-    private Geometry geom;
+    private Geometry geo;
 
     public Long getId() {
         return id;
@@ -57,7 +57,7 @@ public class NoteDbEntity implements Serializable{
     public Note toPojo() {
         Note pojo = new Note();
         pojo.guid = id;
-        pojo.coordinate = geom == null? null : new Coordinate(geom.getCentroid().getX(), geom.getCentroid().getY());
+        pojo.coordinate = geo == null? null : new Coordinate(geo.getCentroid().getX(), geo.getCentroid().getY());
         pojo.title = title;
         pojo.description = description;
         pojo.author = author;
@@ -70,12 +70,12 @@ public class NoteDbEntity implements Serializable{
     public void fromPojo(Note pojo) {
         this.title = pojo.title;
         this.description = pojo.description;
-        this.geom = GeometryFactory.createPoint(new com.vividsolutions.jts.geom.Coordinate(pojo.coordinate.x, pojo.coordinate.y));
-        this.geom.setSRID(4326);
+        this.geo = GeometryFactory.createPoint(new com.vividsolutions.jts.geom.Coordinate(pojo.coordinate.x, pojo.coordinate.y));
+        this.geo.setSRID(4326);
     }
 
     public Point getGeometry() {
-        return (Point) geom;
+        return (Point) geo;
     }
 
     public void setAuthor(Long userId) {

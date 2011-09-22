@@ -225,7 +225,7 @@ public class WmsProxy extends HttpServlet {
                 }
             }
         }
-        return null;
+        return request.getHeader("X-Kloudgis-Authentication");
     }
 
     /** 

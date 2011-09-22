@@ -5,7 +5,6 @@
     <class>org.kloudgis.data.store.NoteDbEntity</class>
     <class>org.kloudgis.data.store.LayerDbEntity</class>
     <class>org.kloudgis.data.store.MemberDbEntity</class>
-    <class>org.kloudgis.data.store.FeatureAttributeDbEntity</class>
     <class>org.kloudgis.data.store.FeatureDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>

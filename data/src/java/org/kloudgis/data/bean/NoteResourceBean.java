@@ -60,7 +60,6 @@ public class NoteResourceBean {
 
     @GET
     @Path("{fId}")
-    @Produces({"application/json"})
     public Response getFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
@@ -91,7 +90,6 @@ public class NoteResourceBean {
 
     @PUT
     @Path("{fId}")
-    @Produces({"application/json"})
     public Response updateFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox, Note in_note) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
@@ -135,7 +133,6 @@ public class NoteResourceBean {
     
     @DELETE
     @Path("{fId}")
-    @Produces({"application/json"})
     public Response deleteFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
@@ -176,7 +173,6 @@ public class NoteResourceBean {
     }
 
     @POST
-    @Produces({"application/json"})
     public Response addFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Note in_note) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
@@ -245,7 +241,7 @@ public class NoteResourceBean {
                 Coordinate[] coords = {sw, new Coordinate(sw.x, ne.y), ne, new Coordinate(ne.x, sw.y), sw};
                 Polygon pBounds = GeometryFactory.createPolygon(GeometryFactory.createLinearRing(coords), null);
                 pBounds.setSRID(4326);
-                criteria.add(SpatialRestrictions.within("geom", pBounds));
+                criteria.add(SpatialRestrictions.within("geo", pBounds));
                 criteria.addOrder(Order.asc("id"));
                 NoteDbEntity feature;
                 List< NoteDbEntity> features = criteria.list();
