@@ -24,6 +24,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
 /**
  *
@@ -58,6 +60,9 @@ public class LayerDbEntity implements Serializable {
     private Boolean         selectable;
     @Column
     private Integer         pixel_tolerance;
+    
+    @Column(length = 100)
+    private String          featuretype;
 
     public Layer toPojo(EntityManager em) {
 
@@ -103,5 +108,9 @@ public class LayerDbEntity implements Serializable {
 
     public void setOwner( Long lOwner ) {
         owner = lOwner;
+    }
+
+    public Criterion getRestriction() {
+        return Restrictions.eq("featuretype", featuretype);
     }
 }

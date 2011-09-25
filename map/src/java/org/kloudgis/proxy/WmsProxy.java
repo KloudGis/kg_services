@@ -46,14 +46,14 @@ public class WmsProxy extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        //EntityManager em = PersistenceManager.getInstance().getEntityManager(PersistenceManager.ADMIN_PU);
+        String server = null,sandbox = null;
         try {
             // System.out.print("Process wms request...");
             HttpSession session = request.getSession(true);
-            String sandbox = getHttpParam(KG_SANDBOX, request);
+            sandbox = getHttpParam(KG_SANDBOX, request);
             String access_key = sandbox + "_" + SESSION_MAP_ACCESS;
             Boolean bAccess = (Boolean) session.getAttribute(access_key);
-            String server = KGConfig.getConfiguration().geoserver_url;
+            server = KGConfig.getConfiguration().geoserver_url;
             String auth_token = getAuthToken(request);
             if (auth_token != null && auth_token.length() > 0) {
                 Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT);
@@ -185,6 +185,7 @@ public class WmsProxy extends HttpServlet {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+            System.out.println("Coud'nt proxy sandbox:"  +sandbox + " on server:" + server);
             throw new ServletException(ex.getMessage());
         }
     }
