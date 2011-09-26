@@ -21,5 +21,27 @@ public class Feature {
     public String geo_type;
     public List<Coordinate> coords;
     public List<Attribute>  attrs;
+
+    @Override
+    public int hashCode() {
+        return guid.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Feature other = (Feature) obj;
+        if ((this.guid == null) ? (other.guid != null) : !this.guid.equals(other.guid)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
     
 }

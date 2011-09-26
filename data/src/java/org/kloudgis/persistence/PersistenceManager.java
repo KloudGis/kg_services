@@ -64,8 +64,8 @@ public class PersistenceManager {
             EntityManager em = emf.createEntityManager();
             try {
                 em.getTransaction().begin();
-                em.createNativeQuery("CREATE INDEX note_gist_ix ON note USING gist(geo)").executeUpdate();
-                em.createNativeQuery("CREATE INDEX feature_gist_ix ON feature USING gist(geo)").executeUpdate();
+                em.createNativeQuery("CREATE INDEX note_gist_ix ON notes USING gist(geo)").executeUpdate();
+                em.createNativeQuery("CREATE INDEX feature_gist_ix ON features USING gist(geo)").executeUpdate();
                 em.getTransaction().commit();
             } catch (Exception e) {
                 em.getTransaction().rollback();

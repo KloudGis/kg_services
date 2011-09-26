@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.GeometryFactory;
@@ -58,13 +59,6 @@ public class FeatureResourceBean {
                 }
             }
             
-            //to remove
-            List<FeatureDbEntity> lst =  em.getSession().createCriteria(FeatureDbEntity.class).list();
-            for(FeatureDbEntity fea: lst){
-                setF.add(fea.toPojo());
-            }
-            
-            
             em.close();
             Records records = new Records();
             records.records = new ArrayList(setF);
@@ -83,7 +77,10 @@ public class FeatureResourceBean {
             inter.setSRID(point.getSRID());
         }
         Criteria criteria = em.getSession().createCriteria(FeatureDbEntity.class);
-        criteria.add(layer.getRestriction());
+        Criterion crit = layer.getRestriction();
+        if(crit != null){
+            criteria.add(crit);
+        }
         criteria.add(SpatialRestrictions.intersects("geo", inter));
         criteria.setMaxResults(limit);
         List result = criteria.list();

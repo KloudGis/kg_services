@@ -26,7 +26,7 @@ import org.kloudgis.data.pojo.Feature;
  * @author jeanfelixg
  */
 @Entity
-@Table (name="feature")
+@Table (name="features")
 public class FeatureDbEntity implements Serializable{
     
     @SequenceGenerator(name = "feature_seq_gen", sequenceName = "feature_seq")

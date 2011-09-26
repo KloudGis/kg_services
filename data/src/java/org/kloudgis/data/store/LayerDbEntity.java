@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
+
 /**
  *
  * @author jeanfelixg
@@ -38,31 +39,29 @@ public class LayerDbEntity implements Serializable {
     @SequenceGenerator(name = "layer_seq_gen", sequenceName = "layer_seq")
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "layer_seq_gen")
-    private Long            id;
+    private Long id;
     @Column
-    private Integer         render_order;
-
+    private Integer render_order;
     @Column(length = 100)
-    private String          name;
+    private String name;
     @Column
-    private Long            owner;
+    private Long owner;
     @Column(length = 100)
-    private String          label;
+    private String label;
     @Column
-    private Timestamp       date_creation;
+    private Timestamp date_creation;
     @Column(length = 254)
-    private String          url;
+    private String url;
     @Column
-    private Integer         buffer;
+    private Integer buffer;
     @Column
-    private Boolean         visibility;
+    private Boolean visibility;
     @Column
-    private Boolean         selectable;
+    private Boolean selectable;
     @Column
-    private Integer         pixel_tolerance;
-    
+    private Integer pixel_tolerance;
     @Column(length = 100)
-    private String          featuretype;
+    private String featuretype;
 
     public Layer toPojo(EntityManager em) {
 
@@ -71,7 +70,7 @@ public class LayerDbEntity implements Serializable {
         pojo.renderOrder = render_order;
         pojo.isSelectable = selectable;
         pojo.pixelTolerance = pixel_tolerance;
-        
+
         pojo.name = name;
         pojo.owner = owner;
         pojo.label = label;
@@ -81,7 +80,6 @@ public class LayerDbEntity implements Serializable {
         return pojo;
     }
 
-
     public Long getId() {
         return id;
     }
@@ -90,27 +88,30 @@ public class LayerDbEntity implements Serializable {
         return pixel_tolerance == null ? 0 : pixel_tolerance.intValue();
     }
 
-    public void setName( String strName ) {
+    public void setName(String strName) {
         name = strName;
     }
 
-    public void setVisible( boolean bVisibility ) {
+    public void setVisible(boolean bVisibility) {
         visibility = bVisibility;
     }
 
-    public void setSelectable( boolean bSelectability ) {
+    public void setSelectable(boolean bSelectability) {
         selectable = bSelectability;
     }
 
-    public void setLabel( String strLabel ) {
+    public void setLabel(String strLabel) {
         label = strLabel;
     }
 
-    public void setOwner( Long lOwner ) {
+    public void setOwner(Long lOwner) {
         owner = lOwner;
     }
 
     public Criterion getRestriction() {
-        return Restrictions.eq("featuretype", featuretype);
+        if (featuretype != null) {
+            return Restrictions.eq("featuretype", featuretype);
+        }
+        return null;
     }
 }

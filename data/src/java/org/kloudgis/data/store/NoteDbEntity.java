@@ -26,7 +26,7 @@ import org.kloudgis.data.pojo.Note;
  * @author jeanfelixg
  */
 @Entity
-@Table(name = "note")
+@Table(name = "notes")
 public class NoteDbEntity implements Serializable{
     @SequenceGenerator(name = "note_seq_gen", sequenceName = "note_seq")
     @Id
