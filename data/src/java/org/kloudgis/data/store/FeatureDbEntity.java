@@ -9,6 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -50,6 +51,8 @@ public class FeatureDbEntity implements Serializable{
     @Column
     @Index(name = "angle")
     private Double angle;
+    @Column
+    private String title_attr;
     //extras
     @Index(name = "feature_ind1_index")
     @Column(columnDefinition="TEXT")
@@ -73,6 +76,7 @@ public class FeatureDbEntity implements Serializable{
         pojo.fid=fid;
         pojo.ft = featuretype;
         pojo.date = date_update != null ? date_update.getTime(): null;
+        pojo.title_attr = title_attr != null ? title_attr: "index1";
         if(geo != null){
             Coordinate[] arrC = geo.getCoordinates();
             ArrayList<org.kloudgis.pojo.Coordinate> arrCPojo = new ArrayList(arrC.length);
@@ -82,13 +86,13 @@ public class FeatureDbEntity implements Serializable{
             pojo.coords = arrCPojo;
             pojo.geo_type = geo.getGeometryType();
         }
-        ArrayList<Attribute> arrAt = new ArrayList(5);
-        arrAt.add(new Attribute("index1", index1));
-        arrAt.add(new Attribute("index2", index2));
-        arrAt.add(new Attribute("index3", index3));
-        arrAt.add(new Attribute("index4", index4));
-        arrAt.add(new Attribute("index5", index5));
-        pojo.attrs = arrAt;
+        LinkedHashMap<String, String> mapAt = new LinkedHashMap<String, String>();
+        mapAt.put("index1", index1);
+        mapAt.put("index2", index2);
+        mapAt.put("index3", index3);
+        mapAt.put("index4", index4);
+        mapAt.put("index5", index5);
+        pojo.attrs = mapAt;
         return pojo;        
     }
     

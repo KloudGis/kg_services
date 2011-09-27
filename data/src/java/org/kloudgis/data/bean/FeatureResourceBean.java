@@ -24,6 +24,7 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
+import org.kloudgis.data.store.DistanceOrder;
 import org.kloudgis.data.store.FeatureDbEntity;
 import org.kloudgis.data.store.LayerDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
@@ -82,6 +83,7 @@ public class FeatureResourceBean {
             criteria.add(crit);
         }
         criteria.add(SpatialRestrictions.intersects("geo", inter));
+        criteria.addOrder(new DistanceOrder("geo", point));
         criteria.setMaxResults(limit);
         List result = criteria.list();
         for (Object oR : result) {
