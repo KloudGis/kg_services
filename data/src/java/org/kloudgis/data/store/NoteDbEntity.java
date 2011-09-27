@@ -90,5 +90,9 @@ public class NoteDbEntity implements Serializable{
         this.date_create = time;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     
 }

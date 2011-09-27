@@ -16,6 +16,7 @@ public class Cluster {
     public Long guid;
     public Double lat;
     public Double lon;
+    public String tip;
     
     public List features = new ArrayList();
 }

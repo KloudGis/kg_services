@@ -285,6 +285,7 @@ public class NoteResourceBean {
 
     private void addToCluster(Cluster cluster, NoteDbEntity feature) {
         cluster.features.add(feature.getId());
+        cluster.tip = "_Notes";
     }
 
     private Cluster createCluster(NoteDbEntity feature) {
@@ -292,6 +293,7 @@ public class NoteResourceBean {
         cluster.lon = feature.getGeometry().getX();
         cluster.lat = feature.getGeometry().getY();
         cluster.features.add(feature.getId());
+        cluster.tip = feature.getTitle();
         cluster.guid = feature.getId();
         return cluster;
     }
