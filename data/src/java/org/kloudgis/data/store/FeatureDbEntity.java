@@ -6,6 +6,7 @@ package org.kloudgis.data.store;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
-import org.kloudgis.data.pojo.Attribute;
 import org.kloudgis.data.pojo.Feature;
 
 /**
@@ -85,6 +85,13 @@ public class FeatureDbEntity implements Serializable{
             }
             pojo.coords = arrCPojo;
             pojo.geo_type = geo.getGeometryType();
+            if(arrC.length > 1){
+                Point ptC = geo.getCentroid();
+                if(ptC != null){
+                    pojo.centroid = new org.kloudgis.pojo.Coordinate(ptC.getX(), ptC.getY());
+                }
+                
+            }
         }
         LinkedHashMap<String, String> mapAt = new LinkedHashMap<String, String>();
         mapAt.put("index1", index1);

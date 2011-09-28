@@ -21,6 +21,7 @@ public class Feature {
     public Long date;
     public String geo_type;
     public List<Coordinate> coords;
+    public Coordinate centroid;
     public Map<String, String>  attrs;
     public String title_attr;
 
