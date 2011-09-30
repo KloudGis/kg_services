@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -70,13 +72,20 @@ public class FeatureDbEntity implements Serializable{
     @Column(columnDefinition="TEXT")
     private String index5;
 
-    public Feature toPojo() {
+    public Feature toPojo(Map<String, FeatureTypeDbEntity> mapFt) {
         Feature pojo = new Feature();
         pojo.guid = id + "";
         pojo.fid=fid;
-        pojo.ft = featuretype;
+        FeatureTypeDbEntity ft = null;
+        if(featuretype != null){
+            ft = mapFt.get(featuretype);
+            if(ft != null){
+                pojo.ft = ft.getLabel();
+            }else{
+                pojo.ft = featuretype;
+            }
+        }
         pojo.date = date_update != null ? date_update.getTime(): null;
-        pojo.title_attr = title_attr != null ? title_attr: "index1";
         if(geo != null){
             Coordinate[] arrC = geo.getCoordinates();
             ArrayList<org.kloudgis.pojo.Coordinate> arrCPojo = new ArrayList(arrC.length);
@@ -94,13 +103,29 @@ public class FeatureDbEntity implements Serializable{
             }
         }
         LinkedHashMap<String, String> mapAt = new LinkedHashMap<String, String>();
-        mapAt.put("index1", index1);
-        mapAt.put("index2", index2);
-        mapAt.put("index3", index3);
-        mapAt.put("index4", index4);
-        mapAt.put("index5", index5);
+        String ind1Lbl = findLabel("index1", ft);
+        mapAt.put(ind1Lbl, index1);
+        mapAt.put(findLabel("index2", ft), index2);
+        mapAt.put(findLabel("index3", ft), index3);
+        mapAt.put(findLabel("index4", ft), index4);
+        mapAt.put(findLabel("index5", ft), index5);
+        pojo.title_attr = title_attr != null ? title_attr: ind1Lbl;
         pojo.attrs = mapAt;
         return pojo;        
+    }
+    
+    private String findLabel(String attr, FeatureTypeDbEntity ft){
+        if(ft != null){
+            List<AttrTypeDbEntity> lstAt = ft.getAttrs();
+            if(lstAt != null){
+                for(AttrTypeDbEntity at : lstAt){
+                    if(at.getName().equals(attr)){
+                        return at.getLabel();
+                    }
+                }
+            }
+        }
+        return attr;
     }
     
 }

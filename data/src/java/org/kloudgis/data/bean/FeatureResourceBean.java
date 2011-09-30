@@ -4,6 +4,7 @@
  */
 package org.kloudgis.data.bean;
 
+import org.kloudgis.model.ModelFactory;
 import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -11,6 +12,7 @@ import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -26,6 +28,7 @@ import org.kloudgis.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.store.DistanceOrder;
 import org.kloudgis.data.store.FeatureDbEntity;
+import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.LayerDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 import org.kloudgis.pojo.Records;
@@ -86,8 +89,9 @@ public class FeatureResourceBean {
         criteria.addOrder(new DistanceOrder("geo", point));
         criteria.setMaxResults(limit);
         List result = criteria.list();
+        Map<String, FeatureTypeDbEntity> mapFt = ModelFactory.getFeatureTypes(em);
         for (Object oR : result) {
-            lstF.add(((FeatureDbEntity) oR).toPojo());
+            lstF.add(((FeatureDbEntity) oR).toPojo(mapFt));
         }
         return lstF;
     }
