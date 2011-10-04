@@ -22,6 +22,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 import org.kloudgis.data.pojo.Feature;
 
 /**
@@ -30,6 +32,7 @@ import org.kloudgis.data.pojo.Feature;
  */
 @Entity
 @Table (name="features")
+@Indexed
 public class FeatureDbEntity implements Serializable{
     
     @SequenceGenerator(name = "feature_seq_gen", sequenceName = "feature_seq")
@@ -58,18 +61,23 @@ public class FeatureDbEntity implements Serializable{
     //extras
     @Index(name = "feature_ind1_index")
     @Column(columnDefinition="TEXT")
+    @Field(index=org.hibernate.search.annotations.Index.TOKENIZED)
     private String index1;
     @Index(name = "feature_ind2_index")
     @Column(columnDefinition="TEXT")
+    @Field(index=org.hibernate.search.annotations.Index.TOKENIZED)
     private String index2;
     @Index(name = "feature_ind3_index")
     @Column(columnDefinition="TEXT")
+    @Field(index=org.hibernate.search.annotations.Index.TOKENIZED)
     private String index3;
     @Index(name = "feature_ind4_index")
     @Column(columnDefinition="TEXT")
+    @Field(index=org.hibernate.search.annotations.Index.TOKENIZED)
     private String index4;
     @Index(name = "feature_ind5_index")
     @Column(columnDefinition="TEXT")
+    @Field(index=org.hibernate.search.annotations.Index.TOKENIZED)
     private String index5;
 
     public Feature toPojo(Map<String, FeatureTypeDbEntity> mapFt) {
