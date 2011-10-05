@@ -12,6 +12,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.KGConfig;
+import org.kloudgis.data.bean.SearchFactory;
 
 /**
  *
@@ -55,7 +56,7 @@ public class PersistenceManager {
         return null;
     }
 
-    protected synchronized EntityManagerFactory createSandboxManagerFactory(String key) {
+    protected synchronized EntityManagerFactory createSandboxManagerFactory(final String key) {
         Map prop = new HashMap();
         String url = KGConfig.getConfiguration().db_url;
         prop.put("hibernate.connection.url", url + "/" + key);
@@ -72,6 +73,14 @@ public class PersistenceManager {
             } finally {
                 em.close();
             }
+            Thread thread = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    SearchFactory.buildSearchIndexFor(key);
+                }
+            });
+            thread.start();
         }
         return emf;
     }

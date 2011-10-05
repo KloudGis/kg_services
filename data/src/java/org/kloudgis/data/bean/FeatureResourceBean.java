@@ -14,8 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
+import java.util.TreeMap;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -33,8 +32,6 @@ import org.apache.lucene.queryParser.MultiFieldQueryParser;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.util.Version;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.GeometryFactory;
@@ -54,11 +51,11 @@ import org.kloudgis.pojo.Records;
 @Path("/protected/features")
 @Produces({"application/json"})
 public class FeatureResourceBean {
-
+    
     protected Class getEntityDbClass() {
         return FeatureDbEntity.class;
     }
-
+    
     @GET
     @Path("features_at")
     public Response getFeaturesAt(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("lon") Double lon, @QueryParam("lat") Double lat,
@@ -80,7 +77,7 @@ public class FeatureResourceBean {
                     }
                 }
             }
-
+            
             em.close();
             Records records = new Records();
             records.records = new ArrayList(setF);
@@ -89,7 +86,7 @@ public class FeatureResourceBean {
             throw new NotFoundException("Sandbox entity manager not found for id:" + sandbox + ".");
         }
     }
-
+    
     private List<Feature> findFeatures(HibernateEntityManager em, Point point, LayerDbEntity layer, double onePixelWorld, Integer limit) {
         List<Feature> lstF = new ArrayList<Feature>();
         int iPixels = layer.getPixelTolerance();
@@ -113,11 +110,11 @@ public class FeatureResourceBean {
         }
         return lstF;
     }
-
+    
     @GET
     @Path("search")
     @Produces({"application/json"})
-    public Response search(@QueryParam("search_string") String search, @QueryParam("sandbox") String sandbox) {
+    public Response search(@QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
             return Response.ok().build();
         }
@@ -131,21 +128,31 @@ public class FeatureResourceBean {
         List<FeatureDbEntity> lstR = query.getResultList();
         List lstPojos = new ArrayList();
         Map<String, FeatureTypeDbEntity> mapFt = ModelFactory.getFeatureTypes(em);
+        if(cat.equals("_unknown")){
+            cat = null;
+        }
         for (FeatureDbEntity f : lstR) {
-            lstPojos.add(f.toPojo(mapFt));
+            if(f.getFeatureType() == null){
+                if(cat == null){
+                    lstPojos.add(f.toPojo(mapFt));
+                }
+            }else if(cat != null && f.getFeatureType().equals(cat)) {
+                lstPojos.add(f.toPojo(mapFt));
+            }
+            
         }
         sem.close();
         Records records = new Records();
         records.records = lstPojos;
         return Response.ok(records).build();
     }
-
+    
     @GET
     @Path("count_search")
     @Produces({"application/json"})
     public Response countSearch(@QueryParam("search_string") String search, @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
-            return Response.ok(new SearchCategory("features","Features",search, 0)).build();
+            return Response.ok(new SearchCategory("?", "?", search, 0)).build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         FullTextEntityManager sem = Search.getFullTextEntityManager(em);
@@ -154,16 +161,39 @@ public class FeatureResourceBean {
             sem.close();
             return Response.serverError().entity("Could'nt build query for: " + search).build();
         }
+        Map<String, FeatureTypeDbEntity> model = ModelFactory.getFeatureTypes(em);
+        Map<String, Integer> mapFt = new TreeMap();
+        List<FeatureDbEntity> list = query.getResultList();
+        String unknown = "_unknown";
+        for (FeatureDbEntity fea : list) {
+            String ft = fea.getFeatureType();
+            if (ft == null) {
+                ft = unknown;
+            }
+            Integer size = mapFt.get(ft);
+            if (size == null) {
+                mapFt.put(ft, 1);
+            } else {
+                mapFt.put(ft, size + 1);
+            }            
+        }
         int iResultSize = query.getResultSize();
         sem.close();
         Records rec = new Records();
-        SearchCategory cat = new SearchCategory("features", "Features", search, iResultSize);
-        List lstCat = new ArrayList(1);
-        lstCat.add(cat);
+        List lstCat = new ArrayList();
+        for (String ft : mapFt.keySet()) {
+            FeatureTypeDbEntity entity = model.get(ft);
+            String label = ft;
+            if (entity != null) {
+                label = entity.getLabel();
+            }
+            SearchCategory cat = new SearchCategory(ft, label, search, mapFt.get(ft));           
+            lstCat.add(cat);
+        }    
         rec.records = lstCat;
         return Response.ok(rec).build();
     }
-
+    
     protected FullTextQuery buildSearchQuery(FullTextEntityManager sem, String search) {
         QueryParser parser = new MultiFieldQueryParser(Version.LUCENE_29, getSearchFields(), new StandardAnalyzer(Version.LUCENE_29));
         org.apache.lucene.search.Query query = null;
@@ -176,42 +206,16 @@ public class FeatureResourceBean {
         FullTextQuery ftq = sem.createFullTextQuery(query, getEntityDbClass());
         return ftq;
     }
-
+    
     protected String[] getSearchFields() {
         return new String[]{"index1", "index2", "index3", "index4", "index5"};
     }
-
+    
     @POST
     @Path("build_search_index")
     @Produces({"application/json"})
     public Response search(@QueryParam("sandbox") String sandbox) {
-        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
-        FullTextEntityManager ftem = Search.getFullTextEntityManager(em);
-        ftem.setFlushMode(FlushModeType.COMMIT);
-        EntityTransaction trx = ftem.getTransaction();
-        Class clazz = getEntityDbClass();
-        System.out.println("Indexing: " + clazz);
-        trx.begin();
-        ftem.purgeAll(clazz);
-        //Scrollable results will avoid loading too many objects in memory
-        int BATCH_SIZE = 500;
-        ScrollableResults results = em.getSession().createCriteria(clazz).setFetchSize(BATCH_SIZE).scroll(ScrollMode.FORWARD_ONLY);
-        int index = 0;
-        while (results.next()) {
-            index++;
-            ftem.index(results.get(0)); //index each element
-            if (index % BATCH_SIZE == 0) {
-                ftem.flushToIndexes(); //free memory since the queue is processed
-                ftem.clear(); //free memory since the queue is processed
-            }
-        }
-        if (index % BATCH_SIZE != 0) {
-            ftem.flushToIndexes(); //free memory since the queue is processed
-            ftem.clear(); //free memory since the queue is processed
-        }
-        trx.commit();
-        ftem.getSearchFactory().optimize(clazz);
-        ftem.close();
+        SearchFactory.buildSearchIndexFor(sandbox);
         return Response.ok().build();
     }
 }

@@ -135,5 +135,9 @@ public class FeatureDbEntity implements Serializable{
         }
         return attr;
     }
+
+    public String getFeatureType() {
+        return featuretype;
+    }
     
 }
