@@ -58,11 +58,11 @@ public class WmsProxy extends HttpServlet {
             if (auth_token != null && auth_token.length() > 0) {
                 Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT);
                 Long time = Calendar.getInstance().getTimeInMillis();
-                if (server != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
+                if (server != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 600000L) > time)) {
                     //ok
                     //System.out.println("Auth token still valid, " + (time - timeout.longValue()) / 1000 + " sec.");
                 } else {
-                    System.out.println("Validate security for " + access_key);
+                    System.out.println(Calendar.getInstance().getTime() + "- Validate security for " + access_key);
                     if (sandbox != null && sandbox.length() > 0) {
                         try {
                             Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
