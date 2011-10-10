@@ -8,6 +8,7 @@
     <class>org.kloudgis.data.store.FeatureDbEntity</class>
     <class>org.kloudgis.data.store.AttrTypeDbEntity</class>
     <class>org.kloudgis.data.store.FeatureTypeDbEntity</class>
+    <class>org.kloudgis.data.store.NoteCommentDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="hibernate.connection.username" value="kloudgis"/>
@@ -19,7 +20,6 @@
       <property name="hibernate.c3p0.timeout" value="60"/>
       <property name="hibernate.c3p0.max_statements" value="10"/>
       <property name="hibernate.show_sql" value="false"/>
-      <property name="hibernate.search.default.indexBase" value="/tmp/search_index"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
     </properties>
   </persistence-unit>

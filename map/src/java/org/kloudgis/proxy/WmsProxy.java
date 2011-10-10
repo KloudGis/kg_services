@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.DeflaterInputStream;
@@ -20,14 +19,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.kloudgis.KGConfig;
-import org.kloudgis.api.ApiFactory;
 
 /**
  * Proxy request to the geoserver mathching the project.
@@ -36,63 +33,21 @@ import org.kloudgis.api.ApiFactory;
 public class WmsProxy extends HttpServlet {
 
     public static final String ENCRES = "responseEncoding";
-    //query params
-    public static final String KG_SANDBOX = "kg_sandbox";
-    //session attributes
-    private static final String SESSION_TIMEOUT = "!kg_timeout!";
-    private static final String SESSION_MAP_ACCESS = "!kg_map_access!";
+   
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String server = null,sandbox = null;
+        String server = KGConfig.getConfiguration().geoserver_url,sandbox = null;
         try {
-            // System.out.print("Process wms request...");
-            HttpSession session = request.getSession(true);
-            sandbox = getHttpParam(KG_SANDBOX, request);
-            String access_key = sandbox + "_" + SESSION_MAP_ACCESS;
-            Boolean bAccess = (Boolean) session.getAttribute(access_key);
-            server = KGConfig.getConfiguration().geoserver_url;
+            sandbox = getHttpParam(org.kloudgis.SecurityManager.KG_SANDBOX, request);
             String auth_token = getAuthToken(request);
-            if (auth_token != null && auth_token.length() > 0) {
-                Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT);
-                Long time = Calendar.getInstance().getTimeInMillis();
-                if (server != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 600000L) > time)) {
-                    //ok
-                    //System.out.println("Auth token still valid, " + (time - timeout.longValue()) / 1000 + " sec.");
-                } else {
-                    System.out.println(Calendar.getInstance().getTime() + "- Validate security for " + access_key);
-                    if (sandbox != null && sandbox.length() > 0) {
-                        try {
-                            Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                            if (user_id != null) {
-                                String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/map_access?sandbox=" + sandbox + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
-                                if (body != null && body.equals("true")) {
-                                    session.setAttribute(access_key, true);
-                                    bAccess = true;
-                                } else {
-                                    session.setAttribute(access_key, false);
-                                    bAccess = false;
-                                }
-                            }
-                            session.setAttribute(SESSION_TIMEOUT, Calendar.getInstance().getTimeInMillis());
-                        } catch (Exception ex) {
-                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            return;
-                        }
-                    } else {
-                        bAccess = false;
-                    }
-                }
-            } else {
-                bAccess = false;
-            }
-
+            boolean bAccess = org.kloudgis.SecurityManager.getInstance().login(request, auth_token, sandbox);
             if (server == null) {
                 throw new IllegalArgumentException("missing server");
             }
-            if (bAccess == null || bAccess.booleanValue() == false) {
+            if (bAccess == false) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }

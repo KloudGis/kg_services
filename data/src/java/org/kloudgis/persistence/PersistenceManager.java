@@ -41,7 +41,7 @@ public class PersistenceManager {
         mapEMF.clear();
     }
 
-    public HibernateEntityManager getEntityManager(String key) {
+    public synchronized HibernateEntityManager getEntityManager(String key) {
         EntityManagerFactory emf = null;
         if (key != null) {
             emf = mapEMF.get(key);
@@ -60,6 +60,7 @@ public class PersistenceManager {
         Map prop = new HashMap();
         String url = KGConfig.getConfiguration().db_url;
         prop.put("hibernate.connection.url", url + "/" + key);
+        prop.put("hibernate.search.default.indexBase", "/tmp/search_index/" + key);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(DATA_PU, prop);
         if (emf != null) {
             EntityManager em = emf.createEntityManager();
@@ -73,6 +74,8 @@ public class PersistenceManager {
             } finally {
                 em.close();
             }
+            
+            System.out.println("build search index for:" + key);
             Thread thread = new Thread(new Runnable() {
 
                 @Override

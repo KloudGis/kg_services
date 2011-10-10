@@ -105,13 +105,16 @@ public class NoteResourceBean {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
-                        em.getTransaction().begin();                        
+                        if (lMember.getUserId() != note.getAuthor()) {
+                            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note: " + sandbox).build();
+                        }
+                        em.getTransaction().begin();
                         note.fromPojo(in_note);
                         Note pojo = note.toPojo();
                         em.getTransaction().commit();
                         em.close();
                         return Response.ok(pojo).build();
-                    }                   
+                    }
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
@@ -129,8 +132,7 @@ public class NoteResourceBean {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
     }
-    
-    
+
     @DELETE
     @Path("{fId}")
     public Response deleteFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
@@ -148,12 +150,16 @@ public class NoteResourceBean {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
-                        em.getTransaction().begin();                        
-                        em.remove(note);
-                        em.getTransaction().commit();
-                        em.close();
-                        return Response.noContent().build();
-                    }                   
+                        if (note.getAuthor() == lMember.getUserId() || AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)) {
+                            em.getTransaction().begin();
+                            em.remove(note);
+                            em.getTransaction().commit();
+                            em.close();
+                            return Response.noContent().build();
+                        }else{
+                            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
+                        }
+                    }
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();

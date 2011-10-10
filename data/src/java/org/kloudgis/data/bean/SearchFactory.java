@@ -12,6 +12,7 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.kloudgis.data.store.FeatureDbEntity;
+import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**
@@ -21,11 +22,17 @@ import org.kloudgis.persistence.PersistenceManager;
 public class SearchFactory {
 
     public static void buildSearchIndexFor(String sandbox) {
+        System.out.println("Indexing Notes...");
+        buildIndex(NoteDbEntity.class, sandbox);
+        System.out.println("Indexing Features...");
+        buildIndex(FeatureDbEntity.class, sandbox);
+    }
+    
+    private static void buildIndex(Class clazz, String sandbox){
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         FullTextEntityManager ftem = Search.getFullTextEntityManager(em);
         ftem.setFlushMode(FlushModeType.COMMIT);
         EntityTransaction trx = ftem.getTransaction();
-        Class clazz = FeatureDbEntity.class;
         System.out.println("Indexing: " + clazz);
         trx.begin();
         ftem.purgeAll(clazz);

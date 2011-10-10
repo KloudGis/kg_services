@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 public class ApiFactory {
 
     private static final String SESSION_USER_ID = "!!kg_user_id!!";
+    private static final String SESSION_SANDBOX_OWNER = "!!kg_user_sandbox_owner_id!!";
     private static final String SESSION_TIMEOUT = "!!kg_timeout!!";
 
     public static String apiGet(String auth_token, String url, String api_key) throws IOException, NumberFormatException {
@@ -50,5 +51,26 @@ public class ApiFactory {
             }
         }
         return user_id;
+    }
+    
+    public static Long getSandboxOwner(HttpSession session, String auth_token, String url, String api_key) throws IOException {
+        Long sandbox_owner = (Long) session.getAttribute(SESSION_SANDBOX_OWNER);
+        Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT);
+        Long time = Calendar.getInstance().getTimeInMillis();
+        //30 sec timeout
+        if (timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
+            //ok
+        } else {
+            sandbox_owner = null;
+        }
+        if (sandbox_owner == null) {
+            String body = ApiFactory.apiGet(auth_token, url, api_key);
+            if (body != null && body.length() > 0) {
+                sandbox_owner = Long.parseLong(body);
+                session.setAttribute(SESSION_SANDBOX_OWNER, sandbox_owner);
+                session.setAttribute(SESSION_TIMEOUT, time);
+            }
+        }
+        return sandbox_owner;
     }
 }

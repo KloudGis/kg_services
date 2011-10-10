@@ -5,9 +5,10 @@
 package org.kloudgis.bean;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -19,6 +20,16 @@ import javax.ws.rs.core.Response;
 public class SecurityResourceBean {
     
     
+    
+    @Path("login")
+    @POST
+    public Response login(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) {
+        if(org.kloudgis.SecurityManager.getInstance().login(req, auth_token, sandbox)){
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.UNAUTHORIZED).build();
+    }
+    
     /**
      * Logout the current user
      * @param req
@@ -27,11 +38,7 @@ public class SecurityResourceBean {
     @Path("logout")
     @POST
     public Response logout(@Context HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-
+        org.kloudgis.SecurityManager.getInstance().logout(req);
         return Response.ok().build();
     }
 

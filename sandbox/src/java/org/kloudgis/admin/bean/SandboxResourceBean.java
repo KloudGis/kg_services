@@ -17,8 +17,6 @@ package org.kloudgis.admin.bean;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
@@ -32,11 +30,9 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
-import org.kloudgis.KGConfig;
 import org.kloudgis.pojo.Records;
 import org.kloudgis.admin.pojo.Sandbox;
 import org.kloudgis.admin.store.SandboxDbEntity;
-import org.kloudgis.api.ApiFactory;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**

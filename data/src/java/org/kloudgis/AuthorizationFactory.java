@@ -39,4 +39,12 @@ public class AuthorizationFactory {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
     }
+
+    public static boolean isSandboxOwner(MemberDbEntity lMember, HttpSession session, String auth_token, String sandbox) throws IOException{
+        Long id = ApiFactory.getSandboxOwner(session, auth_token, KGConfig.getConfiguration().sandbox_url + "/sandbox_owner?sandbox=" + sandbox, KGConfig.getConfiguration().api_key);
+        if(id != null && id.longValue() == lMember.getUserId().longValue()){
+            return true;
+        }
+        return false;
+    }
 }

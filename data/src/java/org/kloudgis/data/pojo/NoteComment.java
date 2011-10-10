@@ -4,22 +4,15 @@
  */
 package org.kloudgis.data.pojo;
 
-import java.util.List;
-import org.kloudgis.pojo.Coordinate;
-
 /**
  *
  * @author jeanfelixg
  */
-public class Note{
-
+public class NoteComment {
+    
     public Long     guid;
-    public String   title;   
-    public String   description;
+    public String   value;   
     public Long     author;
     public String   author_descriptor;
-    public Coordinate coordinate;
     public Long     date;
-    public List<Long> comments;
-    
 }

@@ -50,5 +50,9 @@ public class SandboxDbEntity implements Serializable {
         pojo.owner = owner;
         return pojo;
     }
+
+    public Long getOwnerId() {
+        return owner;
+    }
    
 }
