@@ -86,7 +86,7 @@ public class CommentResourceBean {
                 NoteCommentDbEntity comment = em.find(NoteCommentDbEntity.class, fId);
                 try {
                     if (comment != null) {
-                        if(lMember.getUserId() != comment.getAuthor()){
+                        if(comment.getAuthor() != null && lMember.getUserId().longValue() != comment.getAuthor().longValue()){
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the comment: " + sandbox).build();
                         }
                         em.getTransaction().begin();                        
@@ -129,12 +129,12 @@ public class CommentResourceBean {
                 return Response.serverError().entity(ex.getMessage()).build();
             }
             if (lMember != null) {
-                NoteDbEntity note = em.find(NoteDbEntity.class, fId);
+                NoteCommentDbEntity note_comment = em.find(NoteCommentDbEntity.class, fId);
                 try {
-                    if (note != null) {
-                        if (note.getAuthor() == lMember.getUserId() || AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)) {
+                    if (note_comment != null) {
+                        if (note_comment.getAuthor() == null || note_comment.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)) {
                             em.getTransaction().begin();
-                            em.remove(note);
+                            em.remove(note_comment);
                             em.getTransaction().commit();
                             em.close();
                             return Response.noContent().build();
@@ -149,7 +149,7 @@ public class CommentResourceBean {
                     em.close();
                     return Response.serverError().entity(e.getMessage()).build();
                 }
-                Note pojo = note.toPojo();
+                NoteComment pojo = note_comment.toPojo();
                 em.close();
                 return Response.ok(pojo).build();
             } else {
@@ -173,12 +173,19 @@ public class CommentResourceBean {
                 return Response.serverError().entity(ex.getMessage()).build();
             }
             if (lMember != null) {
+                NoteDbEntity note;
+                try{
+                    note = em.find(NoteDbEntity.class, in_comment.note);
+                }catch(EntityNotFoundException e){
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Note with id: " + in_comment.note  + " is not found").build();
+                }
                 em.getTransaction().begin();
                 NoteCommentDbEntity note_comment = new NoteCommentDbEntity();
                 note_comment.fromPojo(in_comment);
                 note_comment.setAuthor(lMember.getUserId());
                 note_comment.setAuthorDescriptor(lMember.getUserDescriptor());
                 note_comment.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                note_comment.setNote(note);
                 try {
                     em.persist(note_comment);
                     em.getTransaction().commit();

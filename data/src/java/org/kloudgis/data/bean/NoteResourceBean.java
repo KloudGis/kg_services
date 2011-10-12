@@ -105,7 +105,7 @@ public class NoteResourceBean {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
-                        if (lMember.getUserId() != note.getAuthor()) {
+                        if (note.getAuthor() != null && lMember.getUserId().longValue() != note.getAuthor().longValue()) {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note: " + sandbox).build();
                         }
                         em.getTransaction().begin();
@@ -150,7 +150,7 @@ public class NoteResourceBean {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
-                        if (note.getAuthor() == lMember.getUserId() || AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)) {
+                        if (note.getAuthor() == null || note.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)) {
                             em.getTransaction().begin();
                             em.remove(note);
                             em.getTransaction().commit();

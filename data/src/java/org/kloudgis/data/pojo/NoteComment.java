@@ -15,4 +15,5 @@ public class NoteComment {
     public Long     author;
     public String   author_descriptor;
     public Long     date;
+    public Long     note;
 }
