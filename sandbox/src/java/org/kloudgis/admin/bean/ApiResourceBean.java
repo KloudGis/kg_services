@@ -27,7 +27,7 @@ public class ApiResourceBean {
      * Ping GET to test if the server is UP
      * @return 
      */
-    @Path("user_id")
+    @Path("sandbox_owner")
     @GET
     public Response sandboxOwner(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, @QueryParam(value = "sandbox") String sandboxKey) {
         if (api_key == null) {
