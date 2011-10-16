@@ -114,6 +114,8 @@ public class NoteResourceBean {
                         em.getTransaction().commit();
                         em.close();
                         return Response.ok(pojo).build();
+                    }else{
+                        throw new EntityNotFoundException("Not found:" + fId);
                     }
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
@@ -122,9 +124,6 @@ public class NoteResourceBean {
                     em.close();
                     return Response.serverError().entity(e.getMessage()).build();
                 }
-                Note pojo = note.toPojo();
-                em.close();
-                return Response.ok(pojo).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
@@ -159,6 +158,8 @@ public class NoteResourceBean {
                         }else{
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
                         }
+                    }else{
+                        throw new EntityNotFoundException("Not found:" + fId);
                     }
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
@@ -167,9 +168,6 @@ public class NoteResourceBean {
                     em.close();
                     return Response.serverError().entity(e.getMessage()).build();
                 }
-                Note pojo = note.toPojo();
-                em.close();
-                return Response.ok(pojo).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }

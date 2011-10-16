@@ -24,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
-import org.kloudgis.data.pojo.Note;
 import org.kloudgis.data.pojo.NoteComment;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteCommentDbEntity;
@@ -38,7 +37,7 @@ import org.kloudgis.persistence.PersistenceManager;
 @Path("/protected/comments")
 @Produces({"application/json"})
 public class CommentResourceBean {
-    
+
     @GET
     @Path("{fId}")
     public Response getFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) throws NotFoundException {
@@ -86,16 +85,19 @@ public class CommentResourceBean {
                 NoteCommentDbEntity comment = em.find(NoteCommentDbEntity.class, fId);
                 try {
                     if (comment != null) {
-                        if(comment.getAuthor() != null && lMember.getUserId().longValue() != comment.getAuthor().longValue()){
+                        if (comment.getAuthor() != null && lMember.getUserId().longValue() != comment.getAuthor().longValue()) {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the comment: " + sandbox).build();
                         }
-                        em.getTransaction().begin();                        
+                        em.getTransaction().begin();
                         comment.fromPojo(in_comment);
                         NoteComment pojo = comment.toPojo();
                         em.getTransaction().commit();
                         em.close();
                         return Response.ok(pojo).build();
-                    }                   
+                    } else {
+                        em.close();
+                        throw new EntityNotFoundException("Not found:" + fId);
+                    }
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
@@ -103,9 +105,6 @@ public class CommentResourceBean {
                     em.close();
                     return Response.serverError().entity(e.getMessage()).build();
                 }
-                NoteComment pojo = comment.toPojo();
-                em.close();
-                return Response.ok(pojo).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
@@ -113,8 +112,7 @@ public class CommentResourceBean {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
     }
-    
-    
+
     @DELETE
     @Path("{fId}")
     public Response deleteFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) throws NotFoundException {
@@ -138,10 +136,10 @@ public class CommentResourceBean {
                             em.getTransaction().commit();
                             em.close();
                             return Response.noContent().build();
-                        }else{
+                        } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the comment nor the sandbox owner: " + sandbox).build();
                         }
-                    }                   
+                    }
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
@@ -149,9 +147,8 @@ public class CommentResourceBean {
                     em.close();
                     return Response.serverError().entity(e.getMessage()).build();
                 }
-                NoteComment pojo = note_comment.toPojo();
                 em.close();
-                return Response.ok(pojo).build();
+                throw new EntityNotFoundException("Not found:" + fId);
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
@@ -174,10 +171,10 @@ public class CommentResourceBean {
             }
             if (lMember != null) {
                 NoteDbEntity note;
-                try{
+                try {
                     note = em.find(NoteDbEntity.class, in_comment.note);
-                }catch(EntityNotFoundException e){
-                    return Response.status(Response.Status.BAD_REQUEST).entity("Note with id: " + in_comment.note  + " is not found").build();
+                } catch (EntityNotFoundException e) {
+                    throw new EntityNotFoundException("Note with id: " + in_comment.note + " is not found");
                 }
                 em.getTransaction().begin();
                 NoteCommentDbEntity note_comment = new NoteCommentDbEntity();
