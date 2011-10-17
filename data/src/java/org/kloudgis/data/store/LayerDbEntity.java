@@ -14,6 +14,7 @@
  */
 package org.kloudgis.data.store;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.Timestamp;
 import javax.persistence.Column;
@@ -24,9 +25,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
+import org.kloudgis.model.LayerFilter;
 
 /**
  *
@@ -62,6 +65,9 @@ public class LayerDbEntity implements Serializable {
     private Integer pixel_tolerance;
     @Column(length = 100)
     private String featuretype;
+    @Column(columnDefinition = "TEXT")
+    private String jsonFitler;
+    private static ObjectMapper mapper = new ObjectMapper();
 
     public Layer toPojo(EntityManager em) {
 
@@ -109,9 +115,77 @@ public class LayerDbEntity implements Serializable {
     }
 
     public Criterion getRestriction() {
-        if (featuretype != null) {
-            return Restrictions.eq("featuretype", featuretype);
+        if (jsonFitler != null) {
+            try {
+                LayerFilter filter = mapper.readValue(jsonFitler, LayerFilter.class);
+                if (filter != null) {
+                    return buildCriterion(filter);
+                }
+            } catch (Exception ex) {
+                System.out.println("Filter ex:" + ex);
+            }
         }
         return null;
     }
+
+    private static Criterion buildCriterion(LayerFilter filter) {
+        if (filter.leftFilter != null) {
+            Criterion critLeft = buildCriterion(filter.leftFilter);
+            Criterion critRight = null;
+            if (filter.rightFilter != null) {
+                critRight = buildCriterion(filter.rightFilter);
+            }
+            if (critLeft != null && filter.operator.equals("not")) {
+                return Restrictions.not(critLeft);
+            } else if (critLeft != null && critRight != null) {
+                if (filter.operator.equals("or")) {
+                    return Restrictions.or(critLeft, critRight);
+                } else {
+                    return Restrictions.and(critLeft, critRight);
+                }
+            }
+            return null;
+        } else {
+            if (filter.operator.equals("eq")) {
+                return Restrictions.eq(filter.attribute, filter.value);
+            } else if (filter.operator.equals("ne")) {
+                return Restrictions.ne(filter.attribute, filter.value);
+            } else if (filter.operator.equals("like")) {
+                return Restrictions.like(filter.attribute, filter.value);
+            } else if (filter.operator.equals("isNull")) {
+                return Restrictions.isNull(filter.attribute);
+            } else if (filter.operator.equals("ge")) {
+                return Restrictions.ge(filter.attribute, filter.value);
+            } else if (filter.operator.equals("le")) {
+                return Restrictions.le(filter.attribute, filter.value);
+            } else if (filter.operator.equals("in")) {
+                return Restrictions.in(filter.attribute, filter.value.split("|"));
+            }
+            return null;
+        }
+    }
+    
+    
+    public static void main(String a[]) throws IOException{
+        LayerFilter lf = new LayerFilter();
+        lf.operator = "eq";
+        lf.attribute = "index1";
+        lf.value = "toto";
+        String json = mapper.writeValueAsString(lf);
+        System.out.println(json);
+        LayerFilter lf2 = new LayerFilter();
+        lf2.operator = "like";
+        lf2.attribute = "index2";
+        lf2.value = "to%";
+        LayerFilter lfC = new LayerFilter();
+        lfC.operator = "or";
+        lfC.leftFilter = lf;
+        lfC.rightFilter = lf2;
+        json = mapper.writeValueAsString(lfC);
+        System.out.println(json);  
+        LayerFilter lfTest = mapper.readValue(json, LayerFilter.class);
+        Criterion crit = buildCriterion(lfTest);
+        System.out.println(crit);
+    }
+    
 }
