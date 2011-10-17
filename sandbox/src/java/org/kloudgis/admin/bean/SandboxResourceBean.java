@@ -16,20 +16,27 @@ package org.kloudgis.admin.bean;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
+import org.kloudgis.KGConfig;
 import org.kloudgis.pojo.Records;
 import org.kloudgis.admin.pojo.Sandbox;
 import org.kloudgis.admin.store.SandboxDbEntity;
@@ -100,5 +107,90 @@ public class SandboxResourceBean {
             em.close();
         }
         return Response.serverError().entity(err).build();
+    }
+
+    @GET
+    @Path("list_names")
+    public Response getSandboxNames(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+        if (auth_token == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        HttpSession session = req.getSession(true);
+        Long id = null;
+        String err = "Invalid token";
+        try {
+            id = AuthorizationFactory.getUserId(session, auth_token);
+        } catch (IOException ex) {
+            err = ex.getMessage();
+        }
+        if (id != null) {
+            HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
+            try {
+                List<SandboxDbEntity> lstS = em.getSession().createCriteria(SandboxDbEntity.class).addOrder(Order.asc("name")).list();
+                Map<String, String> mapNameKey = new LinkedHashMap();
+                for (SandboxDbEntity sand : lstS) {
+                    mapNameKey.put(sand.getName(), sand.getUniqueKey());
+                }
+                em.close();
+                return Response.ok(mapNameKey).build();
+            } catch (Exception e) {
+                err = e.getMessage();
+            }
+            em.close();
+        }
+        return Response.serverError().entity(err).build();
+    }
+
+    @POST
+    public Response addSandbox(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, Sandbox sandbox, @Context HttpServletRequest req) {
+        if (auth_token == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        HttpSession session = req.getSession(true);
+        Long id = null;
+        try {
+            id = AuthorizationFactory.getUserId(session, auth_token);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        if (id == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if (sandbox.key == null || sandbox.key.length() == 0) {
+            return Response.notModified().entity("Sandbox key is mandatory").build();
+        }
+        HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
+        try {
+            List<SandboxDbEntity> lstS = em.getSession().createCriteria(SandboxDbEntity.class).add(Restrictions.eq("unique_key", sandbox.key)).list();
+            if (lstS.size() > 0) {
+                em.close();
+                return Response.notModified().entity("Sandbox key is already taken").build();
+            }
+        } catch (Exception e) {
+            em.close();
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+        try {
+            HttpClient client = new HttpClient();
+            PostMethod post = new PostMethod(KGConfig.getConfiguration().data_url + "/create_db");
+            post.addRequestHeader("X-Kloudgis-Api-Key", KGConfig.getConfiguration().api_key);
+            post.setRequestEntity(new StringRequestEntity(sandbox.key, "text/plain", "utf-8"));
+            int istatus = client.executeMethod(post);
+            post.releaseConnection();
+            if(istatus == 200){
+                em.getTransaction().begin();
+                SandboxDbEntity entity = new SandboxDbEntity();
+                entity.setName(sandbox.name);
+                entity.setUniqueKey(sandbox.key);
+                entity.setOwnerId(sandbox.owner == null ? id : sandbox.owner);
+                em.persist(entity);
+                em.getTransaction().commit();
+                return Response.ok().build();
+            }
+            return Response.status(istatus).build();
+        } catch (Exception ex) {
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
     }
 }

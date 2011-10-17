@@ -54,5 +54,25 @@ public class SandboxDbEntity implements Serializable {
     public Long getOwnerId() {
         return owner;
     }
+    
+    public String getUniqueKey(){
+        return unique_key;
+    }
+    
+    public String getName(){
+        return name;
+    }
+    
+    public void setOwnerId(Long id) {
+        this.owner = id;
+    }
+    
+    public void setUniqueKey(String key){
+        this.unique_key = key;
+    }
+    
+    public void setName(String name){
+        this.name = name;
+    }
    
 }

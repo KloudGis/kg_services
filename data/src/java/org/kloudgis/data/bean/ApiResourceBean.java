@@ -4,10 +4,11 @@
  */
 package org.kloudgis.data.bean;
 
-import java.io.IOException;
+import java.sql.SQLException;
 import javassist.NotFoundException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -15,6 +16,7 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.KGConfig;
 import org.kloudgis.data.store.MemberDbEntity;
+import org.kloudgis.persistence.DatabaseFactory;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**
@@ -44,5 +46,22 @@ public class ApiResourceBean {
             }
             return Response.serverError().entity(ex.getMessage()).build();
         }
+    }
+    
+    @Path("create_db")
+    @POST
+    public Response createSandboxDb(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, String dbname){
+        if (api_key == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key is mandatory.").build();
+        }
+        if (!api_key.equals(KGConfig.getConfiguration().api_key)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
+        }
+        try {
+            DatabaseFactory.createDB(dbname);
+        } catch (SQLException ex) {
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
+        return Response.ok().build();
     }
 }

@@ -87,4 +87,11 @@ public class PersistenceManager {
         }
         return emf;
     }
+
+    public Map<String, String> getDefaultProperties() {
+        Map<String,String> mapVal = new HashMap();
+        mapVal.put("user", KGConfig.getConfiguration().db_user);
+        mapVal.put("password", KGConfig.getConfiguration().db_pwd);
+        return mapVal;
+    }
 }

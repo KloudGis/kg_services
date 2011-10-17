@@ -115,17 +115,26 @@ public class LayerDbEntity implements Serializable {
     }
 
     public Criterion getRestriction() {
+        Criterion crit = null;
+        if(featuretype != null){
+            crit = Restrictions.eq("featuretype", featuretype);
+        }
         if (jsonFitler != null) {
             try {
                 LayerFilter filter = mapper.readValue(jsonFitler, LayerFilter.class);
                 if (filter != null) {
-                    return buildCriterion(filter);
+                    Criterion critFilter = buildCriterion(filter);
+                    if(crit != null){
+                        return Restrictions.and(crit, critFilter);
+                    }else{
+                        return critFilter;
+                    }                  
                 }
             } catch (Exception ex) {
                 System.out.println("Filter ex:" + ex);
             }
         }
-        return null;
+        return crit;
     }
 
     private static Criterion buildCriterion(LayerFilter filter) {
