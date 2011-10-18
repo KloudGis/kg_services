@@ -60,6 +60,8 @@ public class PersistenceManager {
         Map prop = new HashMap();
         String url = KGConfig.getConfiguration().db_url;
         prop.put("hibernate.connection.url", url + "/" + key);
+        prop.put("hibernate.connection.username", KGConfig.getConfiguration().db_user);
+        prop.put("hibernate.connection.password", KGConfig.getConfiguration().db_pwd);
         prop.put("hibernate.search.default.indexBase", "/tmp/search_index/" + key);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(DATA_PU, prop);
         if (emf != null) {

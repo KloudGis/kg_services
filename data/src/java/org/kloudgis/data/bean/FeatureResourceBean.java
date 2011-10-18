@@ -9,7 +9,9 @@ import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
+import org.kloudgis.data.pojo.LoadFeature;
 import org.kloudgis.data.pojo.SearchCategory;
 import org.kloudgis.data.store.DistanceOrder;
 import org.kloudgis.data.store.FeatureDbEntity;
@@ -52,7 +55,6 @@ import org.kloudgis.pojo.Records;
 @Path("/protected/features")
 @Produces({"application/json"})
 public class FeatureResourceBean {
-
 
     @GET
     @Path("features_at")
@@ -201,9 +203,9 @@ public class FeatureResourceBean {
             lstCat.add(cat);
         }
         query = buildNoteSearchQuery(sem, search);
-        if(query != null){
+        if (query != null) {
             int sizeNote = query.getResultSize();
-            if(sizeNote > 0){
+            if (sizeNote > 0) {
                 lstCat.add(new SearchCategory("_notes_", "_Notes", search, sizeNote));
             }
         }
@@ -228,8 +230,7 @@ public class FeatureResourceBean {
     protected String[] getSearchFields() {
         return new String[]{"index1", "index2", "index3", "index4", "index5"};
     }
-    
-    
+
     protected FullTextQuery buildNoteSearchQuery(FullTextEntityManager sem, String search) {
         QueryParser parser = new MultiFieldQueryParser(Version.LUCENE_29, new String[]{"title", "description", "comments.content"}, new StandardAnalyzer(Version.LUCENE_29));
         org.apache.lucene.search.Query query = null;
@@ -245,9 +246,26 @@ public class FeatureResourceBean {
 
     @POST
     @Path("build_search_index")
-    @Produces({"application/json"})
     public Response search(@QueryParam("sandbox") String sandbox) {
         SearchFactory.buildSearchIndexFor(sandbox);
         return Response.ok().build();
+    }
+
+    @POST
+    @Path("batch_add")
+    public Response addBatchFeatures(@QueryParam("sandbox") String sandbox, List<LoadFeature> features) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            em.getTransaction().begin();
+            for (LoadFeature pojo : features) {
+                FeatureDbEntity entity = new FeatureDbEntity();
+                entity.fromPojo(pojo);
+                entity.setDateInsert(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                em.persist(entity);
+            }
+            em.getTransaction().commit();
+            return Response.ok().entity(features.size() + " features added.").build();
+        }
+        return Response.notModified().entity("sandbox entity manager not found for " + sandbox).build();
     }
 }

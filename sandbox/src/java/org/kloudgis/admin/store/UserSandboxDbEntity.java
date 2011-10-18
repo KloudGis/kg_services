@@ -34,6 +34,50 @@ public class UserSandboxDbEntity implements Serializable {
     private Long user_id;
     @ManyToOne(cascade= CascadeType.ALL)
     @JoinColumn(name="sandbox_id") 
-    private SandboxDbEntity sandboxe;
+    private SandboxDbEntity sandbox;
+
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the user_id
+     */
+    public Long getUserId() {
+        return user_id;
+    }
+
+    /**
+     * @param user_id the user_id to set
+     */
+    public void setUserId(Long user_id) {
+        this.user_id = user_id;
+    }
+
+    /**
+     * @return the sandbox
+     */
+    public SandboxDbEntity getSandbox() {
+        return sandbox;
+    }
+
+    /**
+     * @param sandbox the sandbox to set
+     */
+    public void setSandbox(SandboxDbEntity sandbox) {
+        this.sandbox = sandbox;
+    }
+    
+    
 
 }

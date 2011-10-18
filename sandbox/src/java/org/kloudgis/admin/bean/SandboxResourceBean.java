@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -40,6 +42,7 @@ import org.kloudgis.KGConfig;
 import org.kloudgis.pojo.Records;
 import org.kloudgis.admin.pojo.Sandbox;
 import org.kloudgis.admin.store.SandboxDbEntity;
+import org.kloudgis.admin.store.UserSandboxDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**
@@ -73,6 +76,7 @@ public class SandboxResourceBean {
             }
             Records ret = new Records();
             ret.records = list;
+            em.close();
             return Response.ok(ret).build();
         } else {
             return Response.serverError().entity(err).build();
@@ -160,10 +164,11 @@ public class SandboxResourceBean {
         if (sandbox.key == null || sandbox.key.length() == 0) {
             return Response.notModified().entity("Sandbox key is mandatory").build();
         }
+        sandbox.key = morphKey(sandbox.key);
         HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
         try {
-            List<SandboxDbEntity> lstS = em.getSession().createCriteria(SandboxDbEntity.class).add(Restrictions.eq("unique_key", sandbox.key)).list();
-            if (lstS.size() > 0) {
+            SandboxDbEntity entity = AuthorizationFactory.getSandboxFromKey(sandbox.key, em);
+            if (entity != null) {
                 em.close();
                 return Response.notModified().entity("Sandbox key is already taken").build();
             }
@@ -178,7 +183,7 @@ public class SandboxResourceBean {
             post.setRequestEntity(new StringRequestEntity(sandbox.key, "text/plain", "utf-8"));
             int istatus = client.executeMethod(post);
             post.releaseConnection();
-            if(istatus == 200){
+            if (istatus == 200) {
                 em.getTransaction().begin();
                 SandboxDbEntity entity = new SandboxDbEntity();
                 entity.setName(sandbox.name);
@@ -186,11 +191,125 @@ public class SandboxResourceBean {
                 entity.setOwnerId(sandbox.owner == null ? id : sandbox.owner);
                 em.persist(entity);
                 em.getTransaction().commit();
-                return Response.ok().build();
+                em.close();
+                return Response.ok().entity(entity.toPojo()).build();
             }
+            em.close();
             return Response.status(istatus).build();
         } catch (Exception ex) {
+            em.close();
             return Response.serverError().entity(ex.getMessage()).build();
         }
+    }
+
+    @DELETE
+    @Path("{sandboxKey}")
+    public Response deleteSandbox(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("sandboxKey") String sandboxKey, @Context HttpServletRequest req) {
+        if (auth_token == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        HttpSession session = req.getSession(true);
+        Long id = null;
+        try {
+            id = AuthorizationFactory.getUserId(session, auth_token);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        if (id == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
+        try {
+            SandboxDbEntity entity = AuthorizationFactory.getSandboxFromKey(sandboxKey, em);
+            if (entity != null) {
+                Long oId = entity.getOwnerId();
+                if (oId == null || oId.longValue() == id) {
+                    HttpClient client = new HttpClient();
+                    PostMethod post = new PostMethod(KGConfig.getConfiguration().data_url + "/drop_db");
+                    post.addRequestHeader("X-Kloudgis-Api-Key", KGConfig.getConfiguration().api_key);
+                    post.setRequestEntity(new StringRequestEntity(entity.getUniqueKey(), "text/plain", "utf-8"));
+                    int istatus = client.executeMethod(post);
+                    post.releaseConnection();
+                    if (istatus == 200) {
+                        em.getTransaction().begin();
+                        em.remove(entity);
+                        em.getTransaction().commit();
+                        em.close();
+                        return Response.ok().build();
+                    }else{
+                        em.close();
+                        return Response.serverError().entity("Could drop the sandbox db (" + istatus + ")").build();
+                    }
+                } else {
+                    em.close();
+                    return Response.status(Response.Status.UNAUTHORIZED).entity("Only the sandbox owner can add new users.").build();
+                }
+            } else {
+                em.close();
+               return Response.notModified().entity("Sandbox with key " + sandboxKey + " is not found!").build();
+            }
+        } catch (Exception e) {
+            if(em.isOpen()){
+                em.close();
+            }
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
+    @POST
+    @Path("{sandboxKey}/users")
+    public Response bindUser(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("sandboxKey") String sandboxKey, @Context HttpServletRequest req, List<Long> users) {
+        if (auth_token == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        HttpSession session = req.getSession(true);
+        Long id = null;
+        try {
+            id = AuthorizationFactory.getUserId(session, auth_token);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        if (id == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
+        try {
+            SandboxDbEntity entity = AuthorizationFactory.getSandboxFromKey(sandboxKey, em);
+            if (entity != null) {
+                Long oId = entity.getOwnerId();
+                if (oId == null || oId.longValue() == id) {
+                    em.getTransaction().begin();
+                    for (Long uId : users) {
+                        UserSandboxDbEntity u = new UserSandboxDbEntity();
+                        u.setSandbox(entity);
+                        u.setUserId(uId);
+                        em.persist(u);
+                        entity.addUser(u);
+                    }
+                    em.getTransaction().commit();
+                    em.close();
+                    return Response.ok().build();
+                } else {
+                    em.close();
+                    return Response.status(Response.Status.UNAUTHORIZED).entity("Only the sandbox owner can add new users.").build();
+                }
+            } else {
+                em.close();
+                throw new EntityNotFoundException();
+            }
+        } catch (Exception e) {
+            if(em.isOpen()){
+                em.close();
+            }
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+    
+    
+    private static String morphKey(String key){
+        if(key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox")  ){
+            return key + "_usr_sandbox";
+        }
+        return key;
     }
 }

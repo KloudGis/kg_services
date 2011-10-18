@@ -39,7 +39,7 @@ public class SandboxDbEntity implements Serializable {
     @Index(name = "sandbox_owner_index")
     @Column()
     private Long owner;
-    @OneToMany(mappedBy="sandboxe", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="sandbox", cascade = CascadeType.ALL)
     List<UserSandboxDbEntity> users;
     
     public Sandbox toPojo(){
@@ -73,6 +73,10 @@ public class SandboxDbEntity implements Serializable {
     
     public void setName(String name){
         this.name = name;
+    }
+    
+    public void addUser(UserSandboxDbEntity us){
+       this.users.add(us);
     }
    
 }

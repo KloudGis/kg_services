@@ -12,7 +12,7 @@ import org.kloudgis.KGConfig;
 
 public class DatabaseFactory {
 
-    public static void createDB(String strName) throws SQLException {
+    public static void createDb(String strName) throws SQLException {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException ex) {
@@ -23,7 +23,7 @@ public class DatabaseFactory {
         String user = map.get("user");
         String password = map.get("password");
         try {
-            con = DriverManager.getConnection("jdbc:postgresql://" + KGConfig.getConfiguration().db_url + "/postgres", user, password);
+            con = DriverManager.getConnection(KGConfig.getConfiguration().db_url.replace("postgresql_postGIS", "postgresql") + "/postgres", user, password);
             if (con != null) {
                 PreparedStatement pst = con.prepareStatement("CREATE DATABASE " + strName + " template=postgis;");
                 pst.execute();
@@ -55,9 +55,16 @@ public class DatabaseFactory {
         String password = map.get("password");
         Connection con = null;
         try {
-            con = DriverManager.getConnection("jdbc:postgresql://" + KGConfig.getConfiguration().db_url + "/postgres", user, password);
+            con = DriverManager.getConnection(KGConfig.getConfiguration().db_url.replace("postgresql_postGIS", "postgresql") + "/postgres", user, password);
             if (con != null) {
-                PreparedStatement pst = con.prepareStatement("DROP DATABASE " + strName + " ;");
+                //drop all connection to the db
+                String dropCon = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='" + strName + "';";
+                PreparedStatement pst = con.prepareStatement(dropCon);              
+                pst.execute();
+                pst.close();
+                //drop the database itself
+                String dropDb = "DROP DATABASE " + strName + " ;";              
+                pst = con.prepareStatement(dropDb);  
                 pst.execute();
                 pst.close();
                 con.close();

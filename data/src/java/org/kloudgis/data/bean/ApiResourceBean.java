@@ -58,7 +58,24 @@ public class ApiResourceBean {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
         }
         try {
-            DatabaseFactory.createDB(dbname);
+            DatabaseFactory.createDb(dbname);
+        } catch (SQLException ex) {
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
+        return Response.ok().build();
+    }
+    
+    @Path("drop_db")
+    @POST
+    public Response dropSandboxDb(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, String dbname){
+        if (api_key == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key is mandatory.").build();
+        }
+        if (!api_key.equals(KGConfig.getConfiguration().api_key)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
+        }
+        try {
+            DatabaseFactory.dropDb(dbname);
         } catch (SQLException ex) {
             return Response.serverError().entity(ex.getMessage()).build();
         }

@@ -11,8 +11,6 @@
     <class>org.kloudgis.data.store.NoteCommentDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
-      <property name="hibernate.connection.username" value="kloudgis"/>
-      <property name="hibernate.connection.password" value="kwadmin"/>
       <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>
       <property name="hibernate.dialect" value="org.hibernatespatial.postgis.PostgisDialect"/>
       <property name="hibernate.c3p0.min_size" value="0"/>
