@@ -25,7 +25,7 @@ public class DatabaseFactory {
         try {
             con = DriverManager.getConnection(KGConfig.getConfiguration().db_url.replace("postgresql_postGIS", "postgresql") + "/postgres", user, password);
             if (con != null) {
-                PreparedStatement pst = con.prepareStatement("CREATE DATABASE " + strName + " template=postgis;");
+                PreparedStatement pst = con.prepareStatement("CREATE DATABASE " + strName.toLowerCase() + " template=postgis;");
                 pst.execute();
                 pst.close();
                 con.close();
@@ -58,7 +58,7 @@ public class DatabaseFactory {
             con = DriverManager.getConnection(KGConfig.getConfiguration().db_url.replace("postgresql_postGIS", "postgresql") + "/postgres", user, password);
             if (con != null) {
                 //drop all connection to the db
-                String dropCon = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='" + strName + "';";
+                String dropCon = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='" + strName.toLowerCase() + "';";
                 PreparedStatement pst = con.prepareStatement(dropCon);              
                 pst.execute();
                 pst.close();
@@ -69,7 +69,7 @@ public class DatabaseFactory {
                 pst.close();
                 con.close();
             } else {
-                throw new SQLException("Connection to database " + strName + " is impossible");
+                throw new SQLException("Connection to database " + strName.toLowerCase() + " is impossible");
             }
         } catch (SQLException ex) {
             if (con != null) {

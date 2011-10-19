@@ -51,7 +51,8 @@ public class WmsProxy extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-            PostMethod postMethod = new PostMethod(server);
+            // No need for /gwc/service/wms because gwc will intercept the wms calls
+            PostMethod postMethod = new PostMethod(server + "/wms");
 
             Enumeration paramNames = request.getParameterNames();
             List<NameValuePair> nvp = new ArrayList<NameValuePair>();

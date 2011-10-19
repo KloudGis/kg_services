@@ -59,7 +59,7 @@ public class PersistenceManager {
     protected synchronized EntityManagerFactory createSandboxManagerFactory(final String key) {
         Map prop = new HashMap();
         String url = KGConfig.getConfiguration().db_url;
-        prop.put("hibernate.connection.url", url + "/" + key);
+        prop.put("hibernate.connection.url", url + "/" + key.toLowerCase());
         prop.put("hibernate.connection.username", KGConfig.getConfiguration().db_user);
         prop.put("hibernate.connection.password", KGConfig.getConfiguration().db_pwd);
         prop.put("hibernate.search.default.indexBase", "/tmp/search_index/" + key);

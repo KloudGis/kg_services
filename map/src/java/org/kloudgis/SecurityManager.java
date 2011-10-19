@@ -37,11 +37,10 @@ public class SecurityManager {
         HttpSession session = request.getSession(true);
         String access_key = sandbox + "_" + SESSION_MAP_ACCESS;
         Boolean bAccess = (Boolean) session.getAttribute(access_key);
-        String server = KGConfig.getConfiguration().geoserver_url;
         if (auth_token != null && auth_token.length() > 0) {
             Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT);
             Long time = Calendar.getInstance().getTimeInMillis();
-            if (server != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
+            if (timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
                 if (bAccess == null) {
                     bAccess = false;
                 }
