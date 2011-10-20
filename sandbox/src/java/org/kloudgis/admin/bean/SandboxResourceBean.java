@@ -16,10 +16,10 @@ package org.kloudgis.admin.bean;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.DELETE;
@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
@@ -42,7 +43,7 @@ import org.kloudgis.KGConfig;
 import org.kloudgis.pojo.Records;
 import org.kloudgis.admin.pojo.Sandbox;
 import org.kloudgis.admin.store.SandboxDbEntity;
-import org.kloudgis.admin.store.UserSandboxDbEntity;
+import org.kloudgis.api.ApiFactory;
 import org.kloudgis.persistence.PersistenceManager;
 
 /**
@@ -177,25 +178,50 @@ public class SandboxResourceBean {
             return Response.serverError().entity(e.getMessage()).build();
         }
         try {
-            HttpClient client = new HttpClient();
-            PostMethod post = new PostMethod(KGConfig.getConfiguration().data_url + "/create_db");
-            post.addRequestHeader("X-Kloudgis-Api-Key", KGConfig.getConfiguration().api_key);
-            post.setRequestEntity(new StringRequestEntity(sandbox.key, "text/plain", "utf-8"));
-            int istatus = client.executeMethod(post);
-            post.releaseConnection();
-            if (istatus == 200) {
+            String[] ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/create_db", KGConfig.getConfiguration().api_key, sandbox.key);     
+            if (ret != null && ret[1].equals("200")) {
                 em.getTransaction().begin();
                 SandboxDbEntity entity = new SandboxDbEntity();
                 entity.setName(sandbox.name);
                 entity.setUniqueKey(sandbox.key);
-                entity.setOwnerId(sandbox.owner == null ? id : sandbox.owner);
+                entity.setOwnerId(id);
                 em.persist(entity);
-                em.getTransaction().commit();
-                em.close();
-                return Response.ok().entity(entity.toPojo()).build();
+
+                ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/workspace", KGConfig.getConfiguration().api_key, sandbox.key);
+                if (ret != null && ret[1].equals("200")) {
+                    ret = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/database_prop", KGConfig.getConfiguration().api_key);
+                    if (ret != null && ret[1].equals("200")) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        Map prop = mapper.readValue(ret[0], HashMap.class);
+                        prop.put("name", sandbox.key);
+                        ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/" + sandbox.key + "/store", KGConfig.getConfiguration().api_key, prop);
+                        if (ret != null && ret[1].equals("200")) {
+                            em.getTransaction().commit();
+                            em.close();
+                            return Response.ok().entity(entity.toPojo()).build();
+                        } else {
+                            em.getTransaction().rollback();
+                            em.close();
+                            ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.key);    
+                            ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandbox.key, KGConfig.getConfiguration().api_key);
+                            return Response.serverError().entity("Could not add the geoserver store:" + ret == null ? "?" : ret[0]).build();
+                        }
+                    } else {
+                        em.getTransaction().rollback();
+                        em.close();
+                        ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.key);  
+                        ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandbox.key, KGConfig.getConfiguration().api_key);
+                        return Response.serverError().entity("Could not get the database setting from api data:" + ret == null ? "?" : ret[0]).build();
+                    }
+                } else {
+                    em.getTransaction().rollback();
+                    em.close();
+                    ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.key);  
+                    return Response.serverError().entity("Could not add the geoserver workspace:" + ret == null ? "?" : ret[0]).build();
+                }
             }
             em.close();
-            return Response.status(istatus).build();
+            return Response.serverError().entity("cannot create db: " + ret == null ? "?" : ret[0]).build();
         } catch (Exception ex) {
             em.close();
             return Response.serverError().entity(ex.getMessage()).build();
@@ -224,21 +250,22 @@ public class SandboxResourceBean {
             if (entity != null) {
                 Long oId = entity.getOwnerId();
                 if (oId == null || oId.longValue() == id) {
-                    HttpClient client = new HttpClient();
-                    PostMethod post = new PostMethod(KGConfig.getConfiguration().data_url + "/drop_db");
-                    post.addRequestHeader("X-Kloudgis-Api-Key", KGConfig.getConfiguration().api_key);
-                    post.setRequestEntity(new StringRequestEntity(entity.getUniqueKey(), "text/plain", "utf-8"));
-                    int istatus = client.executeMethod(post);
-                    post.releaseConnection();
-                    if (istatus == 200) {
-                        em.getTransaction().begin();
-                        em.remove(entity);
-                        em.getTransaction().commit();
+                    String[] ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, entity.getUniqueKey());                                     
+                    if (ret != null && (ret[1].equals("200") || ret[1].endsWith("does not exist"))) {
+                        ret = ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandboxKey, KGConfig.getConfiguration().api_key);
+                        if (ret != null && ret[1].equals("200") || ret[0].contains("No such workspace")) {
+                            em.getTransaction().begin();
+                            em.remove(entity);
+                            em.getTransaction().commit();
+                            em.close();
+                            return Response.ok().build();
+                        }else{
+                            em.close();
+                            return Response.serverError().entity("Could delete the geoserver workspace (" + ret != null ? ret[0] : "?" + ")").build();
+                        }
+                    } else {
                         em.close();
-                        return Response.ok().build();
-                    }else{
-                        em.close();
-                        return Response.serverError().entity("Could drop the sandbox db (" + istatus + ")").build();
+                        return Response.serverError().entity("Could drop the sandbox db (" + ret != null ? ret[0] : "?" + ")").build();
                     }
                 } else {
                     em.close();
@@ -246,68 +273,18 @@ public class SandboxResourceBean {
                 }
             } else {
                 em.close();
-               return Response.notModified().entity("Sandbox with key " + sandboxKey + " is not found!").build();
+                return Response.notModified().entity("Sandbox with key " + sandboxKey + " is not found!").build();
             }
         } catch (Exception e) {
-            if(em.isOpen()){
+            if (em.isOpen()) {
                 em.close();
             }
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
 
-    @POST
-    @Path("{sandboxKey}/users")
-    public Response bindUser(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("sandboxKey") String sandboxKey, @Context HttpServletRequest req, List<Long> users) {
-        if (auth_token == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
-        HttpSession session = req.getSession(true);
-        Long id = null;
-        try {
-            id = AuthorizationFactory.getUserId(session, auth_token);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        if (id == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
-        HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
-        try {
-            SandboxDbEntity entity = AuthorizationFactory.getSandboxFromKey(sandboxKey, em);
-            if (entity != null) {
-                Long oId = entity.getOwnerId();
-                if (oId == null || oId.longValue() == id) {
-                    em.getTransaction().begin();
-                    for (Long uId : users) {
-                        UserSandboxDbEntity u = new UserSandboxDbEntity();
-                        u.setSandbox(entity);
-                        u.setUserId(uId);
-                        em.persist(u);
-                        entity.addUser(u);
-                    }
-                    em.getTransaction().commit();
-                    em.close();
-                    return Response.ok().build();
-                } else {
-                    em.close();
-                    return Response.status(Response.Status.UNAUTHORIZED).entity("Only the sandbox owner can add new users.").build();
-                }
-            } else {
-                em.close();
-                throw new EntityNotFoundException();
-            }
-        } catch (Exception e) {
-            if(em.isOpen()){
-                em.close();
-            }
-            return Response.serverError().entity(e.getMessage()).build();
-        }
-    }
-    
-    
-    private static String morphKey(String key){
-        if(key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox")  ){
+    private static String morphKey(String key) {
+        if (key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox")) {
             return key + "_usr_sandbox";
         }
         return key;

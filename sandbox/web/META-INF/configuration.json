@@ -2,5 +2,6 @@
 {
     "auth_url": "http://localhost:8080/api_auth/api",
     "data_url": "http://localhost:8080/api_data/api",
+    "map_url": "http://localhost:8080/api_map/api",
     "api_key": "Kl0uDg1S-@p1-|aCCe33|"
 }

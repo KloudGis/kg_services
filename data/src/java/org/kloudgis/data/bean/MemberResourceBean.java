@@ -5,18 +5,28 @@
 package org.kloudgis.data.bean;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javassist.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.AuthorizationFactory;
+import org.kloudgis.KGConfig;
+import org.kloudgis.api.ApiFactory;
 import org.kloudgis.data.pojo.Member;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
@@ -31,7 +41,6 @@ public class MemberResourceBean {
 
     @GET
     @Path("logged_member")
-    @Produces({"application/json"})
     public Response getFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
@@ -50,6 +59,45 @@ public class MemberResourceBean {
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
+    @POST
+    @Path("multiple/{membership}")
+    public Response addMembers(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("membership") String membership, List<Long> userIds, @QueryParam("sandbox") String sandbox) throws NotFoundException {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (sandbox != null) {
+            em.getTransaction().begin();
+            List<Long> idSucess = new ArrayList();
+            for (Long id : userIds) {
+                try {
+                    String[] user_description = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().auth_url + "/user_descriptor?user=" + id, KGConfig.getConfiguration().api_key);
+                    if (user_description == null || !user_description[1].equals("200")) {
+                        user_description[0] = "?";
+                    }
+                    MemberDbEntity member = new MemberDbEntity();
+                    member.setUserId(id);
+                    member.setDescriptor(user_description[0]);
+                    member.setMembership(membership);
+                    em.persist(member);
+                    idSucess.add(id);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            try {
+                ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().sandbox_url + "/bind_users?sandbox=" + sandbox, KGConfig.getConfiguration().api_key, idSucess);
+                em.getTransaction().commit();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                em.getTransaction().rollback();
+                em.close();
+                return Response.serverError().entity("error binding users: " + ex.getMessage()).build();
+            }
+            em.close();
+            return Response.ok().entity(idSucess + " members added").build();
         } else {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }

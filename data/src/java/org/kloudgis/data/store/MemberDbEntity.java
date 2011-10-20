@@ -57,4 +57,16 @@ public class MemberDbEntity implements Serializable {
         pojo.access_type = access_type;
         return pojo;
     }
+
+    public void setUserId(Long id) {
+        this.user_id = id;
+    }
+
+    public void setDescriptor(String user_description) {
+        this.user_descriptor = user_description;
+    }
+
+    public void setMembership(String membership) {
+        this.access_type = membership;
+    }
 }

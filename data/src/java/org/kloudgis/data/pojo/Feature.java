@@ -24,6 +24,9 @@ public class Feature {
     public Coordinate centroid;
     public Map<String, String>  attrs;
     public String title_attr;
+    
+    
+    public Feature(){}
 
     @Override
     public int hashCode() {

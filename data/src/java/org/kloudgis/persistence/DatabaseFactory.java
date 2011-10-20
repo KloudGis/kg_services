@@ -63,7 +63,7 @@ public class DatabaseFactory {
                 pst.execute();
                 pst.close();
                 //drop the database itself
-                String dropDb = "DROP DATABASE " + strName + " ;";              
+                String dropDb = "DROP DATABASE " + strName.toLowerCase() + " ;";              
                 pst = con.prepareStatement(dropDb);  
                 pst.execute();
                 pst.close();

@@ -14,7 +14,6 @@
  */
 package org.kloudgis.data.store;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.Timestamp;
 import javax.persistence.Column;
@@ -29,6 +28,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
+import org.kloudgis.data.pojo.PostLayer;
 import org.kloudgis.model.LayerFilter;
 
 /**
@@ -67,6 +67,8 @@ public class LayerDbEntity implements Serializable {
     private String featuretype;
     @Column(columnDefinition = "TEXT")
     private String jsonFitler;
+    @Column(columnDefinition = "TEXT")
+    private String sld;
     private static ObjectMapper mapper = new ObjectMapper();
 
     public Layer toPojo(EntityManager em) {
@@ -85,6 +87,21 @@ public class LayerDbEntity implements Serializable {
         pojo.visibility = visibility;
         return pojo;
     }
+    
+    public void fromPostPojo(PostLayer pojo) {
+        this.render_order = pojo.renderOrder;
+        this.selectable = pojo.isSelectable;
+        this.pixel_tolerance = pojo.pixelTolerance;
+      
+        this.label = pojo.label;
+        this.url = "/api_map/wms";
+        this.buffer = pojo.buffer;
+        this.visibility = pojo.visibility;
+        
+        this.featuretype = pojo.featuretype;
+        this.jsonFitler = pojo.filter;
+        this.sld = pojo.sld;       
+    }
 
     public Long getId() {
         return id;
@@ -92,6 +109,10 @@ public class LayerDbEntity implements Serializable {
 
     public int getPixelTolerance() {
         return pixel_tolerance == null ? 0 : pixel_tolerance.intValue();
+    }
+    
+    public String getName() {
+        return name;
     }
 
     public void setName(String strName) {
@@ -101,9 +122,17 @@ public class LayerDbEntity implements Serializable {
     public void setVisible(boolean bVisibility) {
         visibility = bVisibility;
     }
+    
+    public void setDateCreate(Timestamp time){
+        this.date_creation = time;
+    }
 
     public void setSelectable(boolean bSelectability) {
         selectable = bSelectability;
+    }
+    
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void setLabel(String strLabel) {
@@ -174,7 +203,7 @@ public class LayerDbEntity implements Serializable {
         }
     }
     
-    
+    /*
     public static void main(String a[]) throws IOException{
         LayerFilter lf = new LayerFilter();
         lf.operator = "eq";
@@ -195,6 +224,6 @@ public class LayerDbEntity implements Serializable {
         LayerFilter lfTest = mapper.readValue(json, LayerFilter.class);
         Criterion crit = buildCriterion(lfTest);
         System.out.println(crit);
-    }
-    
+    }*/
+
 }

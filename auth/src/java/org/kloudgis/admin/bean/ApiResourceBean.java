@@ -9,6 +9,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.kloudgis.AuthorizationManager;
 import org.kloudgis.KGConfig;
@@ -42,6 +43,27 @@ public class ApiResourceBean {
             throw new EntityNotFoundException();
         }
         return Response.ok(u.getId() + "").build();
+    }
+    
+    @Path("user_descriptor")
+    @GET
+    public Response getUserDescriptor(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, @QueryParam("user") Long id) {
+        if (api_key == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key is mandatory.").build();
+        }
+        if (!api_key.equals(KGConfig.getConfiguration().api_key)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
+        }
+        if(id == null){
+            throw new EntityNotFoundException();
+        }
+        EntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
+        UserDbEntity u = em.find(UserDbEntity.class, id);
+        em.close();
+        if(u == null){
+            throw new EntityNotFoundException();
+        }
+        return Response.ok(u.getFullName()).build();
     }
     
 }

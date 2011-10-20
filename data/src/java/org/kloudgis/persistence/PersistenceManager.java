@@ -96,4 +96,12 @@ public class PersistenceManager {
         mapVal.put("password", KGConfig.getConfiguration().db_pwd);
         return mapVal;
     }
+    
+    public void closeEntityManagerFactory(String sandboxKey){
+        EntityManagerFactory emf = mapEMF.get(sandboxKey);
+        if(emf != null){
+            emf.close();
+            mapEMF.remove(sandboxKey);
+        }
+    }
 }

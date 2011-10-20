@@ -59,8 +59,8 @@ public class SecurityManager {
                         try {
                             Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
                             if (user_id != null) {
-                                String body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/map_access?sandbox=" + sandbox + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
-                                if (body != null && body.equals("true")) {
+                                String[] body = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/map_access?sandbox=" + sandbox + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
+                                if (body != null && body[1].equals("200") && body.equals("true")) {
                                     session.setAttribute(access_key, true);
                                     bAccess = true;
                                 } else {

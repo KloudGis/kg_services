@@ -4,6 +4,8 @@ package org.kloudgis;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.codehaus.jackson.map.ObjectMapper;
 
 /**
@@ -28,5 +30,8 @@ public class KGConfig {
         return config;
     }
         
+    public static Credentials getGeoserverCredentials(){
+        return new UsernamePasswordCredentials(config.geoserver_user, config.geoserver_pwd);
+    }
     
 }
