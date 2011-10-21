@@ -135,10 +135,9 @@ public class LayerResourceBean {
 
                 Map<String,String> prop = new HashMap();
                 prop.put("name", layerN);
-                prop.put("minX", pojo.minX + "");
-                prop.put("minY", pojo.minY + "");
-                prop.put("maxX", pojo.maxX + "");
-                prop.put("maxY", pojo.maxY + "");
+                //fixe me hardcoded table name
+                prop.put("tableName", "features");
+                prop.put("sld", pojo.sld);
                 String[] res = null;
                 try {
                     res = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/" + sandbox + "/" + sandbox + "/layer", KGConfig.getConfiguration().api_key, prop);

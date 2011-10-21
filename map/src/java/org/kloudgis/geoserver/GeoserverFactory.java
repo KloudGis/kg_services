@@ -65,13 +65,10 @@ public abstract class GeoserverFactory {
     }
     
     public static void addLayer( String strGeoserverURL, String strWSName, String strDSName,
-            String strFTName, String minX, String minY, String maxX, String maxY, Credentials crd) throws MalformedURLException, IOException, GeoserverException {
+            String strFTName, String tableName, Credentials crd) throws MalformedURLException, IOException, GeoserverException {
 
         PostMethod pst = new PostMethod(strGeoserverURL + "/rest/workspaces/" + strWSName.toLowerCase() + "/datastores/" + strDSName.toLowerCase() + "/featuretypes");
-        pst.setRequestEntity(new StringRequestEntity("<featureType><name>" + strFTName.toLowerCase() + "</name><srs>EPSG:4326</srs><nativeBoundingBox><minx>"
-                + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY
-                + "</maxy></nativeBoundingBox><latLonBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>"
-                + minY + "</miny><maxy>" + maxY + "</maxy></latLonBoundingBox></featureType>", "application/xml", "UTF-8"));
+        pst.setRequestEntity(new StringRequestEntity("<featureType><name>" + strFTName.toLowerCase() + "</name><nativeName>"+ tableName +"</nativeName></featureType>", "application/xml", "UTF-8"));
         HttpClient htc = new HttpClient();
         htc.getState().setCredentials(AuthScope.ANY, crd);
         int iResponse = htc.executeMethod(pst);
@@ -175,16 +172,8 @@ public abstract class GeoserverFactory {
         return lst;
     }
 
-    public static void uploadStyle(String strGeoserverURL, String strStylePath, Credentials crd)
+    public static void uploadStyle(String strGeoserverURL, String sld, String strStyleName, Credentials crd)
             throws MalformedURLException, IOException, GeoserverException {
-        if (strStylePath == null || !strStylePath.toLowerCase().endsWith(".sld")) {
-            throw new GeoserverException(HttpStatus.SC_BAD_REQUEST, "The file is not a style file.");
-        }
-        File fileSytle = new File(strStylePath);
-        if (!fileSytle.exists()) {
-            throw new GeoserverException(HttpStatus.SC_NOT_FOUND, "File not found: " + strStylePath);
-        }
-        String strStyleName = fileSytle.getName().substring(0, fileSytle.getName().lastIndexOf(".sld"));
         PostMethod pst = new PostMethod(strGeoserverURL + "/rest/styles");
         pst.setRequestEntity(new StringRequestEntity("<style><name>" + strStyleName + "</name><filename>" + strStyleName + ".sld</filename></style>",
                 "application/xml", "UTF-8"));
@@ -193,9 +182,9 @@ public abstract class GeoserverFactory {
         int iResponse = htc.executeMethod(pst);
         String strBody = pst.getResponseBodyAsString(1500);
         pst.releaseConnection();
-        if (iResponse == HttpStatus.SC_CREATED) {
+        if (iResponse == HttpStatus.SC_CREATED || strBody.endsWith("already exists.")) {
             PutMethod ptm = new PutMethod(strGeoserverURL + "/rest/styles/" + strStyleName);
-            ptm.setRequestEntity(new FileRequestEntity(fileSytle, "application/vnd.ogc.sld+xml"));
+            ptm.setRequestEntity(new StringRequestEntity(sld, "application/vnd.ogc.sld+xml", "UTF-8"));
             iResponse = htc.executeMethod(ptm);
             strBody = ptm.getResponseBodyAsString(1500);
             ptm.releaseConnection();

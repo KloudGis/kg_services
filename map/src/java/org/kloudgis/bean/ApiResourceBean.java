@@ -65,7 +65,13 @@ public class ApiResourceBean {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
         }
         try {
-            GeoserverFactory.addLayer(KGConfig.getConfiguration().geoserver_url, workspaceName, storeName, layerProp.get("name") + "", layerProp.get("minX") + "", layerProp.get("minY") + "", layerProp.get("maxX") + "", layerProp.get("maxY") + "", KGConfig.getGeoserverCredentials());
+            GeoserverFactory.addLayer(KGConfig.getConfiguration().geoserver_url, workspaceName, storeName, layerProp.get("name") + "", layerProp.get("tableName")  + "", KGConfig.getGeoserverCredentials());
+            String sld = (String) layerProp.get("sld");
+            if(sld != null){
+                String styleName = workspaceName + "_" + layerProp.get("name");
+                GeoserverFactory.uploadStyle(KGConfig.getConfiguration().geoserver_url, sld, styleName,  KGConfig.getGeoserverCredentials());
+                GeoserverFactory.assignStyle(KGConfig.getConfiguration().geoserver_url, workspaceName, layerProp.get("name") + "", styleName, KGConfig.getGeoserverCredentials());
+            }
             return Response.ok().build();
         } catch (Exception ex) {
             return Response.serverError().entity(ex.getMessage()).build();
