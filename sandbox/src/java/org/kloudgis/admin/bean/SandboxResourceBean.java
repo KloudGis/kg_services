@@ -284,7 +284,7 @@ public class SandboxResourceBean {
     }
 
     private static String morphKey(String key) {
-        if (key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox")) {
+        if (key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox") || key.equalsIgnoreCase("test")) {
             return key + "_usr_sandbox";
         }
         return key;

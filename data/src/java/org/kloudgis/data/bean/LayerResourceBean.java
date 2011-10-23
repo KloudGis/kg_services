@@ -28,7 +28,7 @@ import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.KGConfig;
 import org.kloudgis.api.ApiFactory;
 import org.kloudgis.data.pojo.Layer;
-import org.kloudgis.data.pojo.PostLayer;
+import org.kloudgis.data.pojo.LoadLayer;
 import org.kloudgis.data.store.LayerDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
@@ -106,7 +106,7 @@ public class LayerResourceBean {
     }
 
     @POST
-    public Response addLayer(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, PostLayer pojo) {
+    public Response addLayer(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadLayer pojo) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             HttpSession session = req.getSession(true);
@@ -130,14 +130,20 @@ public class LayerResourceBean {
                 entity.setOwner(lMember.getUserId());
                 String layerN = "features_" + pojo.featuretype;
                 entity.setName(sandbox + ":" + layerN);
-                entity.fromPostPojo(pojo);
+                entity.fromLoadPojo(pojo);
                 em.persist(entity);
 
                 Map<String,String> prop = new HashMap();
                 prop.put("name", layerN);
                 //fixe me hardcoded table name
                 prop.put("tableName", "features");
+                
                 prop.put("sld", pojo.sld);
+                prop.put("minX", pojo.minX + "");
+                prop.put("minY", pojo.minY + "");
+                prop.put("maxX", pojo.maxX + "");
+                prop.put("maxY", pojo.maxY + "");
+                
                 String[] res = null;
                 try {
                     res = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/" + sandbox + "/" + sandbox + "/layer", KGConfig.getConfiguration().api_key, prop);

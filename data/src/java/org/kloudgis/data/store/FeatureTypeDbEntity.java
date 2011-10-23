@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.kloudgis.data.pojo.LoadFeatureType;
 
 /**
  *
@@ -46,5 +47,10 @@ public class FeatureTypeDbEntity implements Serializable {
 
     public List<AttrTypeDbEntity> getAttrs() {
         return attrs;
+    }
+
+    public void fromLoadPojo(LoadFeatureType pojo) {
+        this.name = pojo.name;
+        this.label = pojo.label;
     }
 }

@@ -65,10 +65,12 @@ public abstract class GeoserverFactory {
     }
     
     public static void addLayer( String strGeoserverURL, String strWSName, String strDSName,
-            String strFTName, String tableName, Credentials crd) throws MalformedURLException, IOException, GeoserverException {
+            String strFTName, String tableName, String minX, String minY, String maxX, String maxY, Credentials crd) throws MalformedURLException, IOException, GeoserverException {
 
         PostMethod pst = new PostMethod(strGeoserverURL + "/rest/workspaces/" + strWSName.toLowerCase() + "/datastores/" + strDSName.toLowerCase() + "/featuretypes");
-        pst.setRequestEntity(new StringRequestEntity("<featureType><name>" + strFTName.toLowerCase() + "</name><nativeName>"+ tableName +"</nativeName></featureType>", "application/xml", "UTF-8"));
+        pst.setRequestEntity(new StringRequestEntity("<featureType><name>" + strFTName.toLowerCase() + "</name><nativeName>"+ tableName +"</nativeName><srs>EPSG:4326</srs>" + 
+                "<nativeBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY + "</maxy></nativeBoundingBox>" + 
+                "<latLonBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY + "</maxy></latLonBoundingBox></featureType>", "application/xml", "UTF-8"));
         HttpClient htc = new HttpClient();
         htc.getState().setCredentials(AuthScope.ANY, crd);
         int iResponse = htc.executeMethod(pst);

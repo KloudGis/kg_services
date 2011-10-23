@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.kloudgis.data.pojo.AttrType;
 
 /**
  *
@@ -40,5 +41,14 @@ public class AttrTypeDbEntity implements Serializable {
     
     public String getLabel() {
         return label;
+    }
+    
+    public void setFeaturetype(FeatureTypeDbEntity ft){
+        this.ft = ft;
+    }
+
+    public void fromPojo(AttrType pojo) {
+        this.name = pojo.name;
+        this.label = pojo.label;
     }
 }

@@ -28,7 +28,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
-import org.kloudgis.data.pojo.PostLayer;
+import org.kloudgis.data.pojo.LoadLayer;
 import org.kloudgis.model.LayerFilter;
 
 /**
@@ -88,7 +88,7 @@ public class LayerDbEntity implements Serializable {
         return pojo;
     }
     
-    public void fromPostPojo(PostLayer pojo) {
+    public void fromLoadPojo(LoadLayer pojo) {
         this.render_order = pojo.renderOrder;
         this.selectable = pojo.isSelectable;
         this.pixel_tolerance = pojo.pixelTolerance;

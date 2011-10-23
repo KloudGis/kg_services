@@ -18,5 +18,6 @@ public class LoadFeature {
     public String wkt;
     public Map<String, String>  attrs;
     public String title_attr;
+    public Double angle;
 
 }

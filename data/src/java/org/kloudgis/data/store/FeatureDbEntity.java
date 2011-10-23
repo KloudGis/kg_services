@@ -85,6 +85,26 @@ public class FeatureDbEntity implements Serializable {
     @Column(columnDefinition = "TEXT")
     @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
     private String index5;
+    @Index(name = "feature_ind6_index")
+    @Column(columnDefinition = "TEXT")
+    @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
+    private String index6;
+    @Index(name = "feature_ind7_index")
+    @Column(columnDefinition = "TEXT")
+    @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
+    private String index7;
+    @Index(name = "feature_ind8_index")
+    @Column(columnDefinition = "TEXT")
+    @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
+    private String index8;
+    @Index(name = "feature_ind9_index")
+    @Column(columnDefinition = "TEXT")
+    @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
+    private String index9;
+    @Index(name = "feature_ind10_index")
+    @Column(columnDefinition = "TEXT")
+    @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
+    private String index10;
 
     public void setDateInsert(Timestamp time) {
         this.date_insert = time;
@@ -127,6 +147,11 @@ public class FeatureDbEntity implements Serializable {
         mapAt.put(findLabel("index3", ft), index3);
         mapAt.put(findLabel("index4", ft), index4);
         mapAt.put(findLabel("index5", ft), index5);
+        mapAt.put(findLabel("index6", ft), index6);
+        mapAt.put(findLabel("index7", ft), index7);
+        mapAt.put(findLabel("index8", ft), index8);
+        mapAt.put(findLabel("index9", ft), index9);
+        mapAt.put(findLabel("index10", ft), index10);
         pojo.title_attr = title_attr != null ? title_attr : ind1Lbl;
         pojo.attrs = mapAt;
         return pojo;
@@ -135,6 +160,7 @@ public class FeatureDbEntity implements Serializable {
     public void fromPojo(LoadFeature pojo) {
         this.fid = pojo.fid;
         this.featuretype = pojo.ft;
+        this.angle = pojo.angle;
         this.geo_type = pojo.geo_type;
         if (this.geo_type != null) {
             try {
@@ -147,6 +173,11 @@ public class FeatureDbEntity implements Serializable {
         this.index3 = pojo.attrs.get("index3");
         this.index4 = pojo.attrs.get("index4");
         this.index5 = pojo.attrs.get("index5");
+        this.index6 = pojo.attrs.get("index6");
+        this.index7 = pojo.attrs.get("index7");
+        this.index8 = pojo.attrs.get("index8");
+        this.index9 = pojo.attrs.get("index9");
+        this.index10 = pojo.attrs.get("index10");
     }
 
     private String findLabel(String attr, FeatureTypeDbEntity ft) {

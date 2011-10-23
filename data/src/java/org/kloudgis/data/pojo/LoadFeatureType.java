@@ -4,15 +4,17 @@
  */
 package org.kloudgis.data.pojo;
 
+import java.util.List;
+
 /**
  *
  * @author jeanfelixg
  */
-public class PostLayer extends Layer{
+public class LoadFeatureType {
     
-    public String  sld;
-    public String  featuretype;
-    public String  filter;
+    public String name;
+    public String label;
     
-    public Double minX, minY,maxX,maxY;
+    public List<AttrType> attrs;
+    
 }
