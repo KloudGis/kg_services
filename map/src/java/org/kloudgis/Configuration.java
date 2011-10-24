@@ -14,5 +14,7 @@ public class Configuration {
     public String geoserver_url;
     public String geoserver_user;
     public String geoserver_pwd;
+    public String svgFolder;
+    public String imgFolder;
 
 }

@@ -251,7 +251,7 @@ public class SandboxResourceBean {
                 Long oId = entity.getOwnerId();
                 if (oId == null || oId.longValue() == id) {
                     String[] ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, entity.getUniqueKey());                                     
-                    if (ret != null && (ret[1].equals("200") || ret[1].endsWith("does not exist"))) {
+                    if (ret != null && (ret[1].equals("200") || ret[0].endsWith("does not exist"))) {
                         ret = ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandboxKey, KGConfig.getConfiguration().api_key);
                         if (ret != null && ret[1].equals("200") || ret[0].contains("No such workspace")) {
                             em.getTransaction().begin();

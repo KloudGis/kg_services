@@ -128,7 +128,7 @@ public class LayerResourceBean {
                 em.getTransaction().begin();
                 LayerDbEntity entity = new LayerDbEntity();
                 entity.setOwner(lMember.getUserId());
-                String layerN = "features_" + pojo.featuretype;
+                String layerN = "features_" + pojo.name.toLowerCase();
                 entity.setName(sandbox + ":" + layerN);
                 entity.fromLoadPojo(pojo);
                 em.persist(entity);

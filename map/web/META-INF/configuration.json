@@ -5,5 +5,7 @@
     "data_url": "http://localhost:8080/api_data/api",
     "geoserver_url" : "http://localhost:8090/geoserver",
     "geoserver_user" : "admin",
-    "geoserver_pwd" : "geoserver"  
+    "geoserver_pwd" : "geoserver", 
+    "svgFolder" : "file:/Applications/GeoServer.app/Contents/Resources/Java/data_dir/styles/svg", 
+    "imgFolder" : "file:/Applications/GeoServer.app/Contents/Resources/Java/data_dir/styles/img"  
 }

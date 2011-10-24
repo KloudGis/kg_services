@@ -3,7 +3,6 @@
  */
 package org.kloudgis.geoserver;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -16,14 +15,13 @@ import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.kloudgis.KGConfig;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -186,6 +184,11 @@ public abstract class GeoserverFactory {
         pst.releaseConnection();
         if (iResponse == HttpStatus.SC_CREATED || strBody.endsWith("already exists.")) {
             PutMethod ptm = new PutMethod(strGeoserverURL + "/rest/styles/" + strStyleName);
+            //temp workaround: cannot use relative path with external graphics: replace with absolute path
+            String svg = "<OnlineResource xlink:type=\"simple\" xlink:href=\"svg";
+            sld = sld.replace(svg, svg.substring(0, svg.length() - 3) + KGConfig.getConfiguration().svgFolder);
+            String img = "<OnlineResource xlink:type=\"simple\" xlink:href=\"img";
+            sld = sld.replace(img, img.substring(0, img.length() - 3) + KGConfig.getConfiguration().imgFolder);
             ptm.setRequestEntity(new StringRequestEntity(sld, "application/vnd.ogc.sld+xml", "UTF-8"));
             iResponse = htc.executeMethod(ptm);
             strBody = ptm.getResponseBodyAsString(1500);
