@@ -9,6 +9,7 @@ import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,12 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.Criteria;
 import org.hibernate.ejb.HibernateEntityManager;
@@ -36,6 +40,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.util.Version;
 import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.criterion.SpatialRestrictions;
+import org.kloudgis.AuthorizationFactory;
 import org.kloudgis.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.pojo.LoadFeature;
@@ -44,6 +49,7 @@ import org.kloudgis.data.store.DistanceOrder;
 import org.kloudgis.data.store.FeatureDbEntity;
 import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.LayerDbEntity;
+import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.persistence.PersistenceManager;
 import org.kloudgis.pojo.Records;
@@ -58,10 +64,22 @@ public class FeatureResourceBean {
 
     @GET
     @Path("features_at")
-    public Response getFeaturesAt(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("lon") Double lon, @QueryParam("lat") Double lat,
+    public Response getFeaturesAt(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("lon") Double lon, @QueryParam("lat") Double lat,
             @QueryParam("layers") String layers, @QueryParam("limit") Integer limit, @QueryParam("one_pixel") Double onePixelWorld) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
+            HttpSession session = req.getSession(true);
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember == null) {
+                em.close();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
             Point point = GeometryFactory.createPoint(new Coordinate(lon, lat));
             point.setSRID(4326);
             Set<Feature> setF = new LinkedHashSet();
@@ -114,11 +132,23 @@ public class FeatureResourceBean {
     @GET
     @Path("search")
     @Produces({"application/json"})
-    public Response search(@QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox) {
+    public Response search(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
             return Response.ok().build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        HttpSession session = req.getSession(true);
+        MemberDbEntity lMember = null;
+        try {
+            lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+        } catch (IOException ex) {
+            em.close();
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
+        if (lMember == null) {
+            em.close();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+        }
         FullTextEntityManager sem = Search.getFullTextEntityManager(em);
         FullTextQuery query;
         List lstPojos = new ArrayList();
@@ -163,12 +193,24 @@ public class FeatureResourceBean {
     @GET
     @Path("count_search")
     @Produces({"application/json"})
-    public Response countSearch(@QueryParam("search_string") String search,
+    public Response countSearch(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search,
             @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
             return Response.ok(new SearchCategory(0, "?", "?", search, 0)).build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        HttpSession session = req.getSession(true);
+        MemberDbEntity lMember = null;
+        try {
+            lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+        } catch (IOException ex) {
+            em.close();
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
+        if (lMember == null) {
+            em.close();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+        }
         FullTextEntityManager sem = Search.getFullTextEntityManager(em);
         FullTextQuery query = buildSearchQuery(sem, search);
         if (query == null) {
@@ -207,7 +249,7 @@ public class FeatureResourceBean {
             int sizeNote = query.getResultSize();
             if (sizeNote > 0) {
                 String key = "_notes_";
-                lstCat.add(new SearchCategory(key.hashCode(),key, "_Notes", search, sizeNote));
+                lstCat.add(new SearchCategory(key.hashCode(), key, "_Notes", search, sizeNote));
             }
         }
         sem.close();
@@ -245,6 +287,7 @@ public class FeatureResourceBean {
         return ftq;
     }
 
+    //TO remove ???
     @POST
     @Path("build_search_index")
     public Response search(@QueryParam("sandbox") String sandbox) {
@@ -254,9 +297,25 @@ public class FeatureResourceBean {
 
     @POST
     @Path("batch_add")
-    public Response addBatchFeatures(@QueryParam("sandbox") String sandbox, List<LoadFeature> features) {
+    public Response addBatchFeatures(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, List<LoadFeature> features) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
+            HttpSession session = req.getSession(true);
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                if(lMember != null && !AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)){
+                    em.close();
+                    return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the sandbox owner for: " + sandbox).build();
+                }
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember == null) {
+                em.close();
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
             em.getTransaction().begin();
             for (LoadFeature pojo : features) {
                 FeatureDbEntity entity = new FeatureDbEntity();
