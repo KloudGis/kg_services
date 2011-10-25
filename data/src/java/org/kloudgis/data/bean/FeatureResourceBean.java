@@ -166,7 +166,7 @@ public class FeatureResourceBean {
     public Response countSearch(@QueryParam("search_string") String search,
             @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
-            return Response.ok(new SearchCategory("?", "?", search, 0)).build();
+            return Response.ok(new SearchCategory(0, "?", "?", search, 0)).build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         FullTextEntityManager sem = Search.getFullTextEntityManager(em);
@@ -199,14 +199,15 @@ public class FeatureResourceBean {
             if (entity != null) {
                 label = entity.getLabel();
             }
-            SearchCategory cat = new SearchCategory(ft, label, search, mapFt.get(ft));
+            SearchCategory cat = new SearchCategory(ft.hashCode(), ft, label, search, mapFt.get(ft));
             lstCat.add(cat);
         }
         query = buildNoteSearchQuery(sem, search);
         if (query != null) {
             int sizeNote = query.getResultSize();
             if (sizeNote > 0) {
-                lstCat.add(new SearchCategory("_notes_", "_Notes", search, sizeNote));
+                String key = "_notes_";
+                lstCat.add(new SearchCategory(key.hashCode(),key, "_Notes", search, sizeNote));
             }
         }
         sem.close();
@@ -228,7 +229,7 @@ public class FeatureResourceBean {
     }
 
     protected String[] getSearchFields() {
-        return new String[]{"index1", "index2", "index3", "index4", "index5"};
+        return new String[]{"index1", "index2", "index3", "index4", "index5", "index6", "index7", "index8", "index9", "index10"};
     }
 
     protected FullTextQuery buildNoteSearchQuery(FullTextEntityManager sem, String search) {

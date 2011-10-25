@@ -91,7 +91,7 @@ public class LayerDbEntity implements Serializable {
     public void fromLoadPojo(LoadLayer pojo) {
         this.render_order = pojo.renderOrder;
         this.selectable = pojo.isSelectable;
-        this.pixel_tolerance = pojo.pixelTolerance;
+        this.pixel_tolerance = pojo.pixelTolerance != null ? pojo.pixelTolerance: 5;
       
         this.label = pojo.label;
         this.url = "/api_map/wms";

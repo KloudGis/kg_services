@@ -129,7 +129,7 @@ public class LayerResourceBean {
                 LayerDbEntity entity = new LayerDbEntity();
                 entity.setOwner(lMember.getUserId());
                 String layerN = "features_" + pojo.name.toLowerCase();
-                entity.setName(sandbox + ":" + layerN);
+                entity.setName(sandbox.toLowerCase() + ":" + layerN);
                 entity.fromLoadPojo(pojo);
                 em.persist(entity);
 

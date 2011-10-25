@@ -10,6 +10,7 @@ package org.kloudgis.data.pojo;
  */
 public class SearchCategory {
     
+    public Long guid;
     public String category;
     public String categoryLabel;
     public String search;
@@ -17,7 +18,8 @@ public class SearchCategory {
     
     public SearchCategory(){}
     
-    public SearchCategory(String cat, String catLabel, String search, Integer count){
+    public SearchCategory(long id, String cat, String catLabel, String search, Integer count){
+        this.guid = id;
         this.category = cat;
         this.categoryLabel = catLabel;
         this.search = search;
