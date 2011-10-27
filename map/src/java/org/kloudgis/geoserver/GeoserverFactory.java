@@ -48,10 +48,54 @@ public abstract class GeoserverFactory {
     public static void addStore(String strGeoserverURL, String workspace, String datastore, String user, String pwd, String strHost, String strPort, Credentials crd)
             throws MalformedURLException, IOException, GeoserverException {
         PostMethod pst = new PostMethod(strGeoserverURL + "/rest/workspaces/" + workspace.toLowerCase() + "/datastores");
-        pst.setRequestEntity(new StringRequestEntity("<dataStore><name>" + datastore.toLowerCase() + "</name><enabled>true</enabled><connectionParameters><host>"
-                + strHost + "</host><port>" + strPort + "</port><database>" + datastore.toLowerCase() + "</database><user>" + user
-                + "</user><passwd>" + pwd + "</passwd><dbtype>postgis</dbtype><namespace>" + workspace.toLowerCase()
-                + "</namespace></connectionParameters></dataStore>", "application/xml", "UTF-8"));
+        StringBuilder strStore = new StringBuilder();
+        strStore.append("<dataStore>");
+        strStore.append("<name>");
+        strStore.append(datastore.toLowerCase());
+        strStore.append("</name>");
+        strStore.append("<enabled>");
+        strStore.append("true");
+        strStore.append("</enabled>");
+        strStore.append("<connectionParameters>");
+        strStore.append("<entry key=\"host\">");
+        strStore.append(strHost);
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"port\">");
+        strStore.append(strPort);
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"database\">");
+        strStore.append(datastore.toLowerCase());
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"user\">");
+        strStore.append(user);
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"passwd\">");
+        strStore.append(pwd);
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"namespace\">");
+        strStore.append(workspace.toLowerCase());
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"dbtype\">");
+        strStore.append("postgis");
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"min connections\">");
+        strStore.append("0");
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"max connections\">");
+        strStore.append("3");
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"Estimated extends\">");
+        strStore.append("false");
+        strStore.append("</entry>");
+        strStore.append("<entry key=\"Loose bbox\">");
+        strStore.append("false");
+        strStore.append("</entry>");     
+        strStore.append("<entry key=\"Connection timeout\">");
+        strStore.append("20");
+        strStore.append("</entry>");       
+        strStore.append("</connectionParameters>");
+        strStore.append("</dataStore>");       
+        pst.setRequestEntity(new StringRequestEntity(strStore.toString(), "application/xml", "UTF-8"));
         HttpClient htc = new HttpClient();
         htc.getState().setCredentials(AuthScope.ANY, crd);
         int iResponse = htc.executeMethod(pst);

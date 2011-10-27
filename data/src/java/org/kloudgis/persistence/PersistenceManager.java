@@ -72,7 +72,9 @@ public class PersistenceManager {
                 em.createNativeQuery("CREATE INDEX feature_gist_ix ON features USING gist(geo)").executeUpdate();
                 em.getTransaction().commit();
             } catch (Exception e) {
-                em.getTransaction().rollback();
+                if(em.getTransaction().isActive()){
+                    em.getTransaction().rollback();
+                }
             } finally {
                 em.close();
             }
