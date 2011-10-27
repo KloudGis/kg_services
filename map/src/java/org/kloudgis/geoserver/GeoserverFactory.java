@@ -5,6 +5,7 @@ package org.kloudgis.geoserver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,12 +90,12 @@ public abstract class GeoserverFactory {
         strStore.append("</entry>");
         strStore.append("<entry key=\"Loose bbox\">");
         strStore.append("false");
-        strStore.append("</entry>");     
+        strStore.append("</entry>");
         strStore.append("<entry key=\"Connection timeout\">");
         strStore.append("20");
-        strStore.append("</entry>");       
+        strStore.append("</entry>");
         strStore.append("</connectionParameters>");
-        strStore.append("</dataStore>");       
+        strStore.append("</dataStore>");
         pst.setRequestEntity(new StringRequestEntity(strStore.toString(), "application/xml", "UTF-8"));
         HttpClient htc = new HttpClient();
         htc.getState().setCredentials(AuthScope.ANY, crd);
@@ -105,14 +106,14 @@ public abstract class GeoserverFactory {
             throw new GeoserverException(iResponse, strBody);
         }
     }
-    
-    public static void addLayer( String strGeoserverURL, String strWSName, String strDSName,
+
+    public static void addLayer(String strGeoserverURL, String strWSName, String strDSName,
             String strFTName, String tableName, String minX, String minY, String maxX, String maxY, Credentials crd) throws MalformedURLException, IOException, GeoserverException {
 
         PostMethod pst = new PostMethod(strGeoserverURL + "/rest/workspaces/" + strWSName.toLowerCase() + "/datastores/" + strDSName.toLowerCase() + "/featuretypes");
-        pst.setRequestEntity(new StringRequestEntity("<featureType><name>" + strFTName.toLowerCase() + "</name><nativeName>"+ tableName +"</nativeName><srs>EPSG:4326</srs>" + 
-                "<nativeBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY + "</maxy></nativeBoundingBox>" + 
-                "<latLonBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY + "</maxy></latLonBoundingBox></featureType>", "application/xml", "UTF-8"));
+        pst.setRequestEntity(new StringRequestEntity("<featureType><name>" + strFTName.toLowerCase() + "</name><nativeName>" + tableName + "</nativeName><srs>EPSG:4326</srs>"
+                + "<nativeBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY + "</maxy></nativeBoundingBox>"
+                + "<latLonBoundingBox><minx>" + minX + "</minx><maxx>" + maxX + "</maxx><miny>" + minY + "</miny><maxy>" + maxY + "</maxy></latLonBoundingBox></featureType>", "application/xml", "UTF-8"));
         HttpClient htc = new HttpClient();
         htc.getState().setCredentials(AuthScope.ANY, crd);
         int iResponse = htc.executeMethod(pst);
@@ -121,7 +122,41 @@ public abstract class GeoserverFactory {
         if (iResponse != HttpStatus.SC_CREATED) {
             throw new GeoserverException(iResponse, strBody);
         }
+    }
 
+    public static void addGroupLayer(String geoserver_url, String workspaceName, List<String> layNames, Credentials crd) throws IOException {
+        StringBuilder strLay = new StringBuilder();
+        strLay.append("<layerGroup>");
+        strLay.append("<name>");
+        strLay.append(workspaceName);
+        strLay.append("</name>");
+        strLay.append("<layers>");
+        for (String layer : layNames) {
+            strLay.append("<layer>");
+            strLay.append(layer);
+            strLay.append("</layer>");
+        }
+        strLay.append("</layers>");
+        strLay.append("</layerGroup>");
+        HttpClient htc = new HttpClient();
+        htc.getState().setCredentials(AuthScope.ANY, crd);
+        PostMethod post = new PostMethod(geoserver_url + "/rest/layergroups");
+        post.setRequestEntity(new StringRequestEntity(strLay.toString(), "application/xml", "UTF-8"));
+        int iResponse = htc.executeMethod(post);
+        String strBody = post.getResponseBodyAsString(1500);
+        if (iResponse != HttpStatus.SC_CREATED) {
+            if(strBody.endsWith("already exists.")){
+                PutMethod put = new PutMethod(geoserver_url + "/rest/layergroups/" + workspaceName);
+                put.setRequestEntity(new StringRequestEntity(strLay.toString(), "application/xml", "UTF-8"));
+                iResponse = htc.executeMethod(post);
+                if(iResponse != HttpStatus.SC_OK){
+                    strBody = put.getResponseBodyAsString(1500);
+                    throw new GeoserverException(iResponse, strBody);
+                }
+            }else{
+                throw new GeoserverException(iResponse, strBody);
+            }
+        }       
     }
 
     public static ArrayList<String> getStores(String strGeoserverURL, String strWorkspace, Credentials crd) throws IOException {

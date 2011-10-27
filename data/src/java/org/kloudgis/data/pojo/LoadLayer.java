@@ -13,6 +13,7 @@ public class LoadLayer extends Layer{
     public String  sld;
     public String  featuretype;
     public String  filter;
+    public Boolean  canGroup;
     
     public Double minX, minY,maxX,maxY;
 }

@@ -15,7 +15,7 @@
 package org.kloudgis.data.store;
 
 import java.io.Serializable;
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -62,6 +62,10 @@ public class LayerDbEntity implements Serializable {
     @Column
     private Boolean selectable;
     @Column
+    private Boolean can_group;
+    @Column
+    private Boolean is_group;
+    @Column
     private Integer pixel_tolerance;
     @Column(length = 100)
     private String featuretype;
@@ -78,7 +82,10 @@ public class LayerDbEntity implements Serializable {
         pojo.renderOrder = render_order;
         pojo.isSelectable = selectable;
         pojo.pixelTolerance = pixel_tolerance;
-
+        if(can_group == null || can_group.booleanValue() == false){
+            pojo.canRender = true;
+        }       
+        pojo.isGroup = is_group;
         pojo.name = name;
         pojo.owner = owner;
         pojo.label = label;
@@ -101,6 +108,7 @@ public class LayerDbEntity implements Serializable {
         this.featuretype = pojo.featuretype;
         this.jsonFitler = pojo.filter;
         this.sld = pojo.sld;       
+        this.can_group = pojo.canGroup == null ? true: pojo.canGroup;
     }
 
     public Long getId() {
@@ -141,6 +149,10 @@ public class LayerDbEntity implements Serializable {
 
     public void setOwner(Long lOwner) {
         owner = lOwner;
+    }
+    
+    public void setGroup() {
+        is_group = true;
     }
 
     public Criterion getRestriction() {

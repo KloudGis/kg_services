@@ -4,6 +4,7 @@
  */
 package org.kloudgis.bean;
 
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.HeaderParam;
@@ -98,6 +99,24 @@ public class ApiResourceBean {
         }
         try {
             GeoserverFactory.deleteWorkspace(KGConfig.getConfiguration().geoserver_url, workspaceName, KGConfig.getGeoserverCredentials());
+            return Response.ok().build();
+        } catch (Exception ex) {
+            return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
+        }
+    }
+    
+    
+    @POST
+    @Path("{workspace}/group_layers")
+    public Response addGroupLayer(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, @PathParam("workspace") String workspaceName, List<String> layNames) {
+        if (api_key == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key is mandatory.").build();
+        }
+        if (!api_key.equals(KGConfig.getConfiguration().api_key)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
+        }
+        try {
+            GeoserverFactory.addGroupLayer(KGConfig.getConfiguration().geoserver_url, workspaceName, layNames,  KGConfig.getGeoserverCredentials());         
             return Response.ok().build();
         } catch (Exception ex) {
             return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
