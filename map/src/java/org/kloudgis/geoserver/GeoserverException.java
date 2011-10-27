@@ -3,12 +3,12 @@
  */
 package org.kloudgis.geoserver;
 
-import java.io.IOException;
+import javax.ws.rs.WebApplicationException;
 
-public class GeoserverException extends IOException {
+public class GeoserverException extends WebApplicationException {
 
 
     public GeoserverException( int iResponseCode, String strResponse ) {
-        super(iResponseCode + ": " + strResponse);
+        super( new Throwable("Geoserver error: "  +strResponse), iResponseCode);
     }
 }

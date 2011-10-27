@@ -184,11 +184,6 @@ public abstract class GeoserverFactory {
         pst.releaseConnection();
         if (iResponse == HttpStatus.SC_CREATED || strBody.endsWith("already exists.")) {
             PutMethod ptm = new PutMethod(strGeoserverURL + "/rest/styles/" + strStyleName);
-            //temp workaround: cannot use relative path with external graphics: replace with absolute path
-            String svg = "<OnlineResource xlink:type=\"simple\" xlink:href=\"svg";
-            sld = sld.replace(svg, svg.substring(0, svg.length() - 3) + KGConfig.getConfiguration().svgFolder);
-            String img = "<OnlineResource xlink:type=\"simple\" xlink:href=\"img";
-            sld = sld.replace(img, img.substring(0, img.length() - 3) + KGConfig.getConfiguration().imgFolder);
             ptm.setRequestEntity(new StringRequestEntity(sld, "application/vnd.ogc.sld+xml", "UTF-8"));
             iResponse = htc.executeMethod(ptm);
             strBody = ptm.getResponseBodyAsString(1500);

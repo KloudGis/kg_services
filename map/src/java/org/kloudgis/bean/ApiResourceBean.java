@@ -34,7 +34,7 @@ public class ApiResourceBean {
             GeoserverFactory.addWorkspace(KGConfig.getConfiguration().geoserver_url, workspaceName, KGConfig.getGeoserverCredentials());
             return Response.ok().build();
         } catch (Exception ex) {
-            return Response.serverError().entity(ex.getMessage()).build();
+            return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
         }
     }
 
@@ -51,7 +51,7 @@ public class ApiResourceBean {
             GeoserverFactory.addStore(KGConfig.getConfiguration().geoserver_url, workspaceName, storeProp.get("name") + "", storeProp.get("user") + "", storeProp.get("pwd") + "", storeProp.get("host") + "", storeProp.get("port") + "", KGConfig.getGeoserverCredentials());
             return Response.ok().build();
         } catch (Exception ex) {
-            return Response.serverError().entity(ex.getMessage()).build();
+            return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
         }
     }
 
@@ -70,12 +70,20 @@ public class ApiResourceBean {
             String sld = (String) layerProp.get("sld");
             if(sld != null){
                 String styleName = workspaceName + "_" + layerProp.get("name");
+                //add workspace name in the svg/img external resource path
+                //set an absolute path because relative path does not work (error on geoserver version 2.1.0)
+                String absolutePath = "file://" + KGConfig.getConfiguration().kloudgis_folder;
+                String svg = "<OnlineResource xlink:type=\"simple\" xlink:href=\"svg";
+                sld = sld.replace(svg, svg.substring(0,svg.length() - 3) + absolutePath + "/svg/" + workspaceName);
+                String img = "<OnlineResource xlink:type=\"simple\" xlink:href=\"img";
+                sld = sld.replace(img, img.substring(0,img.length() - 3) + absolutePath + "/img/" + workspaceName);
+                
                 GeoserverFactory.uploadStyle(KGConfig.getConfiguration().geoserver_url, sld, styleName,  KGConfig.getGeoserverCredentials());
                 GeoserverFactory.assignStyle(KGConfig.getConfiguration().geoserver_url, workspaceName, layerProp.get("name") + "", styleName, KGConfig.getGeoserverCredentials());
             }
             return Response.ok().build();
         } catch (Exception ex) {
-            return Response.serverError().entity(ex.getMessage()).build();
+            return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
         }
     }
 
@@ -92,7 +100,7 @@ public class ApiResourceBean {
             GeoserverFactory.deleteWorkspace(KGConfig.getConfiguration().geoserver_url, workspaceName, KGConfig.getGeoserverCredentials());
             return Response.ok().build();
         } catch (Exception ex) {
-            return Response.serverError().entity(ex.getMessage()).build();
+            return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
         }
     }
 }

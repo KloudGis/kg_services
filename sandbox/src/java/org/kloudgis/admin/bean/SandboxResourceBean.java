@@ -31,9 +31,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -45,6 +42,7 @@ import org.kloudgis.admin.pojo.Sandbox;
 import org.kloudgis.admin.store.SandboxDbEntity;
 import org.kloudgis.api.ApiFactory;
 import org.kloudgis.persistence.PersistenceManager;
+import org.kloudgis.utils.StringTools;
 
 /**
  *
@@ -283,7 +281,8 @@ public class SandboxResourceBean {
         }
     }
 
-    private static String morphKey(String key) {
+    private static String morphKey(String key) {    
+        key = StringTools.replaceUnicodeChars(key, '_');
         if (key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox") || key.equalsIgnoreCase("test")) {
             return key + "_usr_sandbox";
         }
