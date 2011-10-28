@@ -5,6 +5,7 @@
 package org.kloudgis.sandbox.store;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -37,8 +38,10 @@ public class SandboxDbEntity implements Serializable {
     @Column(length = 100)
     private String unique_key;
     @Index(name = "sandbox_owner_index")
-    @Column()
+    @Column
     private Long owner;
+    @Column
+    private Timestamp dateCreation;
     @OneToMany(mappedBy="sandbox", cascade = CascadeType.ALL)
     List<UserSandboxDbEntity> users;
     
@@ -48,6 +51,7 @@ public class SandboxDbEntity implements Serializable {
         pojo.name = name;
         pojo.key = unique_key;
         pojo.owner = owner;
+        pojo.date = dateCreation != null ? dateCreation.getTime() : null;
         return pojo;
     }
 
@@ -77,6 +81,10 @@ public class SandboxDbEntity implements Serializable {
     
     public void addUser(UserSandboxDbEntity us){
        this.users.add(us);
+    }
+
+    public void setDateCreation(Timestamp timestamp) {
+        this.dateCreation = timestamp;
     }
    
 }

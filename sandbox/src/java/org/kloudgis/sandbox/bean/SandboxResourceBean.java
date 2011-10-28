@@ -15,7 +15,9 @@
 package org.kloudgis.sandbox.bean;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -183,6 +185,7 @@ public class SandboxResourceBean {
                 entity.setName(sandbox.name);
                 entity.setUniqueKey(sandbox.key);
                 entity.setOwnerId(id);
+                entity.setDateCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 em.persist(entity);
 
                 ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/workspace", KGConfig.getConfiguration().api_key, sandbox.key);

@@ -13,5 +13,6 @@ public class Sandbox {
     public Long guid;
     public String key;
     public Long owner;
+    public Long date;
     
 }
