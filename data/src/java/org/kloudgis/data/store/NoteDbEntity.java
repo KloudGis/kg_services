@@ -23,8 +23,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
-import org.kloudgis.GeometryFactory;
-import org.kloudgis.pojo.Coordinate;
+import org.kloudgis.data.GeometryFactory;
+import org.kloudgis.core.pojo.Coordinate;
 import org.kloudgis.data.pojo.Note;
 
 /**

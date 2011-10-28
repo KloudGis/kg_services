@@ -41,14 +41,14 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernatespatial.criterion.SpatialRestrictions;
-import org.kloudgis.AuthorizationFactory;
-import org.kloudgis.GeometryFactory;
+import org.kloudgis.data.AuthorizationFactory;
+import org.kloudgis.data.GeometryFactory;
 import org.kloudgis.data.pojo.Cluster;
 import org.kloudgis.data.pojo.Note;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
-import org.kloudgis.persistence.PersistenceManager;
-import org.kloudgis.pojo.Records;
+import org.kloudgis.data.persistence.PersistenceManager;
+import org.kloudgis.core.pojo.Records;
 
 /**
  *

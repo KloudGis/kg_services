@@ -28,15 +28,15 @@ import javax.ws.rs.core.Response;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
-import org.kloudgis.AuthorizationFactory;
-import org.kloudgis.KGConfig;
-import org.kloudgis.api.ApiFactory;
+import org.kloudgis.data.AuthorizationFactory;
+import org.kloudgis.data.KGConfig;
+import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.data.pojo.Layer;
 import org.kloudgis.data.pojo.LoadLayer;
 import org.kloudgis.data.store.LayerDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
-import org.kloudgis.persistence.PersistenceManager;
-import org.kloudgis.pojo.Records;
+import org.kloudgis.data.persistence.PersistenceManager;
+import org.kloudgis.core.pojo.Records;
 
 /**
  *

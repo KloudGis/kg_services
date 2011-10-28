@@ -29,7 +29,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
 import org.kloudgis.data.pojo.LoadLayer;
-import org.kloudgis.model.LayerFilter;
+import org.kloudgis.data.model.LayerFilter;
 
 /**
  *

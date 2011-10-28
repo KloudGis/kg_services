@@ -7,8 +7,8 @@
     </servlet>
     <servlet>
         <servlet-name>WMSProxy</servlet-name>
-        <servlet-class>org.kloudgis.proxy.WmsProxy</servlet-class>
-    </servlet>    
+        <servlet-class>org.kloudgis.map.proxy.WmsProxy</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ServletAdaptor</servlet-name>
         <url-pattern>/*</url-pattern>
@@ -24,6 +24,6 @@
         </session-timeout>
     </session-config>
     <listener>
-        <listener-class>org.kloudgis.ContextListener</listener-class>
+        <listener-class>org.kloudgis.map.ContextListener</listener-class>
     </listener>
 </web-app>

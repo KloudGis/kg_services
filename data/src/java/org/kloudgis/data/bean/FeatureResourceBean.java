@@ -4,7 +4,7 @@
  */
 package org.kloudgis.data.bean;
 
-import org.kloudgis.model.ModelFactory;
+import org.kloudgis.data.model.ModelFactory;
 import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -40,8 +40,8 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.util.Version;
 import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.criterion.SpatialRestrictions;
-import org.kloudgis.AuthorizationFactory;
-import org.kloudgis.GeometryFactory;
+import org.kloudgis.data.AuthorizationFactory;
+import org.kloudgis.data.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.pojo.LoadFeature;
 import org.kloudgis.data.pojo.SearchCategory;
@@ -51,8 +51,8 @@ import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.LayerDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
-import org.kloudgis.persistence.PersistenceManager;
-import org.kloudgis.pojo.Records;
+import org.kloudgis.data.persistence.PersistenceManager;
+import org.kloudgis.core.pojo.Records;
 
 /**
  *

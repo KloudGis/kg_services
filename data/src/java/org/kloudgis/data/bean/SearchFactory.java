@@ -13,7 +13,7 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.kloudgis.data.store.FeatureDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
-import org.kloudgis.persistence.PersistenceManager;
+import org.kloudgis.data.persistence.PersistenceManager;
 
 /**
  *

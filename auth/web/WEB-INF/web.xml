@@ -16,6 +16,6 @@
         </session-timeout>
     </session-config>
     <listener>
-        <listener-class>org.kloudgis.ContextListener</listener-class>
+        <listener-class>org.kloudgis.auth.ContextListener</listener-class>
     </listener>
 </web-app>

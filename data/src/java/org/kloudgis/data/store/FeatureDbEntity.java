@@ -25,7 +25,7 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
-import org.kloudgis.GeometryFactory;
+import org.kloudgis.data.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.pojo.LoadFeature;
 
@@ -126,16 +126,16 @@ public class FeatureDbEntity implements Serializable {
         pojo.date = date_update != null ? date_update.getTime() : null;
         if (geo != null) {
             Coordinate[] arrC = geo.getCoordinates();
-            ArrayList<org.kloudgis.pojo.Coordinate> arrCPojo = new ArrayList(arrC.length);
+            ArrayList<org.kloudgis.core.pojo.Coordinate> arrCPojo = new ArrayList(arrC.length);
             for (Coordinate c : arrC) {
-                arrCPojo.add(new org.kloudgis.pojo.Coordinate(c.x, c.y));
+                arrCPojo.add(new org.kloudgis.core.pojo.Coordinate(c.x, c.y));
             }
             pojo.coords = arrCPojo;
             pojo.geo_type = geo.getGeometryType();
             if (arrC.length > 1) {
                 Point ptC = geo.getCentroid();
                 if (ptC != null) {
-                    pojo.centroid = new org.kloudgis.pojo.Coordinate(ptC.getX(), ptC.getY());
+                    pojo.centroid = new org.kloudgis.core.pojo.Coordinate(ptC.getX(), ptC.getY());
                 }
 
             }

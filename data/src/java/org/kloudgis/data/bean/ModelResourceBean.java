@@ -16,13 +16,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
-import org.kloudgis.AuthorizationFactory;
+import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.data.pojo.AttrType;
 import org.kloudgis.data.pojo.LoadFeatureType;
 import org.kloudgis.data.store.AttrTypeDbEntity;
 import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
-import org.kloudgis.persistence.PersistenceManager;
+import org.kloudgis.data.persistence.PersistenceManager;
 
 /**
  *

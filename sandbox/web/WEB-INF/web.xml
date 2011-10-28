@@ -4,7 +4,7 @@
         <servlet-name>ServletAdaptor</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <load-on-startup>1</load-on-startup>
-    </servlet>  
+    </servlet>
     <servlet-mapping>
         <servlet-name>ServletAdaptor</servlet-name>
         <url-pattern>/*</url-pattern>
@@ -16,6 +16,6 @@
         </session-timeout>
     </session-config>
     <listener>
-        <listener-class>org.kloudgis.ContextListener</listener-class>
+        <listener-class>org.kloudgis.sandbox.ContextListener</listener-class>
     </listener>
 </web-app>

@@ -5,7 +5,7 @@
 package org.kloudgis.data.pojo;
 
 import java.util.List;
-import org.kloudgis.pojo.Coordinate;
+import org.kloudgis.core.pojo.Coordinate;
 
 /**
  *
