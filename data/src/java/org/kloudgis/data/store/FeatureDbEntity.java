@@ -63,6 +63,9 @@ public class FeatureDbEntity implements Serializable {
     @Index(name = "angle")
     private Double angle;
     @Column
+    @Index(name = "angle_label")
+    private Double angle_label;
+    @Column
     private String title_attr;
     //extras
     @Index(name = "feature_ind1_index")
@@ -161,6 +164,7 @@ public class FeatureDbEntity implements Serializable {
         this.fid = pojo.fid;
         this.featuretype = pojo.ft;
         this.angle = pojo.angle;
+        this.angle_label = pojo.angle_label;
         this.geo_type = pojo.geo_type;
         if (this.geo_type != null) {
             try {

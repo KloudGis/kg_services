@@ -32,7 +32,7 @@ import org.kloudgis.map.KGConfig;
  */
 public class WmsProxy extends HttpServlet {
 
-    public static final String ENCRES = "responseEncoding";
+    public static final String ENCRES = "responseEncoding";   
    
 
     @Override
@@ -75,9 +75,9 @@ public class WmsProxy extends HttpServlet {
             postMethod.setRequestBody(data);
 
             // Execute the request
-            postMethod.setFollowRedirects(false);
-            HttpClient httpClient = new HttpClient();
+            postMethod.setFollowRedirects(false);       
 
+            HttpClient httpClient = new HttpClient();
             int status = httpClient.executeMethod(postMethod);
             response.setStatus(status);
 
@@ -129,17 +129,15 @@ public class WmsProxy extends HttpServlet {
                 OutputStream outputStreamClientResponse = response.getOutputStream();
                 int intNextByte;
 
-                //System.out.print("\nCopying response: ");
-                StringBuilder sb = new StringBuilder();
                 int cnt = 0;
                 while ((intNextByte = bufferedInputStream.read()) != -1) {
                     cnt++;
                     outputStreamClientResponse.write(intNextByte);
                 }
 
-                //System.out.println(" - > BYTE READED: " + cnt);
                 outputStreamClientResponse.flush();
                 outputStreamClientResponse.close();
+                postMethod.releaseConnection();
 
             }
 

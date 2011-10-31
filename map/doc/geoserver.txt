@@ -1,0 +1,6 @@
+desactivate other services then WMS.
+increase the max memory for wms service (default is 65536 K).  Put 165 536 K to render big maps.
+
+
+Known issues
+	The label on the edge of a tile may no render properly or not at all.
