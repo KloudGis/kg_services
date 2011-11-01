@@ -50,6 +50,7 @@ public class ApiResourceBean {
             MemberDbEntity lAccess = AuthorizationFactory.getMember(em, user_id, sandbox, auth_token);
             return Response.ok((lAccess != null) + "").build();
         } catch (Exception ex) {
+            ex.printStackTrace();
             if (em != null) {
                 em.close();
             }

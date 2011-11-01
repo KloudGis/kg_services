@@ -84,6 +84,11 @@ public class DatabaseFactory {
     }
 
     static boolean isValidDb(String dbName) {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
         Map<String, String> map = PersistenceManager.getInstance().getDefaultProperties();
         String user = map.get("user");
         String password = map.get("password");

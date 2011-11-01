@@ -7,6 +7,8 @@ package org.kloudgis.data.persistence;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -36,7 +38,7 @@ public class PersistenceManager {
 
     public void closeEntityManagerFactories() {
         for (EntityManagerFactory emf : mapEMF.values()) {
-            if(emf != null){
+            if (emf != null) {
                 emf.close();
             }
         }
@@ -59,9 +61,9 @@ public class PersistenceManager {
     }
 
     protected synchronized EntityManagerFactory createSandboxManagerFactory(final String key) {
-        Map prop = new HashMap();       
+        Map prop = new HashMap();
         String dbName = key.toLowerCase();
-        if(!DatabaseFactory.isValidDb(dbName)){
+        if (!DatabaseFactory.isValidDb(dbName)) {
             return null;
         }
         String url = KGConfig.getConfiguration().db_url;
@@ -78,36 +80,44 @@ public class PersistenceManager {
                 em.createNativeQuery("CREATE INDEX feature_gist_ix ON features USING gist(geo)").executeUpdate();
                 em.getTransaction().commit();
             } catch (Exception e) {
-                if(em.getTransaction().isActive()){
+                if (em.getTransaction().isActive()) {
                     em.getTransaction().rollback();
                 }
             } finally {
                 em.close();
             }
-            
-            System.out.println("build search index for:" + key);
-            Thread thread = new Thread(new Runnable() {
 
+
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    SearchFactory.buildSearchIndexFor(key);
+                    System.out.println("build search index for:" + key);
+                    Thread thread = new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            SearchFactory.buildSearchIndexFor(key);
+                        }
+                    });
+                    thread.start();
                 }
-            });
-            thread.start();
+            }, 1000);
+
         }
         return emf;
     }
 
     public Map<String, String> getDefaultProperties() {
-        Map<String,String> mapVal = new HashMap();
+        Map<String, String> mapVal = new HashMap();
         mapVal.put("user", KGConfig.getConfiguration().db_user);
         mapVal.put("password", KGConfig.getConfiguration().db_pwd);
         return mapVal;
     }
-    
-    public void closeEntityManagerFactory(String sandboxKey){
+
+    public void closeEntityManagerFactory(String sandboxKey) {
         EntityManagerFactory emf = mapEMF.get(sandboxKey);
-        if(emf != null){
+        if (emf != null) {
             emf.close();
             mapEMF.remove(sandboxKey);
         }
