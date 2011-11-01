@@ -39,8 +39,6 @@ public class Layer {
     public String   name;  
     //relative or complete url to geoserver
     public String   url;
-    //number of tiles render outside the visible area
-    public Integer  buffer;
     public Boolean  visibility;
 
 }

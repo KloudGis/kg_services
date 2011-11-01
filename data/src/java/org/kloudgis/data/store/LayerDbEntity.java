@@ -56,8 +56,6 @@ public class LayerDbEntity implements Serializable {
     @Column(length = 254)
     private String url;
     @Column
-    private Integer buffer;
-    @Column
     private Boolean visibility;
     @Column
     private Boolean selectable;
@@ -90,7 +88,6 @@ public class LayerDbEntity implements Serializable {
         pojo.owner = owner;
         pojo.label = label;
         pojo.url = url;
-        pojo.buffer = buffer;
         pojo.visibility = visibility;
         return pojo;
     }
@@ -102,7 +99,6 @@ public class LayerDbEntity implements Serializable {
       
         this.label = pojo.label;
         this.url = "/api_map/wms";
-        this.buffer = pojo.buffer;
         this.visibility = pojo.visibility;
         
         this.featuretype = pojo.featuretype;
