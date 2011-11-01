@@ -1,5 +1,7 @@
-desactivate other services then WMS.
-increase the max memory for wms service (default is 65536 K).  Put 165 536 K to render big maps.
+- desactivate other services then WMS.
+- increase the max memory for wms service (default is 65536 K).  Put 165 536 K to render big maps.
+
+- do not use the integrated GWC service.  Issues with it. Geoserver 2.1.2.  Use the standalone geowebcache version 1.3 + (1.2.6 have an issue with REST api)
 
 
 Known issues
