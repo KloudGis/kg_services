@@ -6,5 +6,8 @@
     "geoserver_url" : "http://localhost:8090/geoserver",
     "geoserver_user" : "admin",
     "geoserver_pwd" : "geoserver", 
+    "gwc_url" : "http://localhost:8080/geowebcache",
+    "gwc_user" : "geowebcache",
+    "gwc_pwd" : "secured", 
     "kloudgis_folder" : "/kloudgis_files"   
 }

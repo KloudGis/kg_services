@@ -14,6 +14,9 @@ public class Configuration {
     public String geoserver_url;
     public String geoserver_user;
     public String geoserver_pwd;
+    public String gwc_url;
+    public String gwc_user;
+    public String gwc_pwd;
     public String kloudgis_folder;
 
 }

@@ -33,5 +33,9 @@ public class KGConfig {
     public static Credentials getGeoserverCredentials(){
         return new UsernamePasswordCredentials(config.geoserver_user, config.geoserver_pwd);
     }
+
+    public static Credentials getGwcCredentials() {
+        return new UsernamePasswordCredentials(config.gwc_user, config.gwc_pwd);
+    }
     
 }

@@ -39,7 +39,7 @@ public class WmsProxy extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String server = KGConfig.getConfiguration().geoserver_url,sandbox = null;
+        String server = KGConfig.getConfiguration().gwc_url,sandbox = null;
         try {
             sandbox = getHttpParam(org.kloudgis.map.SecurityManager.KG_SANDBOX, request);
             String auth_token = getAuthToken(request);
@@ -51,13 +51,7 @@ public class WmsProxy extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-            String url = "/gwc/service/wms";
-            String noGWC = getHttpParam("no_gwc", request);
-            if(noGWC != null && noGWC.equals("true")){
-                url = "/wms";
-            }
-            PostMethod postMethod = new PostMethod(server + url);
-
+            PostMethod postMethod = new PostMethod(server + "/service/wms");
             Enumeration paramNames = request.getParameterNames();
             List<NameValuePair> nvp = new ArrayList<NameValuePair>();
             while (paramNames.hasMoreElements()) {

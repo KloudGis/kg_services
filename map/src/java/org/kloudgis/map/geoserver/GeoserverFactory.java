@@ -289,4 +289,59 @@ public abstract class GeoserverFactory {
             throw new GeoserverException(iResponse, strBody);
         }
     }
+
+    public static void gwcLayer(String gwc_url, String geoServerUrl, String layerName, Credentials crd) throws IOException {
+        PutMethod put = new PutMethod(gwc_url + "/rest/layers/" + layerName.toLowerCase() + ".xml");
+        
+        StringBuilder strXML = new StringBuilder();
+        
+        strXML.append("<wmsLayer>");
+        strXML.append("<name>");
+        strXML.append(layerName.toLowerCase());
+        strXML.append("</name>");
+        strXML.append("<wmsUrl>");
+        strXML.append("<keyword>");
+        strXML.append(geoServerUrl + "/wms");
+        strXML.append("</keyword>");
+        strXML.append("</wmsUrl>");
+        strXML.append("<metaWidthHeight>");
+        strXML.append("<int>");
+        strXML.append(3);
+        strXML.append("</int>");
+        strXML.append("<int>");
+        strXML.append(3);
+        strXML.append("</int>");
+        strXML.append("</metaWidthHeight>");
+        strXML.append("<backendTimeout>");
+        strXML.append("120");
+        strXML.append("</backendTimeout>");
+        strXML.append("<enabled>");
+        strXML.append("true");
+        strXML.append("</enabled>");
+        strXML.append("<gutter>");
+        strXML.append("0");
+        strXML.append("</gutter>");
+        strXML.append("<concurrency>");
+        strXML.append("32");
+        strXML.append("</concurrency>");
+        strXML.append("</wmsLayer>");
+        
+        StringRequestEntity entity = new StringRequestEntity(strXML.toString(), "application/xml", "UTF-8");
+        put.setRequestEntity(entity);
+        HttpClient htc = new HttpClient();
+        htc.getState().setCredentials(AuthScope.ANY, crd);
+        int iResponse = htc.executeMethod(put);
+        String strBody = put.getResponseBodyAsString(1500);
+        put.releaseConnection();
+        if(strBody != null && strBody.contains("already exists")){
+            PostMethod post = new PostMethod(gwc_url + "/rest/layers/" + layerName.toLowerCase() + ".xml");
+            post.setRequestEntity(entity);
+            iResponse = htc.executeMethod(post);
+            strBody = post.getResponseBodyAsString(1500);
+            post.releaseConnection();
+        }       
+        if (iResponse != HttpStatus.SC_OK) {
+            throw new GeoserverException(iResponse, "GWC Exception:" + strBody);
+        }
+    }
 }

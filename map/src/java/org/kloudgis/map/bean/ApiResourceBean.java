@@ -116,7 +116,8 @@ public class ApiResourceBean {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
         }
         try {
-            GeoserverFactory.addGroupLayer(KGConfig.getConfiguration().geoserver_url, workspaceName, layNames,  KGConfig.getGeoserverCredentials());         
+            GeoserverFactory.addGroupLayer(KGConfig.getConfiguration().geoserver_url, workspaceName, layNames,  KGConfig.getGeoserverCredentials());      
+            GeoserverFactory.gwcLayer(KGConfig.getConfiguration().gwc_url, KGConfig.getConfiguration().geoserver_url, workspaceName, KGConfig.getGwcCredentials());
             return Response.ok().build();
         } catch (Exception ex) {
             return Response.serverError().entity("Geoserver: " + ex.getMessage()).build();
