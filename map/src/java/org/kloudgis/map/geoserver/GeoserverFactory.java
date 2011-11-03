@@ -5,7 +5,6 @@ package org.kloudgis.map.geoserver;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.kloudgis.map.KGConfig;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -145,18 +143,18 @@ public abstract class GeoserverFactory {
         int iResponse = htc.executeMethod(post);
         String strBody = post.getResponseBodyAsString(1500);
         if (iResponse != HttpStatus.SC_CREATED) {
-            if(strBody.endsWith("already exists.")){
+            if (strBody.endsWith("already exists.")) {
                 PutMethod put = new PutMethod(geoserver_url + "/rest/layergroups/" + workspaceName);
                 put.setRequestEntity(new StringRequestEntity(strLay.toString(), "application/xml", "UTF-8"));
                 iResponse = htc.executeMethod(post);
-                if(iResponse != HttpStatus.SC_OK){
+                if (iResponse != HttpStatus.SC_OK) {
                     strBody = put.getResponseBodyAsString(1500);
                     throw new GeoserverException(iResponse, strBody);
                 }
-            }else{
+            } else {
                 throw new GeoserverException(iResponse, strBody);
             }
-        }       
+        }
     }
 
     public static ArrayList<String> getStores(String strGeoserverURL, String strWorkspace, Credentials crd) throws IOException {
@@ -292,9 +290,9 @@ public abstract class GeoserverFactory {
 
     public static void gwcLayer(String gwc_url, String geoServerUrl, String layerName, Credentials crd) throws IOException {
         PutMethod put = new PutMethod(gwc_url + "/rest/layers/" + layerName.toLowerCase() + ".xml");
-        
+
         StringBuilder strXML = new StringBuilder();
-        
+
         strXML.append("<wmsLayer>");
         strXML.append("<name>");
         strXML.append(layerName.toLowerCase());
@@ -325,7 +323,7 @@ public abstract class GeoserverFactory {
         strXML.append("32");
         strXML.append("</concurrency>");
         strXML.append("</wmsLayer>");
-        
+
         StringRequestEntity entity = new StringRequestEntity(strXML.toString(), "application/xml", "UTF-8");
         put.setRequestEntity(entity);
         HttpClient htc = new HttpClient();
@@ -333,15 +331,72 @@ public abstract class GeoserverFactory {
         int iResponse = htc.executeMethod(put);
         String strBody = put.getResponseBodyAsString(1500);
         put.releaseConnection();
-        if(strBody != null && strBody.contains("already exists")){
+        if (strBody != null && strBody.contains("already exists")) {
             PostMethod post = new PostMethod(gwc_url + "/rest/layers/" + layerName.toLowerCase() + ".xml");
             post.setRequestEntity(entity);
             iResponse = htc.executeMethod(post);
             strBody = post.getResponseBodyAsString(1500);
             post.releaseConnection();
-        }       
+            //truncate all
+            gwcSeedReq(gwc_url, layerName, "truncate", 1, 18, null, crd);
+        }
         if (iResponse != HttpStatus.SC_OK) {
             throw new GeoserverException(iResponse, "GWC Exception:" + strBody);
         }
+    }
+
+    /**
+     * 
+     * @param gwc_url
+     * @param layerName
+     * @param type      truncate, seed or reseed
+     * @param zoomStart 
+     * @param zoomStop
+     * @param bounds    optional, 4 doubles minx, miny, maxx, maxy in srs 900913
+     * @param crd
+     * @throws IOException 
+     */
+    public static void gwcSeedReq(String gwc_url, String layerName, String type, int zoomStart, int zoomStop, double[] bounds, Credentials crd) throws IOException {
+        StringBuilder strXML = new StringBuilder();
+        strXML.append("<seedRequest>");
+        strXML.append("<name>");
+        strXML.append(layerName.toLowerCase());
+        strXML.append("</name>");
+        strXML.append("<srs><number>900913</number></srs>");
+        if(bounds != null){
+            strXML.append("<bounds>");
+            strXML.append("<coords>");
+            for(int i=0; i < 4; i++){
+                strXML.append("<double>"); 
+                strXML.append(bounds[i]);
+                strXML.append("</double>");
+            }
+            strXML.append("</coords>");
+            strXML.append("</bounds>");
+        }       
+        strXML.append("<zoomStart>");
+        strXML.append(zoomStart);
+        strXML.append("</zoomStart>");
+        strXML.append("<zoomStop>");
+        strXML.append(zoomStop);
+        strXML.append("</zoomStop>");
+        strXML.append("<format>image/png</format>");
+        strXML.append("<type>");
+        strXML.append(type);
+        strXML.append("</type>");
+        strXML.append("<threadCount>1</threadCount>");
+        strXML.append("</seedRequest>");
+        StringRequestEntity entity = new StringRequestEntity(strXML.toString(), "application/xml", "UTF-8");
+        HttpClient htc = new HttpClient();
+        htc.getState().setCredentials(AuthScope.ANY, crd);
+        PostMethod post = new PostMethod(gwc_url + "/rest/seed/" + layerName.toLowerCase() + ".xml");
+        post.setRequestEntity(entity);
+        int iResponse = htc.executeMethod(post);
+        String strBody = post.getResponseBodyAsString(1500);
+        post.releaseConnection();
+        if (iResponse != HttpStatus.SC_OK) {
+            throw new GeoserverException(iResponse, "GWC Exception:" + strBody);
+        }
+
     }
 }
