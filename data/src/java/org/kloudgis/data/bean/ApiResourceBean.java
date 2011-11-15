@@ -35,6 +35,34 @@ import org.kloudgis.core.pojo.SignupUser;
 @Produces({"application/json"})
 public class ApiResourceBean {
 
+    
+    @Path("membership")
+    @GET
+    public Response getMemberByUserId(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("user_id") Long user_id) throws NotFoundException {
+        if (api_key == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key is mandatory.").build();
+        }
+        if (!api_key.equals(KGConfig.getConfiguration().api_key)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Api Key doesn't match.").build();
+        }
+        HibernateEntityManager em = null;
+        try {
+            em = PersistenceManager.getInstance().getEntityManager(sandbox);
+            MemberDbEntity lAccess = AuthorizationFactory.getMember(em, user_id, sandbox, auth_token);
+            if(lAccess != null){
+                return Response.ok(lAccess.toPojo()).build();
+            }else{
+                return Response.serverError().entity("member not found").build();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            if (em != null) {
+                em.close();
+            }
+            return Response.serverError().entity(ex.getMessage()).build();
+        }
+    }
+    
     @Path("map_access")
     @GET
     public Response hasMapAccess(@HeaderParam(value = "X-Kloudgis-Api-Key") String api_key, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("user_id") Long user_id) throws NotFoundException {

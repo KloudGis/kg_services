@@ -41,12 +41,20 @@ import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.jersey.Broadcastable;
 
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response.Status;
 import org.atmosphere.jersey.SuspendResponse;
+import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.notification.EventsLogger;
+import org.kloudgis.notification.KGConfig;
 
 /**
  * Simple PubSub resource that demonstrate many functionality supported by
@@ -60,7 +68,6 @@ public class MessageResourceBean {
     @PreDestroy
     public void destroy() {
     }
-    
     /**
      * Inject a {@link Broadcaster} based on @Path
      */
@@ -70,102 +77,49 @@ public class MessageResourceBean {
     String topic_str;
 
     @GET
-    public SuspendResponse<String> subscribe() {
-        return new SuspendResponse.SuspendResponseBuilder<String>()
-                .broadcaster(topic)
-                .outputComments(true)
-                .addListener(new EventsLogger())
-                .build();
+    public SuspendResponse<String> subscribe(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+        if (securityCheck(auth_token, req)) {
+            return new SuspendResponse.SuspendResponseBuilder<String>().broadcaster(topic).outputComments(true).addListener(new EventsLogger()).build();
+        }
+        throw new WebApplicationException(Status.UNAUTHORIZED);
     }
-    
-    @GET
-    @Path("{tst2}")
-    public SuspendResponse<String> subscribe2() {
-        return new SuspendResponse.SuspendResponseBuilder<String>()
-                .broadcaster(topic)
-                .outputComments(true)
-                .addListener(new EventsLogger())
-                .build();
-    }
-    
+
     @POST
     @Broadcast
-    public Broadcastable publishMessage(String message) {
-        return broadcast(message);
+    public Broadcastable publishMessage(String message, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+        if (securityCheck(auth_token, req)) {
+            return broadcast(message);
+        }
+        throw new WebApplicationException(Status.UNAUTHORIZED);
     }
 
-    
-    @POST
-    @Path("resume")
-    @Broadcast(resumeOnBroadcast = true)
-    public Broadcastable publishResume() {
-        return broadcast("");
-    }
-
-  
-    Broadcastable broadcast(String content) {
+    private Broadcastable broadcast(String content) {
         try {
             return new Broadcastable(content, "", topic);
         } catch (Exception ex) {
         }
-        return new Broadcastable("***error", topic);
+        return null;
+    }
+
+    /**  resume kills the other streaming connections... DONT USE
+    @POST
+    @Path("resume")
+    @Broadcast(resumeOnBroadcast = true)
+    public Broadcastable publishResume() {
+    return broadcast("");
     }
     
-     /*
-    private void readConfig(ServletContext context) {
-        if (configuration == null) {
-            InputStream in = context.getResourceAsStream("/META-INF/configuration.json");
-            try {
-                configuration = mapper.readValue(in, Configuration.class);
-                System.out.println(configuration);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    private boolean securityCheck(String auth_token, HttpServletRequest request, ServletContext context) {
+     **/
+    private boolean securityCheck(String auth_token, HttpServletRequest request) {
         HttpSession session = request.getSession(true);
-        Long time = Calendar.getInstance().getTimeInMillis();
-        Number timeout = (Number) session.getAttribute(KG_TIMEOUT);
-        if (auth_token != null && timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 60000L) > time)) {
-            //ok
-            System.out.println("Auth token still valid, " + (time - timeout.longValue()) / 1000 + " sec.");
-            return true;
-        } else {
-            System.out.println("Revalidate Auth token");
-            boolean valid = authenticate(auth_token, context);
-            if (valid) {
-                session.setAttribute(KG_TIMEOUT, Calendar.getInstance().getTimeInMillis());
+        try {
+            Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+            if (user_id != null) {
+                String membership = ApiFactory.getMembership(session, auth_token, KGConfig.getConfiguration().data_url + "/membership?sandbox=" + topic_str + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
+                return membership != null;
             }
-            return valid;
-        }
-    }
-
-    private boolean authenticate(String auth_token, ServletContext context) {
-        return true;
-        readConfig(context);
-        if (configuration != null && auth_token != null) {
-
-            if (httpClient == null) {
-                httpClient = new HttpClient();
-            }
-            String url = (String) configuration.auth_url + "/public/notification_check?sandbox=" + topic_str;
-            GetMethod getUsr = new GetMethod(url);
-            getUsr.addRequestHeader("Cookie", "security-Kloudgis.org=" + auth_token);
-            try {
-                int status = httpClient.executeMethod(getUsr);
-                if (status == 200) {
-                    String response = getUsr.getResponseBodyAsString(100);
-                    if (response.equals("Notification-Access-Granted")) {
-                        return true;
-                    }
-                }
-            } catch (IOException ex) {
-                getUsr.releaseConnection();
-            }
+        } catch (Exception e) {
         }
         return false;
     }
-*/
 }

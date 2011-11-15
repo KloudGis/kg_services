@@ -292,6 +292,6 @@ public class SandboxResourceBean {
         if (key.equalsIgnoreCase("postgres") || key.equalsIgnoreCase("postgis") || key.equalsIgnoreCase("kg_auth") || key.equalsIgnoreCase("kg_sandbox") || key.equalsIgnoreCase("test")) {
             return key + "_usr_sandbox";
         }
-        return key;
+        return key.toLowerCase();
     }
 }

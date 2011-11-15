@@ -1,0 +1,7 @@
+TOMCAT SERVER SETUP:
+
+to work well with atmosphere follow this wiki:
+https://github.com/Atmosphere/atmosphere/wiki/Setting-up-Atmosphere-in-Netbeans-using-Tomcat
+
+
+Setup the JVM:
