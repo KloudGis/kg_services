@@ -26,6 +26,8 @@ public class SearchFactory {
         buildIndex(NoteDbEntity.class, sandbox);
         System.out.println("Indexing Features...");
         buildIndex(FeatureDbEntity.class, sandbox);
+        
+        System.out.println("Indexing Done...");
     }
     
     private static void buildIndex(Class clazz, String sandbox){
