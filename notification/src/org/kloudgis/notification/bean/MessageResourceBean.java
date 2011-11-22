@@ -51,6 +51,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.BroadcasterFactory;
+import org.atmosphere.cpr.DefaultBroadcaster;
 import org.atmosphere.jersey.SuspendResponse;
 import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.notification.EventsLogger;
@@ -62,24 +65,28 @@ import org.kloudgis.notification.KGConfig;
  *
  * @author Jeanfrancois Arcand
  */
-@Path("/{topic}")
+@Path("/{sandboxKey}/{topic}")
 public class MessageResourceBean {
 
     @PreDestroy
     public void destroy() {
     }
-    /**
-     * Inject a {@link Broadcaster} based on @Path
-     */
+    
+    private @PathParam("sandboxKey")
+    String sandboxKey;
+
     private @PathParam("topic")
-    Broadcaster topic;
-    private @PathParam("topic")
-    String topic_str;
+    String topic;
+    
+    private String buildBroadcasterId(){
+        return sandboxKey + "_" + topic;
+    }
 
     @GET
     public SuspendResponse<String> subscribe(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+        Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(DefaultBroadcaster.class, buildBroadcasterId(), true);
         if (securityCheck(auth_token, req)) {
-            return new SuspendResponse.SuspendResponseBuilder<String>().broadcaster(topic).outputComments(true).addListener(new EventsLogger()).build();
+            return new SuspendResponse.SuspendResponseBuilder<String>().broadcaster(broadcaster).outputComments(true).addListener(new EventsLogger()).build();
         }
         throw new WebApplicationException(Status.UNAUTHORIZED);
     }
@@ -87,18 +94,15 @@ public class MessageResourceBean {
     @POST
     @Broadcast
     public Broadcastable publishMessage(String message, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
-        if (securityCheck(auth_token, req)) {
-            return broadcast(message);
+        Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(DefaultBroadcaster.class, buildBroadcasterId(), false);
+        if(broadcaster == null){
+            //no listeners
+            throw new WebApplicationException(Status.NOT_MODIFIED);
+        }
+        if (securityCheck(auth_token, req)) {            
+            return new Broadcastable(message, "", broadcaster);
         }
         throw new WebApplicationException(Status.UNAUTHORIZED);
-    }
-
-    private Broadcastable broadcast(String content) {
-        try {
-            return new Broadcastable(content, "", topic);
-        } catch (Exception ex) {
-        }
-        return null;
     }
 
     /**  resume kills the other streaming connections... DONT USE
@@ -115,7 +119,7 @@ public class MessageResourceBean {
         try {
             Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
             if (user_id != null) {
-                String membership = ApiFactory.getMembership(session, auth_token, KGConfig.getConfiguration().data_url + "/membership?sandbox=" + topic_str + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
+                String membership = ApiFactory.getMembership(session, auth_token, KGConfig.getConfiguration().data_url + "/membership?sandbox=" + sandboxKey + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
                 return membership != null;
             }
         } catch (Exception e) {
