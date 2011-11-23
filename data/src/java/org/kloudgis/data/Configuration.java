@@ -15,5 +15,6 @@ public class Configuration {
     public String db_url;
     public String db_user;
     public String db_pwd;
+    public String notification_url;
 
 }

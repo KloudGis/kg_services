@@ -13,7 +13,7 @@
  * with Echosphere Technologies, Inc.
  *
  */
-package org.kloudgis.data;
+package org.kloudgis.core.utils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;

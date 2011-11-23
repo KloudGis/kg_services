@@ -9,6 +9,8 @@
     <class>org.kloudgis.data.store.AttrTypeDbEntity</class>
     <class>org.kloudgis.data.store.FeatureTypeDbEntity</class>
     <class>org.kloudgis.data.store.NoteCommentDbEntity</class>
+    <class>org.kloudgis.data.store.TransactionAttributeDbEntity</class>
+    <class>org.kloudgis.data.store.TransactionDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>

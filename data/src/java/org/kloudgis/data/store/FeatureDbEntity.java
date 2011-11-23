@@ -25,7 +25,7 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
-import org.kloudgis.data.GeometryFactory;
+import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.pojo.LoadFeature;
 

@@ -42,7 +42,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.data.AuthorizationFactory;
-import org.kloudgis.data.GeometryFactory;
+import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Cluster;
 import org.kloudgis.data.pojo.Note;
 import org.kloudgis.data.store.MemberDbEntity;

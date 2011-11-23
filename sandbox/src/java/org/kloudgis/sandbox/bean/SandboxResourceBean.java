@@ -186,6 +186,8 @@ public class SandboxResourceBean {
                 entity.setUniqueKey(sandbox.key);
                 entity.setOwnerId(id);
                 entity.setDateCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                entity.setCentre(sandbox.lon, sandbox.lat);
+                entity.setZoom(sandbox.zoom);
                 em.persist(entity);
 
                 ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/workspace", KGConfig.getConfiguration().api_key, sandbox.key);

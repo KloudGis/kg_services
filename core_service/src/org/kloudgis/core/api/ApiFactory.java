@@ -18,10 +18,10 @@ import org.kloudgis.core.pojo.SignupUser;
  */
 public class ApiFactory {
 
-    private static final String SESSION_USER_ID = "!!kg_user_id!!";
+    private static final String SESSION_USER = "!!kg_user!!";
     private static final String SESSION_SANDBOX_OWNER = "!!kg_user_sandbox_owner_id!!";
     private static final String SESSION_MEMBERSHIP = "!!kg_user_membership!!";
-    private static final String SESSION_TIMEOUT_USERID = "!!kg_timeout_user_id!!";
+    private static final String SESSION_TIMEOUT_USER = "!!kg_timeout_user!!";
     private static final String SESSION_TIMEOUT_SANDBOX_OWNER = "!!kg_timeout_sandbox_owner!!";
     private static final String SESSION_TIMEOUT_MEMBERSHIP = "!!kg_timeout_membership!!";
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -72,27 +72,36 @@ public class ApiFactory {
         }
         return null;
     }
-
+    
     public static Long getUserId(HttpSession session, String auth_token, String auth_url, String api_key) throws IOException {
-        Long user_id = (Long) session.getAttribute(SESSION_USER_ID);
-        Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT_USERID);
+        SignupUser user = getUser(session, auth_token, auth_url, api_key);
+        if(user != null){
+            return user.id;
+        }
+        return null;
+    }
+
+    public static SignupUser getUser(HttpSession session, String auth_token, String auth_url, String api_key) throws IOException {
+        SignupUser user = (SignupUser) session.getAttribute(SESSION_USER);
+        Long timeout = (Long) session.getAttribute(SESSION_TIMEOUT_USER);
         Long time = Calendar.getInstance().getTimeInMillis();
         //30 sec timeout
         if (timeout != null && (timeout.longValue() < time) && ((timeout.longValue() + 30000L) > time)) {
             //ok
         } else {
-            user_id = null;
+            user = null;
         }
-        if (user_id == null) {
+        if (user == null) {
             String[] body = ApiFactory.apiGet(auth_token, auth_url + "/connected_user", api_key);
             if (body != null && body[0].length() > 0 && body[1].equals("200")) {
-                user_id = mapper.readValue(body[0], SignupUser.class).id;
-                session.setAttribute(SESSION_USER_ID, user_id);
-                session.setAttribute(SESSION_TIMEOUT_USERID, time);
+                user = mapper.readValue(body[0], SignupUser.class);
+                session.setAttribute(SESSION_USER, user);
+                session.setAttribute(SESSION_TIMEOUT_USER, time);
             }
         }
-        return user_id;
+        return user;
     }
+    
 
     public static Long getSandboxOwner(HttpSession session, String auth_token, String url, String api_key) throws IOException {
         Long sandbox_owner = (Long) session.getAttribute(SESSION_SANDBOX_OWNER);

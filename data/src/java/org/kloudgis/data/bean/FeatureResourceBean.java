@@ -41,7 +41,7 @@ import org.apache.lucene.util.Version;
 import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.data.AuthorizationFactory;
-import org.kloudgis.data.GeometryFactory;
+import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.pojo.LoadFeature;
 import org.kloudgis.data.pojo.SearchCategory;

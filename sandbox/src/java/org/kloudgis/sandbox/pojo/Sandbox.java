@@ -14,5 +14,9 @@ public class Sandbox {
     public String key;
     public Long owner;
     public Long date;
+    //initial location
+    public Double lat;
+    public Double lon;
+    public Integer zoom;
     
 }
