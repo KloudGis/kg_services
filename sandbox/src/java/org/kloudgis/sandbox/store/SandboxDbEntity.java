@@ -63,7 +63,7 @@ public class SandboxDbEntity implements Serializable {
         pojo.date = dateCreation != null ? dateCreation.getTime() : null;
         if (geo != null) {
             pojo.lon = geo.getCoordinate().x;
-            pojo.lat = geo.getCoordinate().x;
+            pojo.lat = geo.getCoordinate().y;
         }
         pojo.zoom = zoom;
         return pojo;
