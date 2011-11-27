@@ -5,6 +5,7 @@
 package org.kloudgis.data.bean;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import javassist.NotFoundException;
@@ -40,7 +41,7 @@ public class MemberResourceBean {
 
     @GET
     @Path("logged_member")
-    public Response getFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) throws NotFoundException {
+    public Response getLoggedMember(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             HttpSession session = req.getSession(true);
@@ -86,6 +87,16 @@ public class MemberResourceBean {
             } catch (IOException ex) {
             }
             if (bOwner) {
+                //100 millions
+                long block_size = 100000000;
+                long startIdBlock;
+                Number retMax = (Number) em.createNativeQuery("select max(seq_id_max) from members;").getSingleResult();
+                if(retMax == null || retMax.longValue() == 0){
+                    //2 Billion + 1
+                    startIdBlock = 2000000001L;
+                }else{
+                    startIdBlock = retMax.longValue() + 1;
+                }
                 em.getTransaction().begin();
                 List<Long> lstSucess = new ArrayList();
                 ObjectMapper mapper = new ObjectMapper();
@@ -102,6 +113,9 @@ public class MemberResourceBean {
                                 member.setUserId(u.id);
                                 member.setDescriptor(u.name);
                                 member.setMembership(membership);
+                                member.setSeqIdMin(startIdBlock);
+                                member.setSeqIdMax(startIdBlock + block_size);
+                                startIdBlock += block_size + 1;
                                 em.persist(member);
                             }
                             lstSucess.add(u.id);

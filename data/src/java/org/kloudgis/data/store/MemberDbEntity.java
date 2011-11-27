@@ -36,6 +36,10 @@ public class MemberDbEntity implements Serializable {
     @Index (name="access_index")
     @Column
     private String access_type;
+    @Column
+    private Long seq_id_min;
+    @Column
+    private Long seq_id_max;
     
     public Long getId(){
         return id;
@@ -55,6 +59,8 @@ public class MemberDbEntity implements Serializable {
         pojo.user_id = user_id;
         pojo.user_descriptor = user_descriptor;
         pojo.access_type = access_type;
+        pojo.seq_id_min = seq_id_min;
+        pojo.seq_id_max = seq_id_max;
         return pojo;
     }
 
@@ -68,5 +74,33 @@ public class MemberDbEntity implements Serializable {
 
     public void setMembership(String membership) {
         this.access_type = membership;
+    }
+
+    /**
+     * @return the seq_id_min
+     */
+    public Long getSeqIdMin() {
+        return seq_id_min;
+    }
+
+    /**
+     * @param seq_id_min the seq_id_min to set
+     */
+    public void setSeqIdMin(Long seq_id_min) {
+        this.seq_id_min = seq_id_min;
+    }
+
+    /**
+     * @return the seq_id_max
+     */
+    public Long getSeqIdMax() {
+        return seq_id_max;
+    }
+
+    /**
+     * @param seq_id_max the seq_id_max to set
+     */
+    public void setSeqIdMax(Long seq_id_max) {
+        this.seq_id_max = seq_id_max;
     }
 }

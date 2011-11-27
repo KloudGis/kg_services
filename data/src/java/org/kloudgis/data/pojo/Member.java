@@ -14,4 +14,6 @@ public class Member {
     public String access_type;
     public String user_descriptor;
     public Long user_id;
+    public Long seq_id_min;
+    public Long seq_id_max;
 }

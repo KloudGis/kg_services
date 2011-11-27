@@ -36,6 +36,8 @@ public class TransactionDbEntity implements Serializable {
     @Column
     private Long user_id;
     @Column
+    private Long trx_id;
+    @Column
     private Long parent_trx_id;
     @Column
     private Long feature_id;
@@ -60,6 +62,7 @@ public class TransactionDbEntity implements Serializable {
         Transaction pojo = new Transaction();
         pojo.web_id = id;
         pojo.user_id = this.user_id;
+        pojo.trx_id = this.trx_id;
         pojo.parent_trx_id = this.parent_trx_id;
         pojo.feature_id = this.feature_id;
         pojo.time = this.create_time;
@@ -79,6 +82,7 @@ public class TransactionDbEntity implements Serializable {
 
     public void fromPojo(Transaction trx, EntityManager em, boolean bCreateJoin) {
         this.user_id = trx.user_id;
+        this.trx_id = trx.trx_id;
         this.parent_trx_id = trx.parent_trx_id;
         this.feature_id = trx.feature_id;
         this.create_time = trx.time;

@@ -157,6 +157,9 @@ public class ApiResourceBean {
                 member.setUserId(user.id);
                 member.setDescriptor(user.name);
                 member.setMembership("owner");
+                //1 billion + 1 to 2 billion
+                member.setSeqIdMin(1000000001L);
+                member.setSeqIdMax(2000000000L);
                 em.persist(member);
                 em.getTransaction().commit();
                 em.close();
