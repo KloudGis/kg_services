@@ -9,15 +9,14 @@ import com.vividsolutions.jts.geom.Point;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
@@ -26,6 +25,8 @@ import org.hibernate.search.annotations.IndexedEmbedded;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.core.pojo.Coordinate;
 import org.kloudgis.data.pojo.Note;
+import org.kloudgis.web_space.pojo.Transaction;
+import org.kloudgis.web_space.pojo.TransactionAttribute;
 
 /**
  *
@@ -36,9 +37,7 @@ import org.kloudgis.data.pojo.Note;
 @Indexed
 public class NoteDbEntity implements Serializable {
 
-    @SequenceGenerator(name = "note_seq_gen", sequenceName = "note_seq")
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "note_seq_gen")
     private Long id;
     @Column
     @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
@@ -79,7 +78,7 @@ public class NoteDbEntity implements Serializable {
         pojo.date = date_create == null ? null : date_create.getTime();
         if (this.comments != null) {
             List<Long> lstComments = new ArrayList();
-            for(NoteCommentDbEntity comment: comments){
+            for (NoteCommentDbEntity comment : comments) {
                 lstComments.add(comment.getId());
             }
             pojo.comments = lstComments;
@@ -117,5 +116,50 @@ public class NoteDbEntity implements Serializable {
 
     public Long getAuthor() {
         return author;
+    }
+
+    public void fromTransaction(Transaction trx) {
+        for (TransactionAttribute ta : trx.details) {
+            if (ta.attribute.equals("id")) {
+                this.id = trx.feature_id;
+            } else if (ta.attribute.equals("title")) {
+                this.title = ta.modified_value;
+            } else if (ta.attribute.equals("descr")) {
+                this.description = ta.modified_value;
+            } else if (ta.attribute.equals("author")) {
+                this.author_descriptor = ta.modified_value;
+                this.author = trx.user_id;
+            } else if (ta.attribute.equals("date_create")) {
+                try {
+                    this.date_create = Timestamp.valueOf(ta.modified_value);
+                } catch (Exception e) {
+                    this.date_create = null;
+                }
+            } else if (ta.attribute.equals("lon_lat")) {
+                try {
+                    this.geo = GeometryFactory.readWKT(ta.modified_value);
+                } catch (Exception ex) {
+                    this.geo = null;
+                }
+            }
+        }
+    }
+
+    public Transaction toTransaction(int iType) {
+        Transaction trx = new Transaction();
+        trx.trx_type = iType;
+        trx.source = "WEB";
+        trx.feature_id = id;
+        trx.featuretype = "sys_note";
+        trx.time = new Timestamp(Calendar.getInstance().getTimeInMillis());
+        TransactionAttribute ta1 = new TransactionAttribute("id", null, id + "");
+        TransactionAttribute ta2 = new TransactionAttribute("title", null, title);
+        TransactionAttribute ta3 = new TransactionAttribute("descr", null, description);
+        TransactionAttribute ta4 = new TransactionAttribute("author", null, author_descriptor);
+        TransactionAttribute ta5 = new TransactionAttribute("date_create", null, date_create + "");
+        TransactionAttribute ta6 = new TransactionAttribute("lon_lat", null, geo != null ? geo.toText() : null);
+        ArrayList<TransactionAttribute> arrlTa = new ArrayList(Arrays.asList(new TransactionAttribute[]{ta1, ta2, ta3, ta4, ta5, ta6}));
+        trx.details = arrlTa;
+        return trx;
     }
 }

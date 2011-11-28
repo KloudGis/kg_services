@@ -13,11 +13,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.kloudgis.web_space.pojo.Transaction;
 import org.kloudgis.web_space.pojo.TransactionAttribute;
@@ -29,14 +26,10 @@ import org.kloudgis.web_space.pojo.TransactionAttribute;
 @Table(name = "transactions")
 public class TransactionDbEntity implements Serializable {
 
-    @SequenceGenerator(name = "trx_seq_gen", sequenceName = "trx_seq")
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "trx_seq_gen")
     private Long id;
     @Column
     private Long user_id;
-    @Column
-    private Long trx_id;
     @Column
     private Long parent_trx_id;
     @Column
@@ -58,11 +51,26 @@ public class TransactionDbEntity implements Serializable {
         return id;
     }
 
+    public void setId(Long id){
+        this.id = id;
+    }
+    
+    public void setUserId(Long id) {
+        this.user_id = id;
+    }
+    
+    public void setAuthor(String author) {
+        this.author = author;
+    }  
+    
+    public void setParentTrx(Long parent){
+        this.parent_trx_id = parent;
+    }
+    
     public Transaction toPojo() {
         Transaction pojo = new Transaction();
-        pojo.web_id = id;
         pojo.user_id = this.user_id;
-        pojo.trx_id = this.trx_id;
+        pojo.trx_id = this.id;
         pojo.parent_trx_id = this.parent_trx_id;
         pojo.feature_id = this.feature_id;
         pojo.time = this.create_time;
@@ -82,7 +90,7 @@ public class TransactionDbEntity implements Serializable {
 
     public void fromPojo(Transaction trx, EntityManager em, boolean bCreateJoin) {
         this.user_id = trx.user_id;
-        this.trx_id = trx.trx_id;
+        this.id = trx.trx_id;
         this.parent_trx_id = trx.parent_trx_id;
         this.feature_id = trx.feature_id;
         this.create_time = trx.time;

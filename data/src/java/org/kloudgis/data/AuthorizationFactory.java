@@ -4,9 +4,9 @@
  */
 package org.kloudgis.data;
 
-import com.sun.jersey.api.NotFoundException;
 import java.io.IOException;
 import java.util.List;
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpSession;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
@@ -36,7 +36,7 @@ public class AuthorizationFactory {
             }
             return null;
         } else {
-            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+            throw new EntityNotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
     }
 

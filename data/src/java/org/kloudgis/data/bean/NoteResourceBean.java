@@ -41,6 +41,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernatespatial.criterion.SpatialRestrictions;
+import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Cluster;
@@ -49,6 +50,11 @@ import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.data.persistence.PersistenceManager;
 import org.kloudgis.core.pojo.Records;
+import org.kloudgis.core.pojo.SignupUser;
+import org.kloudgis.data.KGConfig;
+import org.kloudgis.data.NotificationFactory;
+import org.kloudgis.data.store.NoteSequence;
+import org.kloudgis.data.store.TransactionDbEntity;
 
 /**
  *
@@ -114,7 +120,7 @@ public class NoteResourceBean {
                         em.getTransaction().commit();
                         em.close();
                         return Response.ok(pojo).build();
-                    }else{
+                    } else {
                         throw new EntityNotFoundException("Not found:" + fId);
                     }
                 } catch (Exception e) {
@@ -155,10 +161,10 @@ public class NoteResourceBean {
                             em.getTransaction().commit();
                             em.close();
                             return Response.noContent().build();
-                        }else{
+                        } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
                         }
-                    }else{
+                    } else {
                         throw new EntityNotFoundException("Not found:" + fId);
                     }
                 } catch (Exception e) {
@@ -195,9 +201,16 @@ public class NoteResourceBean {
                 note.setAuthor(lMember.getUserId());
                 note.setAuthorDescriptor(lMember.getUserDescriptor());
                 note.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                note.setId(NoteSequence.next(em));
                 try {
                     em.persist(note);
+                    SignupUser user = ApiFactory.getUser(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                    TransactionDbEntity entity = TransactionFactory.createTransaction(em, note.toTransaction(1), false);
+                    entity.setUserId(user.id);
+                    entity.setAuthor(lMember.getUserDescriptor());
+                    entity.setParentTrx(-1L);
                     em.getTransaction().commit();
+                    NotificationFactory.postTransaction(user.user, sandbox, auth_token, entity.toPojo());
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();

@@ -24,6 +24,7 @@ public class SecurityResourceBean {
     @Path("login")
     @POST
     public Response login(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) {
+        org.kloudgis.map.SecurityManager.getInstance().logout(req);
         if(org.kloudgis.map.SecurityManager.getInstance().login(req, auth_token, sandbox)){
             return Response.ok().build();
         }
