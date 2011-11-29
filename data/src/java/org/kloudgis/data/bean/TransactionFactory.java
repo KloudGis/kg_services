@@ -18,10 +18,8 @@ class TransactionFactory {
 
     static TransactionDbEntity createTransaction(HibernateEntityManager em, Transaction trx, boolean updateFeature) {
         TransactionDbEntity entity = new TransactionDbEntity();
+        entity.setId(TransactionSequence.next(em));
         entity.fromPojo(trx, em, true);
-        if(entity.getId() == null){
-            entity.setId(TransactionSequence.next(em));
-        }
         em.persist(entity);
         if (updateFeature) {
             updateFeature(trx, em);
