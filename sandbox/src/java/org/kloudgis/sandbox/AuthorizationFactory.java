@@ -5,7 +5,8 @@
 package org.kloudgis.sandbox;
 
 import java.io.IOException;
-import javax.servlet.http.HttpSession;
+import javax.servlet.ServletContext;
+import javax.ws.rs.core.Context;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.sandbox.store.SandboxDbEntity;
@@ -17,8 +18,8 @@ import org.kloudgis.core.api.ApiFactory;
  */
 public class AuthorizationFactory {
 
-    public static Long getUserId(HttpSession session, String auth_token) throws IOException {
-        Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+    public static Long getUserId(@Context ServletContext sContext, String auth_token) throws IOException {
+        Long user_id = ApiFactory.getUserId(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
         return user_id;
     }
 

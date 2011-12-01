@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
@@ -47,13 +48,12 @@ import org.kloudgis.core.pojo.Records;
 public class LayerResourceBean {
 
     @GET
-    public Response getLayers(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) {
+    public Response getLayers(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -79,13 +79,12 @@ public class LayerResourceBean {
 
     @GET
     @Path("{layerId}")
-    public Response getLayer(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @PathParam("layerId") Long layerId) {
+    public Response getLayer(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @PathParam("layerId") Long layerId) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -110,13 +109,12 @@ public class LayerResourceBean {
     }
 
     @POST
-    public Response addLayer(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadLayer pojo) {
+    public Response addLayer(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadLayer pojo) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -124,7 +122,7 @@ public class LayerResourceBean {
             boolean bOwner = false;
             try {
                 if (lMember != null) {
-                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox);
+                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox);
                 }
             } catch (IOException ex) {
             }
@@ -174,13 +172,12 @@ public class LayerResourceBean {
 
     @POST
     @Path("group_layers")
-    public Response groupLayers(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) {
+    public Response groupLayers(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -188,7 +185,7 @@ public class LayerResourceBean {
             boolean bOwner = false;
             try {
                 if (lMember != null) {
-                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox);
+                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox);
                 }
             } catch (IOException ex) {
             }

@@ -4,11 +4,8 @@
  */
 package org.kloudgis.auth.admin.bean;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 /**
@@ -26,12 +23,7 @@ public class SecurityResourceBean {
      */
     @Path("logout")
     @POST
-    public Response logout(@Context HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-
+    public Response logout() {
         return Response.ok().build();
     }
 

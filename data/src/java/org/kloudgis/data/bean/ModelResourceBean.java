@@ -6,7 +6,7 @@ package org.kloudgis.data.bean;
 
 import java.io.IOException;
 import javassist.NotFoundException;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -34,13 +34,12 @@ public class ModelResourceBean {
 
     @POST
     @Path("featuretype")
-    public Response addFeaturetype(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadFeatureType pojo) throws NotFoundException {
+    public Response addFeaturetype(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadFeatureType pojo) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -48,7 +47,7 @@ public class ModelResourceBean {
             boolean bOwner = false;
             try {
                 if (lMember != null) {
-                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox);
+                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox);
                 }
             } catch (IOException ex) {
             }

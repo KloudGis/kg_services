@@ -6,9 +6,7 @@ package org.kloudgis.data.bean;
 
 import com.sun.jersey.api.NotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -39,13 +37,12 @@ import org.kloudgis.web_space.pojo.Transaction;
 public class TransactionResourceBean {
 
     @POST
-    public Response postTransaction(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Transaction trx) {
+    public Response postTransaction(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Transaction trx) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -57,7 +54,7 @@ public class TransactionResourceBean {
                 em.close();            
                 String user;
                 try {
-                    SignupUser su = ApiFactory.getUser(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                    SignupUser su = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
                     user = su.user;
                 } catch (IOException ex) {
                     user = "?";

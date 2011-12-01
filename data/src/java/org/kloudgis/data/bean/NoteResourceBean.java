@@ -24,8 +24,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -66,13 +65,12 @@ public class NoteResourceBean {
 
     @GET
     @Path("{fId}")
-    public Response getFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
+    public Response getFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -96,13 +94,12 @@ public class NoteResourceBean {
 
     @PUT
     @Path("{fId}")
-    public Response updateFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox, Note in_note) {
+    public Response updateFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox, Note in_note) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -140,13 +137,12 @@ public class NoteResourceBean {
 
     @DELETE
     @Path("{fId}")
-    public Response deleteFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
+    public Response deleteFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") Long fId, @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -155,7 +151,7 @@ public class NoteResourceBean {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
-                        if (note.getAuthor() == null || note.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)) {
+                        if (note.getAuthor() == null || note.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
                             em.getTransaction().begin();
                             em.remove(note);
                             em.getTransaction().commit();
@@ -183,13 +179,12 @@ public class NoteResourceBean {
     }
 
     @POST
-    public Response addFeature(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Note in_note) {
+    public Response addFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Note in_note) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -204,7 +199,7 @@ public class NoteResourceBean {
                 note.setId(NoteSequence.next(em));
                 try {
                     em.persist(note);
-                    SignupUser user = ApiFactory.getUser(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                    SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
                     TransactionDbEntity entity = TransactionFactory.createTransaction(em, note.toTransaction(1), false);
                     entity.setUserId(user.id);
                     entity.setAuthor(lMember.getUserDescriptor());
@@ -231,7 +226,7 @@ public class NoteResourceBean {
 
     @GET
     @Path("clusters")
-    public Response getNoteClusters(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token,
+    public Response getNoteClusters(@Context ServletContext servlet, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token,
             @QueryParam("sw_lat") Double swlat,
             @QueryParam("sw_lon") Double swlon,
             @QueryParam("ne_lat") Double nelat,
@@ -240,10 +235,10 @@ public class NoteResourceBean {
             @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
+            
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(servlet, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();

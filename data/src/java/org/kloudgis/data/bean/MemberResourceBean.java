@@ -5,10 +5,10 @@
 package org.kloudgis.data.bean;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import javassist.NotFoundException;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
@@ -41,13 +41,12 @@ public class MemberResourceBean {
 
     @GET
     @Path("logged_member")
-    public Response getLoggedMember(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) throws NotFoundException {
+    public Response getLoggedMember(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -66,15 +65,14 @@ public class MemberResourceBean {
 
     @POST
     @Path("multiple_email/{membership}")
-    public Response addMembers(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token,
+    public Response addMembers(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token,
             @PathParam("membership") String membership, List<String> lstEmail, @QueryParam("sandbox") String sandbox) throws NotFoundException {
 
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -82,7 +80,7 @@ public class MemberResourceBean {
             boolean bOwner = false;
             try {
                 if (lMember != null) {
-                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox);
+                    bOwner = AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox);
                 }
             } catch (IOException ex) {
             }

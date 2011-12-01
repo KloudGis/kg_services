@@ -43,7 +43,7 @@ public class WmsProxy extends HttpServlet {
         try {
             sandbox = getHttpParam(org.kloudgis.map.SecurityManager.KG_SANDBOX, request);
             String auth_token = getAuthToken(request);
-            boolean bAccess = org.kloudgis.map.SecurityManager.getInstance().login(request, auth_token, sandbox);
+            boolean bAccess = org.kloudgis.map.SecurityManager.getInstance().login(getServletContext(), auth_token, sandbox);
             if (server == null) {
                 throw new IllegalArgumentException("missing server");
             }
@@ -170,15 +170,12 @@ public class WmsProxy extends HttpServlet {
     }
 
     private String getAuthToken(HttpServletRequest request) {
-        Cookie[] arrC = request.getCookies();
-        if (arrC != null) {
-            for (Cookie cookie : arrC) {
-                if (cookie.getName().equals("C-Kloudgis-Authentication")) {
-                    return cookie.getValue();
-                }
-            }
+        String val =  request.getHeader("X-Kloudgis-Authentication");
+        if(val != null && val.length() > 0){
+            return val;
+        }else{
+            return getHttpParam("auth_token", request);
         }
-        return request.getHeader("X-Kloudgis-Authentication");
     }
 
     /** 

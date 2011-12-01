@@ -17,14 +17,11 @@ package org.kloudgis.auth.admin.bean;
 import java.util.Calendar;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.kloudgis.auth.AuthorizationManager;
 import org.kloudgis.auth.LoginFactory;
@@ -50,7 +47,7 @@ public class LoginResourceBean {
      * @return  the auth token if successful
      */
     @POST   
-    public Response login(@Context HttpServletRequest req, Credential crd) {
+    public Response login(Credential crd) {
         EntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
         UserDbEntity u = authenticate(em, crd.user, crd.pwd);
         if (u != null) {
@@ -68,9 +65,6 @@ public class LoginResourceBean {
             }else{
                 hashed_token = crd.pwd;
             }
-            //create a session
-            HttpSession session = req.getSession(true);
-            session.setAttribute("timeout", Calendar.getInstance().getTimeInMillis());
             LoginResponse response = new LoginResponse();
             response.token = hashed_token;
             response.user = u.toSimpleUser();

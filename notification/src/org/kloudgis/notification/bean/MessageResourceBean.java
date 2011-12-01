@@ -41,6 +41,7 @@ import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.jersey.Broadcastable;
 
 import javax.annotation.PreDestroy;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
@@ -84,9 +85,9 @@ public class MessageResourceBean {
     }
 
     @GET
-    public SuspendResponse<String> subscribe(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+    public SuspendResponse<String> subscribe(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context ServletContext sContext) {
         System.out.println("Subscribe resquest");    
-        if (securityCheck(auth_token, req)) {
+        if (securityCheck(auth_token, sContext)) {
             return new SuspendResponse.SuspendResponseBuilder<String>().broadcaster(broadcaster).outputComments(true).addListener(new EventsLogger()).build();
         }
         throw new WebApplicationException(Status.UNAUTHORIZED);
@@ -94,13 +95,13 @@ public class MessageResourceBean {
 
     @POST
     @Broadcast
-    public Broadcastable publishMessage(String message, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+    public Broadcastable publishMessage(String message, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context ServletContext sContext) {
         System.out.println("publish message: " + message);
         if(broadcaster == null){
             //no listeners
             throw new WebApplicationException(Status.NOT_MODIFIED);
         }
-        if (securityCheck(auth_token, req)) {            
+        if (securityCheck(auth_token, sContext)) {            
             return new Broadcastable(message, "", broadcaster);
         }
         throw new WebApplicationException(Status.UNAUTHORIZED);
@@ -115,13 +116,12 @@ public class MessageResourceBean {
     }
     
      **/
-    private boolean securityCheck(String auth_token, HttpServletRequest request) {
-        HttpSession session = request.getSession(true);
+    private boolean securityCheck(String auth_token, ServletContext sContext) {
         try {
-            Long user_id = ApiFactory.getUserId(session, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+            Long user_id = ApiFactory.getUserId(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
             if (user_id != null) {
                 System.out.println("securityCheck for user " + user_id);
-                String membership = ApiFactory.getMembership(session, auth_token, KGConfig.getConfiguration().data_url + "/membership?sandbox=" + sandboxKey + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
+                String membership = ApiFactory.getMembership(sContext, auth_token, KGConfig.getConfiguration().data_url + "/membership?sandbox=" + sandboxKey + "&user_id=" + user_id, KGConfig.getConfiguration().api_key);
                 return membership != null;
             }
         } catch (Exception e) {

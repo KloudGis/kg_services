@@ -22,8 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -55,16 +54,14 @@ import org.kloudgis.core.utils.StringTools;
 public class SandboxResourceBean {
 
     @GET
-    public Response getSandboxes(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+    public Response getSandboxes(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context ServletContext sContext) {
         if (auth_token == null) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-
-        HttpSession session = req.getSession(true);
         Long id = null;
         String err = "Invalid token";
         try {
-            id = AuthorizationFactory.getUserId(session, auth_token);
+            id = AuthorizationFactory.getUserId(sContext, auth_token);
         } catch (IOException ex) {
             err = ex.getMessage();
         }
@@ -87,16 +84,15 @@ public class SandboxResourceBean {
 
     @GET
     @Path("{key}/meta")
-    public Response getSandboxMeta(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req, @PathParam("key") String key) {
+    public Response getSandboxMeta(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context ServletContext sContext, @PathParam("key") String key) {
         if (auth_token == null) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        HttpSession session = req.getSession(true);
         Long id = null;
         String err = "Invalid token";
         try {
-            id = AuthorizationFactory.getUserId(session, auth_token);
+            id = AuthorizationFactory.getUserId(sContext, auth_token);
         } catch (IOException ex) {
             err = ex.getMessage();
         }
@@ -116,16 +112,14 @@ public class SandboxResourceBean {
 
     @GET
     @Path("list_names")
-    public Response getSandboxNames(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context HttpServletRequest req) {
+    public Response getSandboxNames(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @Context ServletContext sContext) {
         if (auth_token == null) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-
-        HttpSession session = req.getSession(true);
         Long id = null;
         String err = "Invalid token";
         try {
-            id = AuthorizationFactory.getUserId(session, auth_token);
+            id = AuthorizationFactory.getUserId(sContext, auth_token);
         } catch (IOException ex) {
             err = ex.getMessage();
         }
@@ -148,14 +142,13 @@ public class SandboxResourceBean {
     }
 
     @POST
-    public Response addSandbox(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, Sandbox sandbox, @Context HttpServletRequest req) {
+    public Response addSandbox(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, Sandbox sandbox, @Context ServletContext sContext) {
         if (auth_token == null) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        HttpSession session = req.getSession(true);
         Long id = null;
         try {
-            id = AuthorizationFactory.getUserId(session, auth_token);
+            id = AuthorizationFactory.getUserId(sContext, auth_token);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -236,14 +229,13 @@ public class SandboxResourceBean {
 
     @DELETE
     @Path("{sandboxKey}")
-    public Response deleteSandbox(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("sandboxKey") String sandboxKey, @Context HttpServletRequest req) {
+    public Response deleteSandbox(@HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("sandboxKey") String sandboxKey, @Context ServletContext sContext) {
         if (auth_token == null) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        HttpSession session = req.getSession(true);
         Long id = null;
         try {
-            id = AuthorizationFactory.getUserId(session, auth_token);
+            id = AuthorizationFactory.getUserId(sContext, auth_token);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
@@ -64,14 +65,13 @@ public class FeatureResourceBean {
 
     @GET
     @Path("features_at")
-    public Response getFeaturesAt(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("lon") Double lon, @QueryParam("lat") Double lat,
+    public Response getFeaturesAt(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @QueryParam("lon") Double lon, @QueryParam("lat") Double lat,
             @QueryParam("layers") String layers, @QueryParam("limit") Integer limit, @QueryParam("one_pixel") Double onePixelWorld) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
             } catch (IOException ex) {
                 em.close();
                 return Response.serverError().entity(ex.getMessage()).build();
@@ -132,15 +132,14 @@ public class FeatureResourceBean {
     @GET
     @Path("search")
     @Produces({"application/json"})
-    public Response search(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox) {
+    public Response search(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
             return Response.ok().build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
-        HttpSession session = req.getSession(true);
         MemberDbEntity lMember = null;
         try {
-            lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+            lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
         } catch (IOException ex) {
             em.close();
             return Response.serverError().entity(ex.getMessage()).build();
@@ -193,16 +192,15 @@ public class FeatureResourceBean {
     @GET
     @Path("count_search")
     @Produces({"application/json"})
-    public Response countSearch(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search,
+    public Response countSearch(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search,
             @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
             return Response.ok(new SearchCategory(0, "?", "?", search, 0)).build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
-        HttpSession session = req.getSession(true);
         MemberDbEntity lMember = null;
         try {
-            lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
+            lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
         } catch (IOException ex) {
             em.close();
             return Response.serverError().entity(ex.getMessage()).build();
@@ -297,14 +295,13 @@ public class FeatureResourceBean {
 
     @POST
     @Path("batch_add")
-    public Response addBatchFeatures(@Context HttpServletRequest req, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, List<LoadFeature> features) {
+    public Response addBatchFeatures(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, List<LoadFeature> features) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            HttpSession session = req.getSession(true);
             MemberDbEntity lMember = null;
             try {
-                lMember = AuthorizationFactory.getMember(session, em, sandbox, auth_token);
-                if(lMember != null && !AuthorizationFactory.isSandboxOwner(lMember, session, auth_token, sandbox)){
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
+                if(lMember != null && !AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)){
                     em.close();
                     return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the sandbox owner for: " + sandbox).build();
                 }
