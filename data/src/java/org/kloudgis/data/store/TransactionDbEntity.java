@@ -89,8 +89,10 @@ public class TransactionDbEntity implements Serializable {
     }
 
     public void fromPojo(Transaction trx, EntityManager em, boolean bCreateJoin) {
-        this.user_id = trx.user_id;
-        this.id = trx.trx_id;
+        if(trx.trx_id != null){
+            this.id = trx.trx_id;
+        }
+        this.user_id = trx.user_id;       
         this.parent_trx_id = trx.parent_trx_id;
         this.feature_id = trx.feature_id;
         this.create_time = trx.time;

@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.kloudgis.web_space.pojo.Message;
 import org.kloudgis.web_space.pojo.Transaction;
+import org.kloudgis.web_space.pojo.TransactionSummary;
 
 /**
  *
@@ -44,7 +45,11 @@ public class NotificationFactory {
 
     public static void postTransaction(String user, String sandbox, String auth_token, Transaction trx) {
         try {        
+            //transaction details message
             postNotification(sandbox, "trx", mapper.writeValueAsString(new Message(trx.toMap(), "trx", user)), auth_token);
+            //transaction summary message
+            TransactionSummary trxSumm = new TransactionSummary(trx.featuretype, trx.feature_id);
+            postNotification(sandbox, "general", mapper.writeValueAsString(new Message(trxSumm.toMap(), "trx", user)), auth_token);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
