@@ -4,7 +4,9 @@
  */
 package org.kloudgis.core.api;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletContext;
@@ -18,17 +20,18 @@ public class ContextCleaner {
     private static final String CACHE = "!!servlet-cache-user!!";
     private static final String CACHE_LAST_ACCESS = "!!cache_last_access!!";
 
-    public synchronized Map<String, Object> submitContext(ServletContext context, String auth_token) {
+    public Map<String, Object> submitContext(ServletContext context, String auth_token) {
         Map<String, Map<String, Object>> cache = (Map) context.getAttribute(CACHE);
         if (cache == null) {
-            cache = new HashMap();
+            cache = Collections.synchronizedMap(new HashMap());
             context.setAttribute(CACHE, cache);
         }
         long time = Calendar.getInstance().getTimeInMillis();
-        //15 minutes
-        long maxKeepAlive = 15 * 60 * 1000;
+        //30 minutes
+        long maxKeepAlive = 30L * 60L * 1000L;
         //remove not used cache
-        for (String aToken : cache.keySet()) {
+        ArrayList<String> arrlKeys = new ArrayList(cache.keySet());
+        for (String aToken : arrlKeys) {
             Map<String, Object> properties = cache.get(aToken);
             if (properties != null) {
                 Long last = (Long) properties.get(CACHE_LAST_ACCESS);
@@ -39,7 +42,7 @@ public class ContextCleaner {
         }
         Map<String, Object> prop = cache.get(auth_token);
         if (prop == null) {
-            prop = new HashMap();
+            prop = Collections.synchronizedMap(new HashMap());
             cache.put(auth_token, prop);
         }
 
@@ -47,9 +50,10 @@ public class ContextCleaner {
         return prop;
     }
 
-    public synchronized void clean(ServletContext context, String auth_token) {
+    public void clean(ServletContext context, String auth_token) {
         Map<String, Map<String, Object>> cache = (Map) context.getAttribute(CACHE);
         if(cache != null && auth_token != null){
+            System.out.println("cleaning cache for: "  +auth_token);
             cache.remove(auth_token);
         }
     }
