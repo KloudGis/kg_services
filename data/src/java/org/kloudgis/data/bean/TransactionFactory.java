@@ -5,10 +5,10 @@
 package org.kloudgis.data.bean;
 
 import org.hibernate.ejb.HibernateEntityManager;
+import org.kloudgis.core.pojo.space.Transaction;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.data.store.TransactionDbEntity;
 import org.kloudgis.data.store.TransactionSequence;
-import org.kloudgis.web_space.pojo.Transaction;
 
 /**
  *

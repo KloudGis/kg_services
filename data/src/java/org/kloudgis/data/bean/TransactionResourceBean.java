@@ -7,7 +7,6 @@ package org.kloudgis.data.bean;
 import com.sun.jersey.api.NotFoundException;
 import java.io.IOException;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -20,13 +19,13 @@ import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.core.pojo.SignupUser;
+import org.kloudgis.core.pojo.space.Transaction;
 import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.data.KGConfig;
 import org.kloudgis.data.NotificationFactory;
 import org.kloudgis.data.persistence.PersistenceManager;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.TransactionDbEntity;
-import org.kloudgis.web_space.pojo.Transaction;
 
 /**
  *

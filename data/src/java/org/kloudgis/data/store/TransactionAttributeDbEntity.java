@@ -14,7 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.kloudgis.web_space.pojo.TransactionAttribute;
+import org.kloudgis.core.pojo.space.TransactionAttribute;
 
 /**
  *

@@ -16,8 +16,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.kloudgis.web_space.pojo.Transaction;
-import org.kloudgis.web_space.pojo.TransactionAttribute;
+import org.kloudgis.core.pojo.space.Transaction;
+import org.kloudgis.core.pojo.space.TransactionAttribute;
 /**
  *
  * @author jeanfelixg

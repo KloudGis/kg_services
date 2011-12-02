@@ -11,10 +11,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.kloudgis.web_space.pojo.Message;
-import org.kloudgis.web_space.pojo.Transaction;
-import org.kloudgis.web_space.pojo.TransactionSummary;
-
+import org.kloudgis.core.pojo.space.Message;
+import org.kloudgis.core.pojo.space.Transaction;
+import org.kloudgis.core.pojo.space.TransactionSummary;
 /**
  *
  * @author jeanfelixg

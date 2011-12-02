@@ -24,9 +24,10 @@ import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.core.pojo.Coordinate;
+import org.kloudgis.core.pojo.space.Transaction;
+import org.kloudgis.core.pojo.space.TransactionAttribute;
 import org.kloudgis.data.pojo.Note;
-import org.kloudgis.web_space.pojo.Transaction;
-import org.kloudgis.web_space.pojo.TransactionAttribute;
+
 
 /**
  *
