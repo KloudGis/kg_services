@@ -12,8 +12,6 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.kloudgis.core.pojo.space.Message;
-import org.kloudgis.core.pojo.space.Transaction;
-import org.kloudgis.core.pojo.space.TransactionSummary;
 /**
  *
  * @author jeanfelixg
@@ -42,13 +40,10 @@ public class NotificationFactory {
         
     }
 
-    public static void postTransaction(String user, String sandbox, String auth_token, Transaction trx) {
+    public static void postMessage(String sandbox, String auth_token, Message message) {
         try {        
-            //transaction details message
-            postNotification(sandbox, "trx", mapper.writeValueAsString(new Message(trx.toMap(), "trx", user)), auth_token);
             //transaction summary message
-            TransactionSummary trxSumm = new TransactionSummary(trx.ft_id, trx.feature_id, trx.trx_type);
-            postNotification(sandbox, "general", mapper.writeValueAsString(new Message(trxSumm.toMap(), "trx", user)), auth_token);
+            postNotification(sandbox, "general", mapper.writeValueAsString(message), auth_token);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

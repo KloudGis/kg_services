@@ -32,7 +32,7 @@ import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteCommentDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.data.persistence.PersistenceManager;
-import org.kloudgis.data.store.TransactionDbEntity;
+import org.kloudgis.data.pojo.CommentMessage;
 
 /**
  *
@@ -93,14 +93,10 @@ public class CommentResourceBean {
                         em.getTransaction().begin();
                         comment.fromPojo(in_comment);
                         NoteComment pojo = comment.toPojo();
-                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                        TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, comment.toTransaction(2), false);
-                        entityTrx.setUserId(user.id);
-                        entityTrx.setAuthor(lMember.getUserDescriptor());
-                        entityTrx.setParentTrx(-1L);
                         em.getTransaction().commit();
                         em.close();
-                        NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
+                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                        NotificationFactory.postMessage(sandbox, auth_token, new CommentMessage(pojo.guid, pojo.note, CommentMessage.UPDATE, user.user));
                         return Response.ok(pojo).build();
                     } else {
                         em.close();
@@ -139,15 +135,12 @@ public class CommentResourceBean {
                     if (note_comment != null) {
                         if (note_comment.getAuthor() == null || note_comment.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
                             em.getTransaction().begin();
+                            NoteComment pojo = note_comment.toPojo();
                             em.remove(note_comment);
-                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                            TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note_comment.toTransaction(3), false);
-                            entityTrx.setUserId(user.id);
-                            entityTrx.setAuthor(lMember.getUserDescriptor());
-                            entityTrx.setParentTrx(-1L);
                             em.getTransaction().commit();
                             em.close();
-                            NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
+                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            NotificationFactory.postMessage(sandbox, auth_token, new CommentMessage(pojo.guid, pojo.note, CommentMessage.DELETE, user.user));
                             return Response.noContent().build();
                         } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the comment nor the sandbox owner: " + sandbox).build();
@@ -195,25 +188,23 @@ public class CommentResourceBean {
                 note_comment.setAuthorDescriptor(lMember.getUserDescriptor());
                 note_comment.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 note_comment.setNote(note);
+                NoteComment pojo = null;
                 try {
                     em.persist(note_comment);
-                    SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                    TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note_comment.toTransaction(1), false);
-                    entityTrx.setUserId(user.id);
-                    entityTrx.setAuthor(lMember.getUserDescriptor());
-                    entityTrx.setParentTrx(-1L);
                     em.getTransaction().commit();
-                    NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
+                    em.close();
+                    pojo = note_comment.toPojo();
+                    SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                    NotificationFactory.postMessage(sandbox, auth_token, new CommentMessage(pojo.guid, pojo.note, CommentMessage.ADD, user.user));                
+                    return Response.ok(pojo).build();
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
                     }
                     em.close();
                     return Response.serverError().entity(e.getMessage()).build();
-                }
-                NoteComment pojo = note_comment.toPojo();
-                em.close();
-                return Response.ok(pojo).build();
+                }              
+                
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }

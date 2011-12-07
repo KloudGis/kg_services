@@ -52,8 +52,8 @@ import org.kloudgis.core.pojo.Records;
 import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.data.KGConfig;
 import org.kloudgis.data.NotificationFactory;
+import org.kloudgis.data.pojo.NoteMessage;
 import org.kloudgis.data.store.NoteSequence;
-import org.kloudgis.data.store.TransactionDbEntity;
 
 /**
  *
@@ -113,15 +113,11 @@ public class NoteResourceBean {
                         }
                         em.getTransaction().begin();
                         note.fromPojo(in_note);
-                        Note pojo = note.toPojo();
-                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                        TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note.toTransaction(2), false);
-                        entityTrx.setUserId(user.id);
-                        entityTrx.setAuthor(lMember.getUserDescriptor());
-                        entityTrx.setParentTrx(-1L);
                         em.getTransaction().commit();
                         em.close();
-                        NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
+                        Note pojo = note.toPojo();
+                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                        NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.UPDATE, user.user));
                         return Response.ok(pojo).build();
                     } else {
                         throw new EntityNotFoundException("Not found:" + fId);
@@ -160,14 +156,10 @@ public class NoteResourceBean {
                         if (note.getAuthor() == null || note.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
                             em.getTransaction().begin();
                             em.remove(note);
-                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                            TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note.toTransaction(3), false);
-                            entityTrx.setUserId(user.id);
-                            entityTrx.setAuthor(lMember.getUserDescriptor());
-                            entityTrx.setParentTrx(-1L);
                             em.getTransaction().commit();
                             em.close();
-                            NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
+                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.DELETE, user.user ));
                             return Response.noContent().build();
                         } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
@@ -211,13 +203,9 @@ public class NoteResourceBean {
                 note.setId(NoteSequence.next(em));
                 try {
                     em.persist(note);
+                    em.getTransaction().commit();                 
                     SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                    TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note.toTransaction(1), false);
-                    entityTrx.setUserId(user.id);
-                    entityTrx.setAuthor(lMember.getUserDescriptor());
-                    entityTrx.setParentTrx(-1L);
-                    em.getTransaction().commit();
-                    NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
+                    NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.ADD, user.user));
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
