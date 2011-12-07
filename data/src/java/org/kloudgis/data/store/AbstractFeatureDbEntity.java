@@ -16,10 +16,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
-import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
 import org.kloudgis.core.utils.GeometryFactory;
@@ -37,9 +35,9 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     //                              SYSTEM Columns
     //**************************************************************************
     //private id - Do not expose it.
-    @SequenceGenerator(name = "system_id_gen", sequenceName = "feature_id_seq")
+    
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "system_id_gen")
+    @GeneratedValue(strategy=GenerationType.AUTO)
     @DocumentId
     private Long system_id;
     //feature id
@@ -259,8 +257,6 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     public Long getFeatureTypeId() {
         return this.ft_id;
     }
-
-    
 
     protected void toPojo(Feature pojo) {
         pojo.fid = this.fid;

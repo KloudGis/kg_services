@@ -53,7 +53,6 @@ import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.data.KGConfig;
 import org.kloudgis.data.NotificationFactory;
 import org.kloudgis.data.pojo.NoteMessage;
-import org.kloudgis.data.store.NoteSequence;
 
 /**
  *
@@ -200,7 +199,6 @@ public class NoteResourceBean {
                 note.setAuthor(lMember.getUserId());
                 note.setAuthorDescriptor(lMember.getUserDescriptor());
                 note.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-                note.setId(NoteSequence.next(em));
                 try {
                     em.persist(note);
                     em.getTransaction().commit();                 

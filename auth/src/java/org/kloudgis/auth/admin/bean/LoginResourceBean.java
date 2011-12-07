@@ -30,7 +30,7 @@ import org.kloudgis.auth.admin.pojo.LoginResponse;
 import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.auth.admin.store.UserDbEntity;
 import org.kloudgis.auth.persistence.PersistenceManager;
-import org.kloudgis.core.pojo.Message;
+import org.kloudgis.core.pojo.SimpleMessage;
 
 /**
  *
@@ -81,7 +81,7 @@ public class LoginResourceBean {
     @Path("ping")
     @GET
     public Response pingServer() {
-        return Response.ok(new Message("ping")).build();
+        return Response.ok(new SimpleMessage("ping")).build();
     }
 
     /**

@@ -8,15 +8,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
 import org.kloudgis.data.pojo.Feature;
 
 /**
@@ -48,6 +51,17 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
     inverseJoinColumns = {
         @JoinColumn(name = "src_feature", referencedColumnName = "system_id")})
     private List<FeatureDbEntity> reverse_joins;
+    //**********************************
+    //  JOIN on feature Comments
+    //**********************************
+    @OneToMany(mappedBy = "feature", cascade = CascadeType.ALL)
+    @IndexedEmbedded
+    private List<FeatureCommentDbEntity> comments;
+    
+    
+    public String getGuid(){
+        return buildGuid(fid,ft_id);
+    }    
 
     public void addJoin(FeatureDbEntity f2) {
         if (joins == null) {

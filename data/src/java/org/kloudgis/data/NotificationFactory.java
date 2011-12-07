@@ -11,7 +11,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.kloudgis.core.pojo.space.Message;
+import org.kloudgis.core.pojo.Message;
 /**
  *
  * @author jeanfelixg

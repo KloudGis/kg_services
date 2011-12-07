@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 import org.kloudgis.auth.LoginFactory;
 import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.auth.admin.store.UserDbEntity;
-import org.kloudgis.core.pojo.Message;
+import org.kloudgis.core.pojo.SimpleMessage;
 
 /**
  *
@@ -30,7 +30,7 @@ public class RegisterResourceBean {
     @Path("test_email")
     @POST 
     public Response testEmail(String email) {
-        Message message = new Message();
+        SimpleMessage message = new SimpleMessage();
         if (email == null || email.length() == 0) {       
             message.content = "_Empty";           
         }else if (!email.contains("@")) {

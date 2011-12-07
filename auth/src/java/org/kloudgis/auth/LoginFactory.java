@@ -10,7 +10,7 @@ import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.auth.admin.store.UserDbEntity;
 import org.kloudgis.auth.admin.store.UserRoleDbEntity;
 import org.kloudgis.auth.persistence.PersistenceManager;
-import org.kloudgis.core.pojo.Message;
+import org.kloudgis.core.pojo.SimpleMessage;
 
 public class LoginFactory {
 
@@ -20,9 +20,9 @@ public class LoginFactory {
      * @param strRole       the role to set the user (admin, user, ...)   
      * @return result message
      */
-    public static Message register(SignupUser user_try, String strRole) {
+    public static SimpleMessage register(SignupUser user_try, String strRole) {
         if (user_try == null || user_try.user == null || !user_try.user.contains("@")) {
-            Message message = new Message();
+            SimpleMessage message = new SimpleMessage();
             message.content = "_rejected_invalid";
             return message;
         } else {
@@ -35,7 +35,7 @@ public class LoginFactory {
             user.setPassword(encryptPassword(user_try.pwd, user.getSalt()));
             user.setActive(false);
             if (!isUnique(user_try.user)) {
-                Message message = new Message();
+                SimpleMessage message = new SimpleMessage();
                 message.content = "_rejected_used";
                 return message;
             } else {
@@ -48,7 +48,7 @@ public class LoginFactory {
                 em.persist(user);
                 em.getTransaction().commit();
                 em.close();
-                Message message = new Message();
+                SimpleMessage message = new SimpleMessage();
                 message.content = "_success";
                 return message;
             }

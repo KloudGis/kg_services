@@ -7,7 +7,7 @@ package org.kloudgis.data.pojo;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import org.kloudgis.core.pojo.space.Message;
+import org.kloudgis.core.pojo.Message;
 
 /**
  *

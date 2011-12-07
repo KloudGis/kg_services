@@ -8,9 +8,9 @@
     <class>org.kloudgis.data.store.AttrTypeDbEntity</class>
     <class>org.kloudgis.data.store.FeatureTypeDbEntity</class>
     <class>org.kloudgis.data.store.NoteCommentDbEntity</class>
-    <class>org.kloudgis.data.store.NoteSequence</class>
     <class>org.kloudgis.data.store.FeatureDbEntity</class>
     <class>org.kloudgis.data.store.FeatureVersionDbEntity</class>
+    <class>org.kloudgis.data.store.FeatureCommentDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>
