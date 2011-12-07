@@ -41,7 +41,7 @@ public class TransactionDbEntity implements Serializable {
     @Column
     private String source;
     @Column
-    private String featuretype;
+    private Long ft_id;
     @Column
     private String author;
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -76,7 +76,7 @@ public class TransactionDbEntity implements Serializable {
         pojo.time = this.create_time;
         pojo.trx_type = this.trx_type;
         pojo.source = this.source;
-        pojo.featuretype = this.featuretype;
+        pojo.ft_id = this.ft_id;
         pojo.author = this.author;
         if (details != null) {
             ArrayList<TransactionAttribute> arrlDetailPojos = new ArrayList();
@@ -98,7 +98,7 @@ public class TransactionDbEntity implements Serializable {
         this.create_time = trx.time;
         this.trx_type = trx.trx_type;
         this.source = trx.source;
-        this.featuretype = trx.featuretype;
+        this.ft_id = trx.ft_id;
         this.author = trx.author;
         if (bCreateJoin) {
             List<TransactionAttributeDbEntity> arrlAt = new ArrayList();

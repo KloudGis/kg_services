@@ -66,7 +66,7 @@ public class LayerDbEntity implements Serializable {
     @Column
     private Integer pixel_tolerance;
     @Column(length = 100)
-    private String featuretype;
+    private Long ft_id;
     @Column(columnDefinition = "TEXT")
     private String jsonFitler;
     @Column(columnDefinition = "TEXT")
@@ -101,7 +101,7 @@ public class LayerDbEntity implements Serializable {
         this.url = "/api_map/wms";
         this.visibility = pojo.visibility;
         
-        this.featuretype = pojo.featuretype;
+        this.ft_id = pojo.ft_id;
         this.jsonFitler = pojo.filter;
         this.sld = pojo.sld;       
         this.can_group = pojo.canGroup == null ? true: pojo.canGroup;
@@ -153,8 +153,8 @@ public class LayerDbEntity implements Serializable {
 
     public Criterion getRestriction() {
         Criterion crit = null;
-        if(featuretype != null){
-            crit = Restrictions.eq("featuretype", featuretype);
+        if(ft_id != null){
+            crit = Restrictions.eq("ft_id", ft_id);
         }
         if (jsonFitler != null) {
             try {

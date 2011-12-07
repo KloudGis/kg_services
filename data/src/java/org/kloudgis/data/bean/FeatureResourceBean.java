@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -44,7 +42,6 @@ import org.hibernatespatial.criterion.SpatialRestrictions;
 import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
-import org.kloudgis.data.pojo.LoadFeature;
 import org.kloudgis.data.pojo.SearchCategory;
 import org.kloudgis.data.store.DistanceOrder;
 import org.kloudgis.data.store.FeatureDbEntity;
@@ -122,9 +119,8 @@ public class FeatureResourceBean {
         criteria.addOrder(new DistanceOrder("geo", point));
         criteria.setMaxResults(limit);
         List result = criteria.list();
-        Map<String, FeatureTypeDbEntity> mapFt = ModelFactory.getFeatureTypes(em);
         for (Object oR : result) {
-            lstF.add(((FeatureDbEntity) oR).toPojo(mapFt));
+            lstF.add(((FeatureDbEntity) oR).toPojo());
         }
         return lstF;
     }
@@ -168,19 +164,10 @@ public class FeatureResourceBean {
                 return Response.serverError().entity("Could'nt build query for: " + search).build();
             }
             List<FeatureDbEntity> lstR = query.getResultList();
-            Map<String, FeatureTypeDbEntity> mapFt = ModelFactory.getFeatureTypes(em);
-            if (cat.equals("_unknown")) {
-                cat = null;
-            }
             for (FeatureDbEntity f : lstR) {
-                if (f.getFeatureType() == null) {
-                    if (cat == null) {
-                        lstPojos.add(f.toPojo(mapFt));
-                    }
-                } else if (cat != null && f.getFeatureType().equals(cat)) {
-                    lstPojos.add(f.toPojo(mapFt));
+                if (f.getFeatureTypeId() != null && f.getFeatureTypeId().toString().equals(cat)) {
+                    lstPojos.add(f.toPojo());
                 }
-
             }
         }
         sem.close();
@@ -195,7 +182,7 @@ public class FeatureResourceBean {
     public Response countSearch(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search,
             @QueryParam("sandbox") String sandbox) {
         if (search == null || search.length() == 0) {
-            return Response.ok(new SearchCategory(0, "?", "?", search, 0)).build();
+            return Response.ok(new SearchCategory("-999", "?", search, 0)).build();
         }
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         MemberDbEntity lMember = null;
@@ -215,31 +202,24 @@ public class FeatureResourceBean {
             sem.close();
             return Response.serverError().entity("Could'nt build query for: " + search).build();
         }
-        Map<String, FeatureTypeDbEntity> model = ModelFactory.getFeatureTypes(em);
-        Map<String, Integer> mapFt = new TreeMap();
+        Map<Long, Integer> mapFt = new TreeMap();
         List<FeatureDbEntity> list = query.getResultList();
-        String unknown = "_unknown";
         for (FeatureDbEntity fea : list) {
-            String ft = fea.getFeatureType();
-            if (ft == null) {
-                ft = unknown;
-            }
-            Integer size = mapFt.get(ft);
+            Long ftId = fea.getFeatureTypeId();
+            Integer size = mapFt.get(ftId);
             if (size == null) {
-                mapFt.put(ft, 1);
+                mapFt.put(ftId, 1);
             } else {
-                mapFt.put(ft, size + 1);
+                mapFt.put(ftId, size + 1);
             }
         }
         Records rec = new Records();
         List<SearchCategory> lstCat = new ArrayList();
-        for (String ft : mapFt.keySet()) {
-            FeatureTypeDbEntity entity = model.get(ft);
-            String label = ft;
-            if (entity != null) {
-                label = entity.getLabel();
-            }
-            SearchCategory cat = new SearchCategory(ft.hashCode(), ft, label, search, mapFt.get(ft));
+        Map<Long, FeatureTypeDbEntity> model = ModelFactory.getFeatureTypes(em);
+        for (Long ftId : mapFt.keySet()) {
+            FeatureTypeDbEntity ftEntity = model.get(ftId);
+            String label = ftEntity != null ? ftEntity.getLabel() : "";
+            SearchCategory cat = new SearchCategory(ftId + "", label, search, mapFt.get(ftId));
             lstCat.add(cat);
         }
         query = buildNoteSearchQuery(sem, search);
@@ -247,7 +227,7 @@ public class FeatureResourceBean {
             int sizeNote = query.getResultSize();
             if (sizeNote > 0) {
                 String key = "_notes_";
-                lstCat.add(new SearchCategory(key.hashCode(), key, "_Notes", search, sizeNote));
+                lstCat.add(new SearchCategory(key, key, search, sizeNote));
             }
         }
         sem.close();
@@ -269,7 +249,20 @@ public class FeatureResourceBean {
     }
 
     protected String[] getSearchFields() {
-        return new String[]{"index1", "index2", "index3", "index4", "index5", "index6", "index7", "index8", "index9", "index10"};
+        ArrayList<String> arrlF = new ArrayList();
+        //text
+        for (int i = 1; i < 26; i++) {
+            arrlF.add("text" + i);
+        }
+        //num
+        for (int i = 1; i < 11; i++) {
+            arrlF.add("num" + i);
+        }
+        //decimal
+        for (int i = 1; i < 11; i++) {
+            arrlF.add("decim" + i);
+        }
+        return arrlF.toArray(new String[arrlF.size()]);
     }
 
     protected FullTextQuery buildNoteSearchQuery(FullTextEntityManager sem, String search) {
@@ -295,13 +288,13 @@ public class FeatureResourceBean {
 
     @POST
     @Path("batch_add")
-    public Response addBatchFeatures(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, List<LoadFeature> features) {
+    public Response addBatchFeatures(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, List<Feature> features) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             MemberDbEntity lMember = null;
             try {
                 lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
-                if(lMember != null && !AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)){
+                if (lMember != null && !AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
                     em.close();
                     return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the sandbox owner for: " + sandbox).build();
                 }
@@ -314,9 +307,9 @@ public class FeatureResourceBean {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
             em.getTransaction().begin();
-            for (LoadFeature pojo : features) {
+            for (Feature pojo : features) {
                 FeatureDbEntity entity = new FeatureDbEntity();
-                entity.fromPojo(pojo);
+                entity.fromPojo(pojo, em);
                 entity.setDateInsert(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 em.persist(entity);
             }

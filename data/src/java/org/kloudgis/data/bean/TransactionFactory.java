@@ -28,7 +28,7 @@ class TransactionFactory {
     }
 
     private static void updateFeature(Transaction trx, HibernateEntityManager em) {
-        if (trx.featuretype.equals("sys_note")) {
+        if (trx.ft_id != null && trx.ft_id == NoteDbEntity.FT_ID) {
             NoteDbEntity entity;
             if (trx.trx_type == 1) {
                 entity = new NoteDbEntity();

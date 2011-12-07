@@ -8,9 +8,12 @@ package org.kloudgis.data.pojo;
  *
  * @author jeanfelixg
  */
-public class AttrType {
+public class Attrtype {
     
-    public String name;
+    public Long guid;
     public String label;
+    public String type;
+    public String attr_ref;
+    public Long featuretype;
     
 }

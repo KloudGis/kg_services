@@ -16,11 +16,11 @@ import org.kloudgis.data.store.FeatureTypeDbEntity;
  */
 public class ModelFactory {
 
-    public static Map<String, FeatureTypeDbEntity> getFeatureTypes(HibernateEntityManager em) {
+    public static Map<Long, FeatureTypeDbEntity> getFeatureTypes(HibernateEntityManager em) {
         List<FeatureTypeDbEntity> arrFts = em.getSession().createCriteria(FeatureTypeDbEntity.class).list();
-        Map<String, FeatureTypeDbEntity> mapFt = new HashMap();
+        Map<Long, FeatureTypeDbEntity> mapFt = new HashMap();
         for(FeatureTypeDbEntity ft : arrFts){
-            mapFt.put(ft.getName(), ft);
+            mapFt.put(ft.getId(), ft);
         }
         return mapFt;
     }

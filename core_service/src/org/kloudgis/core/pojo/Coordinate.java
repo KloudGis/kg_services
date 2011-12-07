@@ -18,4 +18,8 @@ public class Coordinate {
         this.x = x;
         this.y = y;
     }
+    
+    public com.vividsolutions.jts.geom.Coordinate toJTS(){
+        return new com.vividsolutions.jts.geom.Coordinate(x, y);
+    }
 }

@@ -11,9 +11,9 @@ package org.kloudgis.data.pojo;
 public class NoteComment {
     
     public Long     guid;
-    public String   value;   
+    public String   comment;   
     public Long     author;
     public String   author_descriptor;
-    public Long     date;
+    public Long     date_create;
     public Long     note;
 }

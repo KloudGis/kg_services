@@ -13,20 +13,23 @@ import java.util.Map;
  */
 public class TransactionSummary {
     
-    public String featuretype;
+    public Long ft_id;
     public Long feature_id;
+    public int  trx_type;
     
     public TransactionSummary(){}
     
-    public TransactionSummary(String sFt, Long fid){
-        this.featuretype = sFt;
+    public TransactionSummary(Long sFt, Long fid, int trx_t){
+        this.ft_id = sFt;
         this.feature_id = fid;
+        this.trx_type = trx_t;
     }
 
     public Map toMap() {
         Map map = new HashMap();
-        map.put("featuretype", this.featuretype);
+        map.put("ft_id", this.ft_id);
         map.put("feature_id", this.feature_id);
+        map.put("trx_type", this.trx_type);
         return map;
     }
 }

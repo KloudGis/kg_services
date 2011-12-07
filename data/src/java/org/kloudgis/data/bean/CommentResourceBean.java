@@ -10,7 +10,6 @@ import java.util.Calendar;
 import javassist.NotFoundException;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -23,12 +22,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.kloudgis.core.api.ApiFactory;
+import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.data.AuthorizationFactory;
+import org.kloudgis.data.KGConfig;
+import org.kloudgis.data.NotificationFactory;
 import org.kloudgis.data.pojo.NoteComment;
 import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteCommentDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.data.persistence.PersistenceManager;
+import org.kloudgis.data.store.TransactionDbEntity;
 
 /**
  *
@@ -89,8 +93,14 @@ public class CommentResourceBean {
                         em.getTransaction().begin();
                         comment.fromPojo(in_comment);
                         NoteComment pojo = comment.toPojo();
+                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                        TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, comment.toTransaction(2), false);
+                        entityTrx.setUserId(user.id);
+                        entityTrx.setAuthor(lMember.getUserDescriptor());
+                        entityTrx.setParentTrx(-1L);
                         em.getTransaction().commit();
                         em.close();
+                        NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
                         return Response.ok(pojo).build();
                     } else {
                         em.close();
@@ -130,8 +140,14 @@ public class CommentResourceBean {
                         if (note_comment.getAuthor() == null || note_comment.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
                             em.getTransaction().begin();
                             em.remove(note_comment);
+                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note_comment.toTransaction(3), false);
+                            entityTrx.setUserId(user.id);
+                            entityTrx.setAuthor(lMember.getUserDescriptor());
+                            entityTrx.setParentTrx(-1L);
                             em.getTransaction().commit();
                             em.close();
+                            NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
                             return Response.noContent().build();
                         } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the comment nor the sandbox owner: " + sandbox).build();
@@ -181,7 +197,13 @@ public class CommentResourceBean {
                 note_comment.setNote(note);
                 try {
                     em.persist(note_comment);
+                    SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                    TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note_comment.toTransaction(1), false);
+                    entityTrx.setUserId(user.id);
+                    entityTrx.setAuthor(lMember.getUserDescriptor());
+                    entityTrx.setParentTrx(-1L);
                     em.getTransaction().commit();
+                    NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();

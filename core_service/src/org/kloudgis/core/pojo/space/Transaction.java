@@ -19,7 +19,7 @@ public class Transaction {
     public Integer trx_type;
     public String source;
     public List<TransactionAttribute> details;
-    public String featuretype;
+    public Long ft_id;
 
     public Transaction() {
         super();
@@ -30,8 +30,8 @@ public class Transaction {
         StringBuilder buf = new StringBuilder();
         buf.append("id=");
         buf.append(trx_id);
-        buf.append(", ft=");
-        buf.append(featuretype);
+        buf.append(", ft_id=");
+        buf.append(ft_id);
         buf.append(", fid=");
         buf.append(feature_id);
         buf.append(", Details:\n");

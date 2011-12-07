@@ -10,11 +10,9 @@ import java.util.List;
  *
  * @author jeanfelixg
  */
-public class LoadFeatureType {
+public class LoadFeaturetype {
     
-    public String name;
     public String label;
-    
-    public List<AttrType> attrs;
-    
+    public String title_attribute;
+    public List<Attrtype> attrs;
 }

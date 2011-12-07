@@ -16,10 +16,12 @@ public class Note{
     public Long     guid;
     public String   title;   
     public String   description;
+    public Long     date_create;
     public Long     author;
     public String   author_descriptor;
     public Coordinate coordinate;
-    public Long     date;
+    public Long     user_update;
+    public Long     date_update;
     public List<Long> comments;
     
 }

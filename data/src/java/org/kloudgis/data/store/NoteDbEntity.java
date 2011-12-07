@@ -37,6 +37,7 @@ import org.kloudgis.data.pojo.Note;
 @Table(name = "notes")
 @Indexed
 public class NoteDbEntity implements Serializable {
+    public final static long FT_ID = -10L;
 
     @Id
     private Long id;
@@ -49,10 +50,14 @@ public class NoteDbEntity implements Serializable {
     @Column
     private Long author;
     @Column
+    private Long user_update;
+    @Column
     @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
     private String author_descriptor;
     @Column
     private Timestamp date_create;
+    @Column
+    private Timestamp date_update;
     @Column
     @Type(type = "org.hibernatespatial.GeometryUserType")
     private Geometry geo;
@@ -76,7 +81,9 @@ public class NoteDbEntity implements Serializable {
         pojo.description = description;
         pojo.author = author;
         pojo.author_descriptor = author_descriptor;
-        pojo.date = date_create == null ? null : date_create.getTime();
+        pojo.date_create = date_create == null ? null : date_create.getTime();
+        pojo.date_update = date_update == null ? null : date_update.getTime();
+        pojo.user_update = user_update;
         if (this.comments != null) {
             List<Long> lstComments = new ArrayList();
             for (NoteCommentDbEntity comment : comments) {
@@ -92,7 +99,6 @@ public class NoteDbEntity implements Serializable {
         this.title = pojo.title;
         this.description = pojo.description;
         this.geo = GeometryFactory.createPoint(new com.vividsolutions.jts.geom.Coordinate(pojo.coordinate.x, pojo.coordinate.y));
-        this.geo.setSRID(4326);
     }
 
     public Point getGeometry() {
@@ -151,7 +157,7 @@ public class NoteDbEntity implements Serializable {
         trx.trx_type = iType;
         trx.source = "WEB";
         trx.feature_id = id;
-        trx.featuretype = "sys_note";
+        trx.ft_id = FT_ID;
         trx.time = new Timestamp(Calendar.getInstance().getTimeInMillis());
         TransactionAttribute ta1 = new TransactionAttribute("id", null, id + "");
         TransactionAttribute ta2 = new TransactionAttribute("title", null, title);

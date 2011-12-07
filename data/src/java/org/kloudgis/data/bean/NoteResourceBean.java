@@ -114,8 +114,14 @@ public class NoteResourceBean {
                         em.getTransaction().begin();
                         note.fromPojo(in_note);
                         Note pojo = note.toPojo();
+                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                        TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note.toTransaction(2), false);
+                        entityTrx.setUserId(user.id);
+                        entityTrx.setAuthor(lMember.getUserDescriptor());
+                        entityTrx.setParentTrx(-1L);
                         em.getTransaction().commit();
                         em.close();
+                        NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
                         return Response.ok(pojo).build();
                     } else {
                         throw new EntityNotFoundException("Not found:" + fId);
@@ -154,8 +160,14 @@ public class NoteResourceBean {
                         if (note.getAuthor() == null || note.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
                             em.getTransaction().begin();
                             em.remove(note);
+                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note.toTransaction(3), false);
+                            entityTrx.setUserId(user.id);
+                            entityTrx.setAuthor(lMember.getUserDescriptor());
+                            entityTrx.setParentTrx(-1L);
                             em.getTransaction().commit();
                             em.close();
+                            NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
                             return Response.noContent().build();
                         } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
@@ -200,12 +212,12 @@ public class NoteResourceBean {
                 try {
                     em.persist(note);
                     SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                    TransactionDbEntity entity = TransactionFactory.createTransaction(em, note.toTransaction(1), false);
-                    entity.setUserId(user.id);
-                    entity.setAuthor(lMember.getUserDescriptor());
-                    entity.setParentTrx(-1L);
+                    TransactionDbEntity entityTrx = TransactionFactory.createTransaction(em, note.toTransaction(1), false);
+                    entityTrx.setUserId(user.id);
+                    entityTrx.setAuthor(lMember.getUserDescriptor());
+                    entityTrx.setParentTrx(-1L);
                     em.getTransaction().commit();
-                    NotificationFactory.postTransaction(user.user, sandbox, auth_token, entity.toPojo());
+                    NotificationFactory.postTransaction(user.user, sandbox, auth_token, entityTrx.toPojo());
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
@@ -235,7 +247,7 @@ public class NoteResourceBean {
             @QueryParam("sandbox") String sandbox) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
-            
+
             MemberDbEntity lMember = null;
             try {
                 lMember = AuthorizationFactory.getMember(servlet, em, sandbox, auth_token);

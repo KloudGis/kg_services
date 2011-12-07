@@ -14,7 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.kloudgis.data.pojo.AttrType;
+import org.kloudgis.data.pojo.Attrtype;
 
 /**
  *
@@ -29,14 +29,16 @@ public class AttrTypeDbEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "at_seq_gen")
     private Long id;
     @Column
-    private String name;
-    @Column
     private String label;
+    @Column
+    private String type;
+    @Column
+    private String attr_ref;
     @ManyToOne(cascade= CascadeType.ALL)
     private FeatureTypeDbEntity ft;
-
-    public String getName() {
-        return name;
+    
+    public Long getId() {
+        return id;
     }
     
     public String getLabel() {
@@ -46,9 +48,20 @@ public class AttrTypeDbEntity implements Serializable {
     public void setFeaturetype(FeatureTypeDbEntity ft){
         this.ft = ft;
     }
+    
+    public Attrtype toPojo(){
+        Attrtype pojo = new Attrtype();
+        pojo.guid = id;
+        pojo.label = label;
+        pojo.type = type;
+        pojo.attr_ref = attr_ref;
+        pojo.featuretype = ft != null ? ft.getId() : null;
+        return pojo;
+    }
 
-    public void fromPojo(AttrType pojo) {
-        this.name = pojo.name;
-        this.label = pojo.label;
+    public void fromPojo(Attrtype pojo) {      
+       this.label = pojo.label;
+       this.type = pojo.type;
+       this.attr_ref = pojo.attr_ref;
     }
 }

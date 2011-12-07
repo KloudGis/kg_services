@@ -7,7 +7,6 @@ package org.kloudgis.data.bean;
 import java.io.IOException;
 import javassist.NotFoundException;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -17,12 +16,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.data.AuthorizationFactory;
-import org.kloudgis.data.pojo.AttrType;
-import org.kloudgis.data.pojo.LoadFeatureType;
+import org.kloudgis.data.persistence.PersistenceManager;
+import org.kloudgis.data.pojo.Attrtype;
+import org.kloudgis.data.pojo.LoadFeaturetype;
 import org.kloudgis.data.store.AttrTypeDbEntity;
 import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
-import org.kloudgis.data.persistence.PersistenceManager;
 
 /**
  *
@@ -34,7 +33,7 @@ public class ModelResourceBean {
 
     @POST
     @Path("featuretype")
-    public Response addFeaturetype(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadFeatureType pojo) throws NotFoundException {
+    public Response addFeaturetype(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadFeaturetype pojo) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             MemberDbEntity lMember = null;
@@ -53,11 +52,12 @@ public class ModelResourceBean {
             }
             if (bOwner) {
                 em.getTransaction().begin();
-                FeatureTypeDbEntity entity = new FeatureTypeDbEntity();
-                entity.fromLoadPojo(pojo);
+                FeatureTypeDbEntity entity = new FeatureTypeDbEntity();             
+                entity.setLabel(pojo.label);
+                entity.setTitleAttribute(pojo.title_attribute);
                 em.persist(entity);
                 if (pojo.attrs != null) {
-                    for (AttrType atPojo : pojo.attrs) {
+                    for (Attrtype atPojo : pojo.attrs) {
                         AttrTypeDbEntity entityAt = new AttrTypeDbEntity();
                         entityAt.fromPojo(atPojo);
                         entityAt.setFeaturetype(entity);
@@ -66,7 +66,7 @@ public class ModelResourceBean {
                 }
                 em.getTransaction().commit();
                 em.close();
-                return Response.ok().build();
+                return Response.ok(entity.getId()).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
@@ -74,4 +74,5 @@ public class ModelResourceBean {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
     }
+    
 }

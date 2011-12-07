@@ -47,7 +47,7 @@ public class NotificationFactory {
             //transaction details message
             postNotification(sandbox, "trx", mapper.writeValueAsString(new Message(trx.toMap(), "trx", user)), auth_token);
             //transaction summary message
-            TransactionSummary trxSumm = new TransactionSummary(trx.featuretype, trx.feature_id);
+            TransactionSummary trxSumm = new TransactionSummary(trx.ft_id, trx.feature_id, trx.trx_type);
             postNotification(sandbox, "general", mapper.writeValueAsString(new Message(trxSumm.toMap(), "trx", user)), auth_token);
         } catch (IOException ex) {
             ex.printStackTrace();
