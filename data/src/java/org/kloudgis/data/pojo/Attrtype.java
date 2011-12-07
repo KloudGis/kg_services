@@ -4,15 +4,16 @@
  */
 package org.kloudgis.data.pojo;
 
-import java.util.List;
-
 /**
  *
  * @author jeanfelixg
  */
-public class LoadFeaturetypetoto {
+public class Attrtype {
     
+    public Long guid;
     public String label;
-    public String title_attribute;
-    public List<Attrtypetoto> attrs;
+    public String type;
+    public String attr_ref;
+    public Long featuretype;
+    
 }
