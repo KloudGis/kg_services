@@ -17,8 +17,8 @@ import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.data.persistence.PersistenceManager;
-import org.kloudgis.data.pojo.Attrtype;
-import org.kloudgis.data.pojo.LoadFeaturetype;
+import org.kloudgis.data.pojo.Attrtypetoto;
+import org.kloudgis.data.pojo.LoadFeaturetypetoto;
 import org.kloudgis.data.store.AttrTypeDbEntity;
 import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
@@ -33,7 +33,7 @@ public class ModelResourceBean {
 
     @POST
     @Path("featuretype")
-    public Response addFeaturetype(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadFeaturetype pojo) throws NotFoundException {
+    public Response addFeaturetype(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, LoadFeaturetypetoto pojo) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             MemberDbEntity lMember = null;
@@ -57,7 +57,7 @@ public class ModelResourceBean {
                 entity.setTitleAttribute(pojo.title_attribute);
                 em.persist(entity);
                 if (pojo.attrs != null) {
-                    for (Attrtype atPojo : pojo.attrs) {
+                    for (Attrtypetoto atPojo : pojo.attrs) {
                         AttrTypeDbEntity entityAt = new AttrTypeDbEntity();
                         entityAt.fromPojo(atPojo);
                         entityAt.setFeaturetype(entity);

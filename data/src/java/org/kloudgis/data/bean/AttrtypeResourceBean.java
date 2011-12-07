@@ -21,7 +21,7 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.kloudgis.core.pojo.Records;
 import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.data.persistence.PersistenceManager;
-import org.kloudgis.data.pojo.Attrtype;
+import org.kloudgis.data.pojo.Attrtypetoto;
 import org.kloudgis.data.store.AttrTypeDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
 
@@ -44,9 +44,9 @@ public class AttrtypeResourceBean {
             }
             if (lMember != null) {
                 List<AttrTypeDbEntity> lstDb = em.createQuery("from AttrTypeDbEntity", AttrTypeDbEntity.class).getResultList();
-                List<Attrtype> lstFT = new ArrayList(lstDb.size());
+                List<Attrtypetoto> lstFT = new ArrayList(lstDb.size());
                 for (AttrTypeDbEntity fDb : lstDb) {
-                    Attrtype pojo = fDb.toPojo();
+                    Attrtypetoto pojo = fDb.toPojo();
                     lstFT.add(pojo);
                 }
                 em.close();
@@ -76,7 +76,7 @@ public class AttrtypeResourceBean {
             }
             if (lMember != null) {
                 AttrTypeDbEntity ftDb = em.find(AttrTypeDbEntity.class, atId);
-                Attrtype pojo = null;
+                Attrtypetoto pojo = null;
                 if (ftDb != null) {
                     pojo = ftDb.toPojo();
                 } else {
