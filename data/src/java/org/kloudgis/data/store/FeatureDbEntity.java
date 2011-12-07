@@ -4,6 +4,7 @@
  */
 package org.kloudgis.data.store;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import java.io.Serializable;
@@ -425,6 +426,10 @@ public class FeatureDbEntity implements Serializable {
             } catch (ParseException ex) {
                 System.out.println("Couldn't read wkt:" + ex);
             }
+        }
+        //avoid null geo to make geoserver happy
+        if(this.geo == null){
+            this.geo = GeometryFactory.createPoint(new Coordinate(0,0));
         }
         //Joins
         List<String> lstNew = pojo.joins == null ? new ArrayList() : pojo.joins;
