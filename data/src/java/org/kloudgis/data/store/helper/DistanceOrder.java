@@ -1,4 +1,4 @@
-package org.kloudgis.data.store;
+package org.kloudgis.data.store.helper;
 
 import com.vividsolutions.jts.geom.Point;
 import org.hibernate.Criteria;

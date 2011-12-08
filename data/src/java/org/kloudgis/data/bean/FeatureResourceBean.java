@@ -43,7 +43,7 @@ import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
 import org.kloudgis.data.pojo.SearchCategory;
-import org.kloudgis.data.store.DistanceOrder;
+import org.kloudgis.data.store.helper.DistanceOrder;
 import org.kloudgis.data.store.FeatureDbEntity;
 import org.kloudgis.data.store.FeatureTypeDbEntity;
 import org.kloudgis.data.store.LayerDbEntity;

@@ -17,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
@@ -36,8 +37,9 @@ import org.kloudgis.data.pojo.Note;
 @Indexed
 public class NoteDbEntity implements Serializable {
 
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SequenceGenerator(name = "note_seq_gen", sequenceName = "note_seq")
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "note_seq_gen")
     private Long id;
     @Column
     @Field(index = org.hibernate.search.annotations.Index.TOKENIZED)
@@ -111,8 +113,12 @@ public class NoteDbEntity implements Serializable {
         this.author_descriptor = desc;
     }
 
-    public void setDate(Timestamp time) {
+    public void setDateCreate(Timestamp time) {
         this.date_create = time;
+    }
+    
+    public void setDateUpdate(Timestamp time) {
+        this.date_update = time;
     }
 
     public String getTitle() {

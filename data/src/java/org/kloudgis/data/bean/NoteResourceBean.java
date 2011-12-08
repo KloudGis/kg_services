@@ -112,6 +112,7 @@ public class NoteResourceBean {
                         }
                         em.getTransaction().begin();
                         note.fromPojo(in_note);
+                        note.setDateUpdate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                         em.getTransaction().commit();
                         em.close();
                         Note pojo = note.toPojo();
@@ -198,7 +199,7 @@ public class NoteResourceBean {
                 note.fromPojo(in_note);
                 note.setAuthor(lMember.getUserId());
                 note.setAuthorDescriptor(lMember.getUserDescriptor());
-                note.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                note.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 try {
                     em.persist(note);
                     em.getTransaction().commit();                 

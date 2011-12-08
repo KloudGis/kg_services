@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.kloudgis.data.store;
+package org.kloudgis.data.store.helper;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -18,13 +18,13 @@ import org.postgresql.util.Base64;
  *
  * @author jeanfelixg
  */
-public class PictureEntity implements Serializable {
+public class PictureColumn implements Serializable {
 
     private byte[] imageBytes;
     
-    public PictureEntity(){}
+    public PictureColumn(){}
     
-    public PictureEntity(String base64){
+    public PictureColumn(String base64){
         this.setAsBase64(base64);
     }
 

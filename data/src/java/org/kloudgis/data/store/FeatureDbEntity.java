@@ -11,13 +11,20 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 import org.kloudgis.data.pojo.Feature;
@@ -28,9 +35,17 @@ import org.kloudgis.data.pojo.Feature;
  */
 @Entity
 @Table(name = "features")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Indexed
 public class FeatureDbEntity extends AbstractFeatureDbEntity {
 
+    //private id - Do not expose it.
+    @SequenceGenerator(name = "feature_seq_gen", sequenceName = "feature_seq")
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "feature_seq_gen")
+    @DocumentId
+    private Long system_id;
+    
     //**********************************
     //  JOIN on itself
     //**********************************

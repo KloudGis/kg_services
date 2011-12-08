@@ -78,6 +78,7 @@ public class PersistenceManager {
                 em.getTransaction().begin();
                 em.createNativeQuery("CREATE INDEX note_gist_ix ON notes USING gist(geo)").executeUpdate();
                 em.createNativeQuery("CREATE INDEX feature_gist_ix ON features USING gist(geo)").executeUpdate();
+                em.createNativeQuery("CREATE INDEX bookmark_gist_ix ON bookmarks USING gist(center)").executeUpdate();
                 em.getTransaction().commit();
             } catch (Exception e) {
                 if (em.getTransaction().isActive()) {

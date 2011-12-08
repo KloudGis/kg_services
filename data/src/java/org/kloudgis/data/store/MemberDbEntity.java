@@ -5,6 +5,7 @@
 package org.kloudgis.data.store;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -28,6 +29,8 @@ public class MemberDbEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "members_seq_gen")
     private Long id;
     @Index (name="user_index")
+    @Column
+    private Timestamp date_create;
     @Column
     private Long user_id;
     @Index (name="user_descr_index")
@@ -57,6 +60,7 @@ public class MemberDbEntity implements Serializable {
         Member pojo = new Member();
         pojo.guid = id;
         pojo.user_id = user_id;
+        pojo.date_create = (date_create == null) ? null: date_create.getTime();
         pojo.user_descriptor = user_descriptor;
         pojo.access_type = access_type;
         pojo.seq_id_min = seq_id_min;
@@ -74,6 +78,10 @@ public class MemberDbEntity implements Serializable {
 
     public void setMembership(String membership) {
         this.access_type = membership;
+    }
+    
+    public void setDateCreate(Timestamp time){
+        this.date_create = time;
     }
 
     /**

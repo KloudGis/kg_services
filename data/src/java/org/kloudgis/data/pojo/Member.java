@@ -16,4 +16,5 @@ public class Member {
     public Long user_id;
     public Long seq_id_min;
     public Long seq_id_max;
+    public Long date_create;
 }

@@ -4,21 +4,16 @@
  */
 package org.kloudgis.data.store;
 
+import org.kloudgis.data.store.helper.PictureColumn;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
@@ -27,19 +22,12 @@ import org.kloudgis.data.pojo.Feature;
  *
  * @author jeanfelixg
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class AbstractFeatureDbEntity implements Serializable {
 
     //**************************************************************************
     //                              SYSTEM Columns
     //**************************************************************************
-    //private id - Do not expose it.
-    
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    @DocumentId
-    private Long system_id;
     //feature id
     @Column(nullable = false)
     @Index(name = "fid_index")
@@ -241,9 +229,9 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     //  2 binary for pictures 
     //**********************************
     @Column
-    private PictureEntity img1;
+    private PictureColumn img1;
     @Column
-    private PictureEntity img2;
+    private PictureColumn img2;
 
     public void setDateInsert(Timestamp time) {
         this.date_create = time;
@@ -408,7 +396,7 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
         this.decim9 = pojo.decim9;
         this.decim10 = pojo.decim10;
         //images
-        this.img1 = pojo.img1 == null ? null : new PictureEntity(pojo.img1);
-        this.img2 = pojo.img2 == null ? null : new PictureEntity(pojo.img2);
+        this.img1 = pojo.img1 == null ? null : new PictureColumn(pojo.img1);
+        this.img2 = pojo.img2 == null ? null : new PictureColumn(pojo.img2);
     }
 }

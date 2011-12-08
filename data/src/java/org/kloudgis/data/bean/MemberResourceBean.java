@@ -5,12 +5,12 @@
 package org.kloudgis.data.bean;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javassist.NotFoundException;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -111,6 +111,7 @@ public class MemberResourceBean {
                                 member.setUserId(u.id);
                                 member.setDescriptor(u.name);
                                 member.setMembership(membership);
+                                member.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                                 member.setSeqIdMin(startIdBlock);
                                 member.setSeqIdMax(startIdBlock + block_size);
                                 startIdBlock += block_size + 1;

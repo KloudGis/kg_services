@@ -7,8 +7,11 @@ package org.kloudgis.data.store;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.kloudgis.data.pojo.Feature;
 
 /**
  *
@@ -17,6 +20,12 @@ import org.kloudgis.data.pojo.Feature;
 @Entity
 @Table(name = "features_version")
 public class FeatureVersionDbEntity extends AbstractFeatureDbEntity{
+    
+    @SequenceGenerator(name = "feature_version_seq_gen", sequenceName = "feature_version_seq")
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "feature_version_seq_gen")
+    private Long system_id;
+    
     @Column
     private String      version_event;
     @Column 

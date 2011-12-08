@@ -8,12 +8,7 @@ package org.kloudgis.data.store;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import org.hibernate.search.annotations.Field;
 import org.kloudgis.data.pojo.AbstractComment;
 import org.kloudgis.data.pojo.NoteComment;
@@ -22,13 +17,9 @@ import org.kloudgis.data.pojo.NoteComment;
  *
  * @author jeanfelixg
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class AbstractCommentDbEntity implements Serializable {
-    
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    @Id
-    private Long id;    
+         
     @Column
     private Long author;
     @Column
@@ -39,17 +30,12 @@ public abstract class AbstractCommentDbEntity implements Serializable {
     @Field(index=org.hibernate.search.annotations.Index.TOKENIZED)
     private String comment; 
     
+    public abstract Long getId();
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public abstract void setId(Long id);
     
     public AbstractComment toPojo(AbstractComment pojo){
-        pojo.guid = id;
+        pojo.guid = getId();
         pojo.author = author;
         pojo.author_descriptor = author_descriptor;
         pojo.date_create = date_create != null ? date_create.getTime(): null;

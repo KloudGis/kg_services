@@ -6,6 +6,8 @@ package org.kloudgis.data.bean;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import javassist.NotFoundException;
@@ -157,6 +159,7 @@ public class ApiResourceBean {
                 member.setUserId(user.id);
                 member.setDescriptor(user.name);
                 member.setMembership("owner");
+                member.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 //1 billion + 1 to 2 billion
                 member.setSeqIdMin(1000000001L);
                 member.setSeqIdMax(2000000000L);

@@ -25,6 +25,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hibernate.annotations.Index;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.kloudgis.data.pojo.Layer;
@@ -44,15 +45,17 @@ public class LayerDbEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "layer_seq_gen")
     private Long id;
     @Column
+    @Index(name = "layers_date_in_index")
+    private Timestamp date_create;
+    @Column
+    @Index(name = "layers_user_in_index")
+    private Long user_create;
+    @Column
     private Integer render_order;
     @Column(length = 100)
     private String name;
-    @Column
-    private Long owner;
     @Column(length = 100)
     private String label;
-    @Column
-    private Timestamp date_creation;
     @Column(length = 254)
     private String url;
     @Column
@@ -85,7 +88,7 @@ public class LayerDbEntity implements Serializable {
         }       
         pojo.isGroup = is_group;
         pojo.name = name;
-        pojo.owner = owner;
+        pojo.user_create = user_create;
         pojo.label = label;
         pojo.url = url;
         pojo.visibility = visibility;
@@ -128,7 +131,7 @@ public class LayerDbEntity implements Serializable {
     }
     
     public void setDateCreate(Timestamp time){
-        this.date_creation = time;
+        this.date_create = time;
     }
 
     public void setSelectable(boolean bSelectability) {
@@ -144,7 +147,7 @@ public class LayerDbEntity implements Serializable {
     }
 
     public void setOwner(Long lOwner) {
-        owner = lOwner;
+        user_create = lOwner;
     }
     
     public void setGroup() {
