@@ -45,7 +45,7 @@ public class SandboxDbEntity implements Serializable {
     @Column
     private Long owner;
     @Column
-    private Timestamp dateCreation;
+    private Timestamp date_create;
     @Column
     @Type(type = "org.hibernatespatial.GeometryUserType")
     private Geometry geo;
@@ -60,7 +60,7 @@ public class SandboxDbEntity implements Serializable {
         pojo.name = name;
         pojo.key = unique_key;
         pojo.owner = owner;
-        pojo.date = dateCreation != null ? dateCreation.getTime() : null;
+        pojo.date_create = date_create != null ? date_create.getTime() : null;
         if (geo != null) {
             pojo.lon = geo.getCoordinate().x;
             pojo.lat = geo.getCoordinate().y;
@@ -97,8 +97,8 @@ public class SandboxDbEntity implements Serializable {
         this.users.add(us);
     }
 
-    public void setDateCreation(Timestamp timestamp) {
-        this.dateCreation = timestamp;
+    public void setDateCreate(Timestamp timestamp) {
+        this.date_create = timestamp;
     }
 
     public void setCentre(Double lon, Double lat) {

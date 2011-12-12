@@ -178,7 +178,7 @@ public class SandboxResourceBean {
                 entity.setName(sandbox.name);
                 entity.setUniqueKey(sandbox.key);
                 entity.setOwnerId(id);
-                entity.setDateCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                entity.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 entity.setCentre(sandbox.lon, sandbox.lat);
                 entity.setZoom(sandbox.zoom);
                 em.persist(entity);

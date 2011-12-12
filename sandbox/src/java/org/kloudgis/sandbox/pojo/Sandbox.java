@@ -13,7 +13,7 @@ public class Sandbox {
     public Long guid;
     public String key;
     public Long owner;
-    public Long date;
+    public Long date_create;
     //initial location
     public Double lat;
     public Double lon;

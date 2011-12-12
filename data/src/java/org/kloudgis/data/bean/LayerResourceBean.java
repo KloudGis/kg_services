@@ -59,7 +59,7 @@ public class LayerResourceBean {
                 return Response.serverError().entity(ex.getMessage()).build();
             }
             if (lMember != null) {
-                List<LayerDbEntity> lstDb = em.createQuery("from LayerDbEntity", LayerDbEntity.class).getResultList();
+                List<LayerDbEntity> lstDb = em.getSession().createCriteria(LayerDbEntity.class).list();
                 List<Layer> lstFT = new ArrayList(lstDb.size());
                 for (LayerDbEntity fDb : lstDb) {
                     Layer pojo = fDb.toPojo(em);
@@ -73,7 +73,7 @@ public class LayerResourceBean {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
         } else {
-            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Sandbox entity manager not found for:" + sandbox + ".").build();
         }
     }
 
@@ -96,7 +96,7 @@ public class LayerResourceBean {
                     pojo = layDb.toPojo(em);
                 } else {
                     em.close();
-                    throw new NotFoundException("Layer " + layerId + " is not found in sandbox " + sandbox + ".");
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Layer " + layerId + " is not found in sandbox " + sandbox + ".").build();
                 }
                 em.close();
                 return Response.ok(pojo).build();
@@ -104,7 +104,7 @@ public class LayerResourceBean {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
             }
         } else {
-            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Sandbox entity manager not found for:" + sandbox + ".").build();
         }
     }
 
@@ -166,7 +166,7 @@ public class LayerResourceBean {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a the owner of sandbox: " + sandbox).build();
             }
         } else {
-            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Sandbox entity manager not found for:" + sandbox + ".").build();
         }
     }
 
@@ -235,7 +235,7 @@ public class LayerResourceBean {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a the owner of sandbox: " + sandbox).build();
             }
         } else {
-            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Sandbox entity manager not found for:" + sandbox + ".").build();
         }
     }
 }

@@ -16,5 +16,8 @@ public class Bookmark {
     public Coordinate   center;
     public Integer      zoom;
     public Long         user_create;
+    public String       user_descriptor;
     public Long         date_create;
+    
 }
+    
