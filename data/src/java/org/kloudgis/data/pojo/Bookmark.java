@@ -13,6 +13,7 @@ import org.kloudgis.core.pojo.Coordinate;
 public class Bookmark {
     
     public Long         guid;
+    public String       label;
     public Coordinate   center;
     public Integer      zoom;
     public Long         user_create;

@@ -9,8 +9,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import javassist.NotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -97,8 +99,57 @@ public class BookmarkResourceBean {
         }
     }
 
+    @DELETE
+    @Path("{bId}")
+    public Response deleteBookmark(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @PathParam("bId") Long bookmarkId) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember != null) {
+                BookmarkDbEntity bDb = em.find(BookmarkDbEntity.class, bookmarkId);
+                if (bDb != null) {
+                    boolean bAuth = false;
+                    if (bDb.getUser() != null) {
+                        if (bDb.getUser().longValue() == lMember.getUserId()) {
+                            bAuth = true;
+                        } else {
+                            try {
+                                bAuth = AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox);
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                    if (bAuth) {
+                        em.getTransaction().begin();
+                        em.remove(bDb);
+                        em.getTransaction().commit();
+                        em.close();
+                        return Response.ok().build();
+                    } else {
+                        em.close();
+                        return Response.status(Response.Status.UNAUTHORIZED).entity("User do not have the rights to delete the bookmark in sandbox: " + sandbox).build();
+                    }
+                } else {
+                    em.close();
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Bookmark " + bookmarkId + " is not found in sandbox " + sandbox + ".").build();
+                }
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Sandbox entity manager not found for:" + sandbox + ".").build();
+        }
+    }
+
     @POST
-    public Response addBookmark(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Bookmark bookmark){
+    public Response addBookmark(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Bookmark bookmark) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
             MemberDbEntity lMember = null;

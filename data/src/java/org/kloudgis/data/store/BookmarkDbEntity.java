@@ -34,6 +34,8 @@ public class BookmarkDbEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "bookmark_seq_gen")
     private Long id;
     @Column
+    private String label;
+    @Column
     @Index(name = "bookmark_date_in_index")
     private Timestamp date_create;
     @Column
@@ -51,6 +53,7 @@ public class BookmarkDbEntity implements Serializable {
     public Bookmark toPojo(){
         Bookmark pojo = new Bookmark();
         pojo.guid = id;
+        pojo.label = label;
         pojo.date_create = date_create == null ? null : date_create.getTime();
         pojo.user_create = user_create;
         pojo.user_descriptor = user_descriptor;
@@ -62,6 +65,7 @@ public class BookmarkDbEntity implements Serializable {
     public void fromPojo(Bookmark pojo){
         this.zoom = pojo.zoom;
         this.center = pojo.center == null ? null : GeometryFactory.createPoint(new com.vividsolutions.jts.geom.Coordinate(pojo.center.x, pojo.center.y));
+        this.label = pojo.label;
     }
 
     public void setDateCreate(Timestamp timestamp) {
@@ -74,6 +78,10 @@ public class BookmarkDbEntity implements Serializable {
 
     public void setUserDescriptor(String userDescriptor) {
         this.user_descriptor = userDescriptor;
+    }
+
+    public Long getUser() {
+        return user_create;
     }
 
 }
