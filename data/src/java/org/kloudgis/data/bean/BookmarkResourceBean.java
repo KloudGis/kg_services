@@ -9,8 +9,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,10 +21,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.core.pojo.Records;
+import org.kloudgis.core.pojo.SignupUser;
 import org.kloudgis.data.AuthorizationFactory;
+import org.kloudgis.data.KGConfig;
+import org.kloudgis.data.NotificationFactory;
 import org.kloudgis.data.persistence.PersistenceManager;
 import org.kloudgis.data.pojo.Bookmark;
+import org.kloudgis.data.pojo.BookmarkMessage;
 import org.kloudgis.data.store.BookmarkDbEntity;
 import org.kloudgis.data.store.MemberDbEntity;
 
@@ -131,6 +134,13 @@ public class BookmarkResourceBean {
                         em.remove(bDb);
                         em.getTransaction().commit();
                         em.close();
+                        SignupUser user;
+                        try {
+                            user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            NotificationFactory.postMessage(sandbox, auth_token, new BookmarkMessage(bDb.getId(), BookmarkMessage.DELETE, user.user));
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
                         return Response.ok().build();
                     } else {
                         em.close();
@@ -169,6 +179,12 @@ public class BookmarkResourceBean {
                 em.persist(entity);
                 em.getTransaction().commit();
                 em.close();
+                try {
+                    SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                    NotificationFactory.postMessage(sandbox, auth_token, new BookmarkMessage(entity.getId(), BookmarkMessage.ADD, user.user));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 return Response.ok(entity.toPojo()).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();

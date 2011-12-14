@@ -84,4 +84,8 @@ public class BookmarkDbEntity implements Serializable {
         return user_create;
     }
 
+    public Long getId() {
+        return id;
+    }
+
 }
