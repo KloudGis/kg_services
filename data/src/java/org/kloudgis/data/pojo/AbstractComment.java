@@ -4,11 +4,13 @@
  */
 package org.kloudgis.data.pojo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author jeanfelixg
  */
-public class AbstractComment {
+public abstract class AbstractComment implements Serializable{
     
     public Long     guid;
     public String   comment;   

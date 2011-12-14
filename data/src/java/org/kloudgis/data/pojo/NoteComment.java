@@ -10,6 +10,5 @@ package org.kloudgis.data.pojo;
  */
 public class NoteComment extends AbstractComment{
     
-    
     public Long     note;
 }

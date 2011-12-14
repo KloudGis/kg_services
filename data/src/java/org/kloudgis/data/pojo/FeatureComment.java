@@ -8,7 +8,7 @@ package org.kloudgis.data.pojo;
  *
  * @author jeanfelixg
  */
-public class FeatureComment {
+public class FeatureComment extends AbstractComment{
     
     public String feature;
 }

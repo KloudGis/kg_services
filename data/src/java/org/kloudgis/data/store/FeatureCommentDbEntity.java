@@ -42,7 +42,7 @@ public class FeatureCommentDbEntity extends AbstractCommentDbEntity {
     
     public FeatureComment toPojo(){
         FeatureComment pojo = new FeatureComment();
-        
+        super.toPojo(pojo);
         pojo.feature = feature != null ? feature.getGuid() : null;
         return pojo;
     }

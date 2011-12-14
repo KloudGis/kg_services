@@ -46,7 +46,7 @@ public class NoteCommentDbEntity extends AbstractCommentDbEntity {
     
     public NoteComment toPojo(){
         NoteComment pojo = new NoteComment();
-        
+        super.toPojo(pojo);
         pojo.note = note != null ? note.getId() : null;
         return pojo;
     }
