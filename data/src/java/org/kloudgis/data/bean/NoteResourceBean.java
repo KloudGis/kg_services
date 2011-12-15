@@ -107,18 +107,20 @@ public class NoteResourceBean {
                 NoteDbEntity note = em.find(NoteDbEntity.class, fId);
                 try {
                     if (note != null) {
-                        if ((note.getAuthor() != null && lMember.getUserId().longValue() != note.getAuthor().longValue()) || !AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
-                            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note: " + sandbox).build();
+                        if (note.getAuthor() == null || note.getAuthor().longValue() == lMember.getUserId().longValue() || AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
+                            em.getTransaction().begin();
+                            note.fromPojo(in_note);
+                            note.setDateUpdate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                            note.setUserUpdate(lMember.getUserId());
+                            em.getTransaction().commit();
+                            em.close();
+                            Note pojo = note.toPojo();
+                            SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.UPDATE, user.user));
+                            return Response.ok(pojo).build();
+                        } else {
+                            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
                         }
-                        em.getTransaction().begin();
-                        note.fromPojo(in_note);
-                        note.setDateUpdate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-                        em.getTransaction().commit();
-                        em.close();
-                        Note pojo = note.toPojo();
-                        SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                        NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.UPDATE, user.user));
-                        return Response.ok(pojo).build();
                     } else {
                         throw new EntityNotFoundException("Not found:" + fId);
                     }
@@ -159,7 +161,7 @@ public class NoteResourceBean {
                             em.getTransaction().commit();
                             em.close();
                             SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                            NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.DELETE, user.user ));
+                            NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.DELETE, user.user));
                             return Response.noContent().build();
                         } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
@@ -202,7 +204,7 @@ public class NoteResourceBean {
                 note.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 try {
                     em.persist(note);
-                    em.getTransaction().commit();                 
+                    em.getTransaction().commit();
                     SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
                     NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(note.getId(), NoteMessage.ADD, user.user));
                 } catch (Exception e) {

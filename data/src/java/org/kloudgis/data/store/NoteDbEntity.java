@@ -120,6 +120,10 @@ public class NoteDbEntity implements Serializable {
     public void setDateUpdate(Timestamp time) {
         this.date_update = time;
     }
+    
+    public void setUserUpdate(Long userId) {
+        this.user_update = userId;
+    }
 
     public String getTitle() {
         return title;
