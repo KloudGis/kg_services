@@ -34,6 +34,10 @@ public class AttrTypeDbEntity implements Serializable {
     private String type;
     @Column
     private String attr_ref;
+    @Column
+    private String css_class;
+    @Column
+    private Integer render_order;
     @ManyToOne(cascade= CascadeType.ALL)
     private FeatureTypeDbEntity ft;
     
@@ -56,6 +60,8 @@ public class AttrTypeDbEntity implements Serializable {
         pojo.type = type;
         pojo.attr_ref = attr_ref;
         pojo.featuretype = ft != null ? ft.getId() : null;
+        pojo.css_class = css_class;
+        pojo.render_order = render_order;
         return pojo;
     }
 
@@ -63,5 +69,7 @@ public class AttrTypeDbEntity implements Serializable {
        this.label = pojo.label;
        this.type = pojo.type;
        this.attr_ref = pojo.attr_ref;
+       this.css_class = pojo.css_class;
+       this.render_order = pojo.render_order;
     }
 }

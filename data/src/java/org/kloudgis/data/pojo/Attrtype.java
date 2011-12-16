@@ -15,5 +15,8 @@ public class Attrtype {
     public String type;
     public String attr_ref;
     public Long featuretype;
+    public Integer width;
+    public String css_class;
+    public Integer render_order;  
     
 }
