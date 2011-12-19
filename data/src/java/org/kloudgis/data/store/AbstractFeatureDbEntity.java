@@ -339,7 +339,7 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
         this.setId(pojo.fid, pojo.ft_id);
         if (pojo.geo != null) {
             this.geo = pojo.geo.toJTS();
-            this.geo_type = geo.getGeometryType();
+            this.geo_type = geo == null ? null : geo.getGeometryType();
         } else if (pojo.wkt != null) {
             try {
                 this.geo = GeometryFactory.readWKT(pojo.wkt);

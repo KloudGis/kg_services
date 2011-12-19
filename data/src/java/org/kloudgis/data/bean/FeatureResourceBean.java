@@ -168,10 +168,13 @@ public class FeatureResourceBean {
                         throw new EntityNotFoundException("Not found:" + fid_ft_id);
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
                     }
-                    em.close();
+                    if(em.isOpen()){
+                        em.close();
+                    }
                     return Response.serverError().entity(e.getMessage()).build();
                 }
             } else {

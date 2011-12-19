@@ -43,7 +43,7 @@ public class Geometry {
     public com.vividsolutions.jts.geom.Geometry toJTS() {
         if(geo_type.equals("Point")){
             return GeometryFactory.createPoint(coords.get(0).toJTS());
-        }else if(geo_type.equals("Linestring")){
+        }else if(geo_type.equals("LineString")){
             com.vividsolutions.jts.geom.Coordinate [] arrC = new com.vividsolutions.jts.geom.Coordinate[coords.size()];
             for(int i=0; i < coords.size(); i++){
                 arrC[i] = coords.get(i).toJTS();
