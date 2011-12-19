@@ -233,8 +233,20 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     @Column
     private PictureColumn img2;
 
-    public void setDateInsert(Timestamp time) {
+    public void setDateCreate(Timestamp time) {
         this.date_create = time;
+    }
+    
+    public void setUserCreate(Long user) {
+        this.user_create = user;
+    }
+    
+    public void setDateUpdate(Timestamp time) {
+        this.date_update = time;
+    }
+    
+    public void setUserUpdate(Long user) {
+        this.user_update = user;
     }
 
     public void setId(long fid, long ft_id) {
@@ -244,6 +256,10 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
 
     public Long getFeatureTypeId() {
         return this.ft_id;
+    }
+    
+    public Long getFid() {
+        return this.fid;
     }
 
     protected void toPojo(Feature pojo) {

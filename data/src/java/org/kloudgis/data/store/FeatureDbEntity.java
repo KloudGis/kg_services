@@ -45,7 +45,6 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "feature_seq_gen")
     @DocumentId
     private Long system_id;
-    
     //**********************************
     //  JOIN on itself
     //**********************************
@@ -72,11 +71,10 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
     @OneToMany(mappedBy = "feature", cascade = CascadeType.ALL)
     @IndexedEmbedded
     private List<FeatureCommentDbEntity> comments;
-    
-    
-    public String getGuid(){
-        return buildGuid(fid,ft_id);
-    }    
+
+    public String getGuid() {
+        return buildGuid(fid, ft_id);
+    }
 
     public void addJoin(FeatureDbEntity f2) {
         if (joins == null) {
@@ -152,19 +150,22 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
         }
     }
 
-    public FeatureDbEntity findByGuid(String guid, HibernateEntityManager em) {
+    public static FeatureDbEntity findByGuid(String guid, HibernateEntityManager em) {
         //add it
-        String[] split = guid.split(";");
-        List<FeatureDbEntity> lst = em.getSession().createCriteria(this.getClass()).
-                add(Restrictions.eq("fid", Long.valueOf(split[0]))).
-                add(Restrictions.eq("ft_id", Long.valueOf(split[1]))).list();
-        if (lst.isEmpty()) {
-            return null;
+        String[] split = guid.split("_");
+        if (split.length == 2) {
+            List<FeatureDbEntity> lst = em.getSession().createCriteria(FeatureDbEntity.class).
+                    add(Restrictions.eq("fid", Long.valueOf(split[0]))).
+                    add(Restrictions.eq("ft_id", Long.valueOf(split[1]))).list();
+            if (lst.isEmpty()) {
+                return null;
+            }
+            return lst.get(0);
         }
-        return lst.get(0);
+        return null;
     }
 
     public static String buildGuid(Long fid, Long ft_id) {
-        return fid + ";" + ft_id;
+        return fid + "_" + ft_id;
     }
 }
