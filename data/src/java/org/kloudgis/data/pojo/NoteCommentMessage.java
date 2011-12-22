@@ -13,15 +13,15 @@ import org.kloudgis.core.pojo.Message;
  *
  * @author jeanfelixg
  */
-public class CommentMessage extends Message{
+public class NoteCommentMessage extends Message{
     public static String ADD = "add";
     public static String DELETE = "delete";
     public static String UPDATE = "update";
     
     
-    public CommentMessage(){}
+    public NoteCommentMessage(){}
     
-    public CommentMessage(Long id, Long noteId, String mType, String author){
+    public NoteCommentMessage(Long id, Long noteId, String mType, String author){
         Map map = new HashMap();
         map.put("id", id);
         map.put("note_id", noteId);

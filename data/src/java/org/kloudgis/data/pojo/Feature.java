@@ -5,11 +5,14 @@
 package org.kloudgis.data.pojo;
 
 import java.util.List;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  *
  * @author jeanfelixg
  */
+@JsonSerialize(include = Inclusion.NON_NULL)
 public class Feature {
     
     //guid is the concatenation of fid and ft_id :  Ex: fid is 123 and ft_id is 1: guid = 123;1
@@ -25,7 +28,9 @@ public class Feature {
     //list of joined features guid (fid;ft_id)
     public List<String> joins;
     //list of reverse joined features guid (fid;ft_id)
-    public List<String> reverse_joins;    
+    public List<String> reverse_joins;   
+    //list of comments
+    public List<Long> comments;
     
     //for geo, uses an object with is the combinaison of coordinate list and geo_type (WKT is not supported)
     public Geometry geo;

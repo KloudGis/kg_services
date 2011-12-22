@@ -113,6 +113,15 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
             }
             pojo.reverse_joins = lstGuid;
         }
+        //comments
+        List<FeatureCommentDbEntity> lstC = comments;
+        if(comments != null){
+            List<Long> lstGuid = new ArrayList(lstC.size());
+            for (FeatureCommentDbEntity fComment : lstC) {
+                lstGuid.add(fComment.getId());
+            }
+            pojo.comments = lstGuid;
+        }
         return pojo;
     }
 

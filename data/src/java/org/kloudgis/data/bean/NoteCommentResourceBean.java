@@ -32,15 +32,15 @@ import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteCommentDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.data.persistence.PersistenceManager;
-import org.kloudgis.data.pojo.CommentMessage;
+import org.kloudgis.data.pojo.NoteCommentMessage;
 
 /**
  *
  * @author jeanfelixg
  */
-@Path("/protected/comments")
+@Path("/protected/note_comments")
 @Produces({"application/json"})
-public class CommentResourceBean {
+public class NoteCommentResourceBean {
 
     @GET
     @Path("{fId}")
@@ -96,7 +96,7 @@ public class CommentResourceBean {
                         em.getTransaction().commit();
                         em.close();
                         SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                        NotificationFactory.postMessage(sandbox, auth_token, new CommentMessage(pojo.guid, pojo.note, CommentMessage.UPDATE, user.user));
+                        NotificationFactory.postMessage(sandbox, auth_token, new NoteCommentMessage(pojo.guid, pojo.note, NoteCommentMessage.UPDATE, user.user));
                         return Response.ok(pojo).build();
                     } else {
                         em.close();
@@ -140,7 +140,7 @@ public class CommentResourceBean {
                             em.getTransaction().commit();
                             em.close();
                             SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                            NotificationFactory.postMessage(sandbox, auth_token, new CommentMessage(pojo.guid, pojo.note, CommentMessage.DELETE, user.user));
+                            NotificationFactory.postMessage(sandbox, auth_token, new NoteCommentMessage(pojo.guid, pojo.note, NoteCommentMessage.DELETE, user.user));
                             return Response.noContent().build();
                         } else {
                             return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the comment nor the sandbox owner: " + sandbox).build();
@@ -179,7 +179,8 @@ public class CommentResourceBean {
                 try {
                     note = em.find(NoteDbEntity.class, in_comment.note);
                 } catch (EntityNotFoundException e) {
-                    throw new EntityNotFoundException("Note with id: " + in_comment.note + " is not found");
+                    em.close();
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Note " + in_comment.note + " is not found in sandbox " + sandbox + ".").build();
                 }
                 em.getTransaction().begin();
                 NoteCommentDbEntity note_comment = new NoteCommentDbEntity();
@@ -195,7 +196,7 @@ public class CommentResourceBean {
                     em.close();
                     pojo = note_comment.toPojo();
                     SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                    NotificationFactory.postMessage(sandbox, auth_token, new CommentMessage(pojo.guid, pojo.note, CommentMessage.ADD, user.user));                
+                    NotificationFactory.postMessage(sandbox, auth_token, new NoteCommentMessage(pojo.guid, pojo.note, NoteCommentMessage.ADD, user.user));                
                     return Response.ok(pojo).build();
                 } catch (Exception e) {
                     if (em.getTransaction().isActive()) {

@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import org.hibernate.search.annotations.Field;
 import org.kloudgis.data.pojo.AbstractComment;
-import org.kloudgis.data.pojo.NoteComment;
 
 /**
  *
@@ -47,7 +46,7 @@ public abstract class AbstractCommentDbEntity implements Serializable {
         return author;
     }
 
-    public void fromPojo(NoteComment in_comment) {
+    public void fromPojo(AbstractComment in_comment) {
         this.comment = in_comment.comment;
     }
 
