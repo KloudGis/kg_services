@@ -32,7 +32,10 @@ public class Geometry {
         this.coords = arrCPojo;
         this.geo_type = geo.getGeometryType();
         if (arrC.length > 0) {
-            Point ptC = geo.getCentroid();
+            Point ptC = geo.getInteriorPoint();
+            if(ptC == null){
+                ptC = geo.getCentroid();
+            }
             if (ptC != null) {
                 this.centroid = new org.kloudgis.core.pojo.Coordinate(ptC.getX(), ptC.getY());
             }

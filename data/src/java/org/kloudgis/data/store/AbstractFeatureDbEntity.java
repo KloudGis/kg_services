@@ -4,7 +4,6 @@
  */
 package org.kloudgis.data.store;
 
-import org.kloudgis.data.store.helper.PictureColumn;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
@@ -226,12 +225,12 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     @Field(index = org.hibernate.search.annotations.Index.UN_TOKENIZED)
     private Double decim10;
     //**********************************
-    //  2 binary for pictures 
+    //  2 pictures - Base64 String
     //**********************************
-    @Column
-    private PictureColumn img1;
-    @Column
-    private PictureColumn img2;
+    @Column(columnDefinition = "TEXT")
+    private String img1;
+    @Column(columnDefinition = "TEXT")
+    private String img2;
 
     public void setDateCreate(Timestamp time) {
         this.date_create = time;
@@ -331,8 +330,8 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
         pojo.decim9 = decim9;
         pojo.decim10 = decim10;
         //images
-        pojo.img1 = img1 == null ? null : img1.getAsBase64();
-        pojo.img2 = img2 == null ? null : img2.getAsBase64();
+        pojo.img1 = img1;
+        pojo.img2 = img2;
     }
 
     public void fromPojo(Feature pojo) {
@@ -412,7 +411,7 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
         this.decim9 = pojo.decim9;
         this.decim10 = pojo.decim10;
         //images
-        this.img1 = pojo.img1 == null ? null : new PictureColumn(pojo.img1);
-        this.img2 = pojo.img2 == null ? null : new PictureColumn(pojo.img2);
+        this.img1 = pojo.img1;
+        this.img2 = pojo.img2;
     }
 }
