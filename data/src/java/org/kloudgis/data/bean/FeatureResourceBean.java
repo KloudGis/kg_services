@@ -324,11 +324,12 @@ public class FeatureResourceBean {
         for (int i = 1; i < 11; i++) {
             arrlF.add("decim" + i);
         }
+        arrlF.add("comments.comment");
         return arrlF.toArray(new String[arrlF.size()]);
     }
 
     protected FullTextQuery buildNoteSearchQuery(FullTextEntityManager sem, String search) {
-        QueryParser parser = new MultiFieldQueryParser(Version.LUCENE_29, new String[]{"title", "description", "comments.content"}, new StandardAnalyzer(Version.LUCENE_29));
+        QueryParser parser = new MultiFieldQueryParser(Version.LUCENE_29, new String[]{"title", "description", "comments.comment"}, new StandardAnalyzer(Version.LUCENE_29));
         org.apache.lucene.search.Query query = null;
         try {
             query = parser.parse(search);

@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.DocumentId;
 import org.kloudgis.data.pojo.FeatureComment;
 
 @Entity
@@ -23,6 +24,7 @@ public class FeatureCommentDbEntity extends AbstractCommentDbEntity {
     
     @SequenceGenerator(name = "feature_comments_seq_gen", sequenceName = "feature_comments_seq")
     @GeneratedValue(strategy=GenerationType.AUTO, generator="feature_comments_seq_gen")
+    @DocumentId
     @Id
     private Long id; 
     

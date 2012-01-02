@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.DocumentId;
 import org.kloudgis.data.pojo.NoteComment;
 
 /**
@@ -27,6 +28,7 @@ public class NoteCommentDbEntity extends AbstractCommentDbEntity {
     
     @SequenceGenerator(name = "note_comments_seq_gen", sequenceName = "note_comments_seq")
     @GeneratedValue(strategy=GenerationType.AUTO, generator="note_comments_seq_gen")
+    @DocumentId
     @Id
     private Long id; 
     

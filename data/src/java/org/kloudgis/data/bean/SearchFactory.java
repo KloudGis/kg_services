@@ -25,8 +25,7 @@ public class SearchFactory {
         System.out.println("Indexing Notes...");
         buildIndex(NoteDbEntity.class, sandbox);
         System.out.println("Indexing Features...");
-        buildIndex(FeatureDbEntity.class, sandbox);
-        
+        buildIndex(FeatureDbEntity.class, sandbox);      
         System.out.println("Indexing Done...");
     }
     
