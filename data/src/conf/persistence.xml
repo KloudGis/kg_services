@@ -12,6 +12,7 @@
     <class>org.kloudgis.data.store.FeatureVersionDbEntity</class>
     <class>org.kloudgis.data.store.FeatureCommentDbEntity</class>
     <class>org.kloudgis.data.store.BookmarkDbEntity</class>
+    <class>org.kloudgis.data.store.CatalogDbEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="hibernate.connection.driver_class" value="org.postgis.DriverWrapper"/>

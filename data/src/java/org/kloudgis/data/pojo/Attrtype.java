@@ -4,6 +4,8 @@
  */
 package org.kloudgis.data.pojo;
 
+import java.util.List;
+
 /**
  *
  * @author jeanfelixg
@@ -17,6 +19,7 @@ public class Attrtype {
     public Long featuretype;
     public Integer width;
     public String css_class;
-    public Integer render_order;  
+    public Integer render_order;
+    public List<Catalog> enum_values;
     
 }
