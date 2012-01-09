@@ -16,4 +16,5 @@ public class Featuretype {
     public String title_attribute;
     
     public List<Long> attrtypes;
+    public String geometry_type;
 }

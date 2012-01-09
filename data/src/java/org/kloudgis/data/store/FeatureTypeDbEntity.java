@@ -39,7 +39,10 @@ public class FeatureTypeDbEntity implements Serializable {
     @OneToMany(mappedBy = "ft", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("render_order, label ASC")
     List<AttrTypeDbEntity> attrtypes;
-
+    
+    @Column
+    private String geometry_type;
+    
     public Long getId() {
         return id;
     }    
@@ -69,6 +72,7 @@ public class FeatureTypeDbEntity implements Serializable {
             }
         }
         pojo.attrtypes = arrlA;
+        pojo.geometry_type = this.geometry_type;
         return pojo;
     }
 

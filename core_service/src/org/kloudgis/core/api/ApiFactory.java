@@ -19,7 +19,6 @@ import org.kloudgis.core.pojo.SignupUser;
  */
 public class ApiFactory {
 
-    
     private static final String SESSION_USER = "!!kg_user!!";
     private static final String SESSION_SANDBOX_OWNER = "!!kg_user_sandbox_owner_id!!";
     private static final String SESSION_MEMBERSHIP = "!!kg_user_membership!!";
@@ -97,7 +96,7 @@ public class ApiFactory {
         }
         if (user == null) {
             String[] body = ApiFactory.apiGet(auth_token, auth_url + "/connected_user", api_key);
-            if (body != null && body[0].length() > 0 && body[1].equals("200")) {
+            if (body != null && body[0] != null && body[1] != null && body[0].length() > 0 && body[1].equals("200")) {
                 user = mapper.readValue(body[0], SignupUser.class);
                 prop.put(SESSION_USER, user);
                 prop.put(SESSION_TIMEOUT_USER, time);
@@ -119,7 +118,7 @@ public class ApiFactory {
         }
         if (sandbox_owner == null) {
             String[] body = ApiFactory.apiGet(auth_token, url, api_key);
-            if (body != null && body[0].length() > 0 && body[1].equals("200")) {
+            if (body != null && body[0] != null && body[1] != null && body[0].length() > 0 && body[1].equals("200")) {
                 sandbox_owner = Long.parseLong(body[0]);
                 prop.put(SESSION_SANDBOX_OWNER, sandbox_owner);
                 prop.put(SESSION_TIMEOUT_SANDBOX_OWNER, time);
@@ -141,7 +140,7 @@ public class ApiFactory {
         }
         if (membership == null) {
             String[] body = ApiFactory.apiGet(auth_token, url, api_key);
-            if (body != null && body[0].length() > 0 && body[1].equals("200")) {
+            if (body != null && body[0] != null && body[1] != null && body[0].length() > 0 && body[1].equals("200")) {
                 try {
                     HashMap mapMember = mapper.readValue(body[0], HashMap.class);
                     membership = (String) mapMember.get("access_type");

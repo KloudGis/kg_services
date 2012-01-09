@@ -4,10 +4,15 @@
  */
 package org.kloudgis.data.store;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityNotFoundException;
@@ -22,6 +27,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.search.annotations.DocumentId;
@@ -115,7 +121,7 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
         }
         //comments
         List<FeatureCommentDbEntity> lstC = comments;
-        if(comments != null){
+        if (comments != null) {
             List<Long> lstGuid = new ArrayList(lstC.size());
             for (FeatureCommentDbEntity fComment : lstC) {
                 lstGuid.add(fComment.getId());
@@ -176,5 +182,25 @@ public class FeatureDbEntity extends AbstractFeatureDbEntity {
 
     public static String buildGuid(Long fid, Long ft_id) {
         return fid + "_" + ft_id;
+    }
+
+    public void generateFid(HibernateEntityManager em) {
+        Object oMax = em.getSession().createCriteria(FeatureDbEntity.class).add(Restrictions.eq("ft_id", this.getFeatureTypeId())).setProjection(Projections.max("fid")).uniqueResult();
+        if (oMax == null) {
+            oMax = 0L;
+        }
+        long iMax = ((Number) oMax).intValue();
+        this.fid = iMax + 1;
+    }
+    
+    
+    public static Geometry getGeoAs900913(FeatureDbEntity newFeature, HibernateEntityManager em) {
+        Object strGeo = em.getSession().createSQLQuery("select asText(transform(geo, 900913)) from features where system_id = " + newFeature.system_id).uniqueResult();
+        WKTReader reader = new WKTReader();
+        try {
+            return reader.read((String)strGeo);
+        } catch (ParseException ex) {
+            return null;
+        }
     }
 }

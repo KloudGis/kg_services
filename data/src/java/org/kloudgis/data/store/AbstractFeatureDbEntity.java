@@ -49,7 +49,6 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     @Column
     @Index(name = "feature_user_up_index")
     private Long user_update;
-    
     //**************************************************************************
     //                              USER Columns
     //**************************************************************************
@@ -235,30 +234,33 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     public void setDateCreate(Timestamp time) {
         this.date_create = time;
     }
-    
+
     public void setUserCreate(Long user) {
         this.user_create = user;
     }
-    
+
     public void setDateUpdate(Timestamp time) {
         this.date_update = time;
     }
-    
+
     public void setUserUpdate(Long user) {
         this.user_update = user;
     }
 
-    public void setId(long fid, long ft_id) {
+    public void setFid(long fid) {
         this.fid = fid;
+    }
+
+    public Long getFid() {
+        return this.fid;
+    }
+
+    public void setFeaturetypeId(long ft_id) {
         this.ft_id = ft_id;
     }
 
     public Long getFeatureTypeId() {
         return this.ft_id;
-    }
-    
-    public Long getFid() {
-        return this.fid;
     }
 
     protected void toPojo(Feature pojo) {
@@ -335,7 +337,12 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
     }
 
     public void fromPojo(Feature pojo) {
-        this.setId(pojo.fid, pojo.ft_id);
+        if (pojo.fid != null) {
+            this.setFid(pojo.fid);
+        }
+        if (pojo.ft_id != null) {
+            this.setFeaturetypeId(pojo.ft_id);
+        }
         if (pojo.geo != null) {
             this.geo = pojo.geo.toJTS();
             this.geo_type = geo == null ? null : geo.getGeometryType();
@@ -348,9 +355,9 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
             }
         }
         //avoid null geo to make geoserver happy
-        if(this.geo == null){
-            this.geo = GeometryFactory.createPoint(new Coordinate(0,0));
-        }        
+        if (this.geo == null) {
+            this.geo = GeometryFactory.createPoint(new Coordinate(0, 0));
+        }
 
         //texts
         this.text1 = pojo.text1;
@@ -413,5 +420,10 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
         //images
         this.img1 = pojo.img1;
         this.img2 = pojo.img2;
+    }
+    
+    
+    public Geometry getGeometry() {
+        return geo;
     }
 }

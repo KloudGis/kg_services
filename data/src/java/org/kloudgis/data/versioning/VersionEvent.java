@@ -9,7 +9,7 @@ package org.kloudgis.data.versioning;
  * @author jeanfelixg
  */
 public enum VersionEvent {
-    
+    ADD,
     UPDATE,
     DELETE            
 }

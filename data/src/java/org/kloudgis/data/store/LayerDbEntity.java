@@ -92,6 +92,7 @@ public class LayerDbEntity implements Serializable {
         pojo.label = label;
         pojo.url = url;
         pojo.visibility = visibility;
+        pojo.ft_id = this.ft_id;
         return pojo;
     }
     

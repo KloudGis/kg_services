@@ -7,12 +7,14 @@ package org.kloudgis.data.bean;
 import org.kloudgis.data.model.ModelFactory;
 import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.util.Version;
 import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.criterion.SpatialRestrictions;
+import org.kloudgis.core.api.ApiFactory;
 import org.kloudgis.data.AuthorizationFactory;
 import org.kloudgis.core.utils.GeometryFactory;
 import org.kloudgis.data.pojo.Feature;
@@ -54,6 +57,7 @@ import org.kloudgis.data.store.MemberDbEntity;
 import org.kloudgis.data.store.NoteDbEntity;
 import org.kloudgis.data.persistence.PersistenceManager;
 import org.kloudgis.core.pojo.Records;
+import org.kloudgis.data.KGConfig;
 import org.kloudgis.data.versioning.VersionEvent;
 import org.kloudgis.data.versioning.VersionsFactory;
 
@@ -129,8 +133,92 @@ public class FeatureResourceBean {
         }
         return lstF;
     }
-    
-    
+
+    @POST
+    public Response addFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Feature in_feature) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember != null) {
+                try {
+                    if (AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
+                        em.getTransaction().begin();
+                        FeatureDbEntity newFeature = new FeatureDbEntity();
+                        newFeature.fromPojo(in_feature, em);
+                        if (newFeature.getFid() == null) {
+                            newFeature.generateFid(em);
+                        } else {
+                            if (FeatureDbEntity.findByGuid(FeatureDbEntity.buildGuid(newFeature.getFid(), newFeature.getFeatureTypeId()), em) != null) {
+                                em.getTransaction().rollback();
+                                em.close();
+                                return Response.status(Response.Status.BAD_REQUEST).entity("Fid already in use:" + newFeature.getFid()).build();
+                            }
+                        }
+                        newFeature.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                        newFeature.setUserCreate(lMember.getUserId());
+                        em.persist(newFeature);
+                        Feature pojo = newFeature.toPojo();
+                        VersionsFactory.addVersion(VersionEvent.ADD, pojo, em, lMember);
+                        em.getTransaction().commit();
+                        if (newFeature.getGeometry() != null) {
+                            Geometry geo = FeatureDbEntity.getGeoAs900913(newFeature, em);
+                            if (geo != null) {
+                                LayerDbEntity layer = ModelFactory.getMainLayer(em);
+                                if (layer != null) {
+                                    Envelope env = geo.getEnvelopeInternal();
+                                    truncateCache(auth_token, layer.getName(), env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY());
+                                }
+                            }
+                        }
+                        em.close();
+                        return Response.ok(pojo).build();
+                    } else {
+                        em.close();
+                        return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    if (em.isOpen()) {
+                        em.close();
+                    }
+                    return Response.serverError().entity(e.getMessage()).build();
+                }
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
+    private String truncateCache(String auth_token, String layer, double lowX, double lowY, double hiX, double hiY) {
+        try {
+            Map mapProp = new HashMap();
+            mapProp.put("layer", layer);
+            mapProp.put("low_x", lowX);
+            mapProp.put("low_y", lowY);
+            mapProp.put("hi_x", hiX);
+            mapProp.put("hi_y", hiY);
+            String[] ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/truncate_cache", KGConfig.getConfiguration().api_key, mapProp);
+            if (ret != null && ret[1].equals("200")) {
+                return null;
+            } else {
+                return ret != null ? ret[0] : "api map error";
+            }
+        } catch (IOException ex) {
+            return "Api map error";
+        }
+    }
+
     @PUT
     @Path("{fId}")
     public Response updateFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") String fid_ft_id, @QueryParam("sandbox") String sandbox, Feature in_feature) {
@@ -156,9 +244,9 @@ public class FeatureResourceBean {
                             feature.setUserUpdate(lMember.getUserId());
                             em.getTransaction().commit();
                             em.close();
-                            Feature pojo = feature.toPojo();                         
-                         //   SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
-                         //   NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(feature.getId(), NoteMessage.UPDATE, user.user));
+                            Feature pojo = feature.toPojo();
+                            //   SignupUser user = ApiFactory.getUser(sContext, auth_token, KGConfig.getConfiguration().auth_url, KGConfig.getConfiguration().api_key);
+                            //   NotificationFactory.postMessage(sandbox, auth_token, new NoteMessage(feature.getId(), NoteMessage.UPDATE, user.user));
                             return Response.ok(pojo).build();
                         } else {
                             em.close();
@@ -172,7 +260,7 @@ public class FeatureResourceBean {
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
                     }
-                    if(em.isOpen()){
+                    if (em.isOpen()) {
                         em.close();
                     }
                     return Response.serverError().entity(e.getMessage()).build();
@@ -184,8 +272,6 @@ public class FeatureResourceBean {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
         }
     }
-    
-    
 
     @GET
     @Path("search")

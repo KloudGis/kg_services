@@ -11,7 +11,6 @@ package org.kloudgis.data.pojo;
 public class LoadLayer extends Layer{
     
     public String  sld;
-    public Long  ft_id;
     public String  filter;
     public Boolean  canGroup;
     

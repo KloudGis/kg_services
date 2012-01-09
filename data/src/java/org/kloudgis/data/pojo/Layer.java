@@ -29,6 +29,7 @@ public class Layer {
     public Integer  pixelTolerance;
     public Boolean  canRender;
     public Boolean  isGroup;
+    public Long     ft_id;
     
     //layer parameters
     //user who has created the layer in the sandbox
