@@ -38,7 +38,7 @@ public class MemberDbEntity implements Serializable {
     private String user_descriptor;
     @Index (name="access_index")
     @Column
-    private String access_type;
+    private String access_type;//owner, read, write
     @Column
     private Long seq_id_min;
     @Column
@@ -78,6 +78,11 @@ public class MemberDbEntity implements Serializable {
 
     public void setMembership(String membership) {
         this.access_type = membership;
+    }
+    
+        
+    public String getMembership(){
+        return access_type;
     }
     
     public void setDateCreate(Timestamp time){

@@ -40,9 +40,21 @@ public class AuthorizationFactory {
     }
 
     public static boolean isSandboxOwner(MemberDbEntity lMember, ServletContext sContext, String auth_token, String sandbox) throws IOException{
-        Long id = ApiFactory.getSandboxOwner(sContext, auth_token, KGConfig.getConfiguration().sandbox_url + "/sandbox_owner?sandbox=" + sandbox, KGConfig.getConfiguration().api_key);
-        if(id != null && id.longValue() == lMember.getUserId().longValue()){
-            return true;
+        String membership = lMember.getMembership();
+        if(membership != null){
+            if(membership.equals("owner")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasWriteAccess(MemberDbEntity lMember, ServletContext sContext, String auth_token, String sandbox) {
+        String membership = lMember.getMembership();
+        if(membership != null){
+            if(membership.equals("owner") || membership.equals("write")){
+                return true;
+            }
         }
         return false;
     }

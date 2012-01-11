@@ -22,14 +22,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.hibernate.Criteria;
@@ -134,6 +127,40 @@ public class FeatureResourceBean {
         return lstF;
     }
 
+    @GET
+    @Path("{fId}")
+    public Response getFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @PathParam("fId") String fid_ft_id, @QueryParam("sandbox") String sandbox) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember != null) {
+                FeatureDbEntity feature = FeatureDbEntity.findByGuid(fid_ft_id, em);
+                em.close();
+                try {
+                    if (feature != null) {
+                        Feature pojo = feature.toPojo();
+                        return Response.ok(pojo).build();
+                    } else {
+                        throw new EntityNotFoundException("Not found:" + fid_ft_id);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return Response.serverError().entity(e.getMessage()).build();
+                }
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
     @POST
     public Response addFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, Feature in_feature) {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
@@ -147,7 +174,7 @@ public class FeatureResourceBean {
             }
             if (lMember != null) {
                 try {
-                    if (AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
+                    if (AuthorizationFactory.hasWriteAccess(lMember, sContext, auth_token, sandbox)) {
                         em.getTransaction().begin();
                         FeatureDbEntity newFeature = new FeatureDbEntity();
                         newFeature.fromPojo(in_feature, em);
@@ -180,7 +207,77 @@ public class FeatureResourceBean {
                         return Response.ok(pojo).build();
                     } else {
                         em.close();
-                        return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
+                        return Response.status(Response.Status.UNAUTHORIZED).entity("User do not have write access in : " + sandbox).build();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    if (em.isOpen()) {
+                        em.close();
+                    }
+                    return Response.serverError().entity(e.getMessage()).build();
+                }
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a member of sandbox: " + sandbox).build();
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
+    @DELETE
+    @Path("{fId}")
+    public Response deleteFeature(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @PathParam("fId") String fid_ft_id) {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if (lMember != null) {
+                try {
+                    FeatureDbEntity feature = FeatureDbEntity.findByGuid(fid_ft_id, em);
+                    try {
+                        if (feature != null) {
+                            if (AuthorizationFactory.hasWriteAccess(lMember, sContext, auth_token, sandbox)) {
+                                Feature pojoBefore = feature.toPojo();
+                                em.getTransaction().begin();
+                                VersionsFactory.addVersion(VersionEvent.DELETE, pojoBefore, em, lMember);
+                                if (feature.getGeometry() != null) {
+                                    Geometry geo = FeatureDbEntity.getGeoAs900913(feature, em);
+                                    if (geo != null) {
+                                        LayerDbEntity layer = ModelFactory.getMainLayer(em);
+                                        if (layer != null) {
+                                            Envelope env = geo.getEnvelopeInternal();
+                                            truncateCache(auth_token, layer.getName(), env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY());
+                                        }
+                                    }
+                                }
+                                em.remove(feature);
+                                em.getTransaction().commit();
+                                em.close();
+                                return Response.ok().build();
+                            } else {
+                                em.close();
+                                return Response.status(Response.Status.UNAUTHORIZED).entity("User do not have write access in : " + sandbox).build();
+                            }
+                        } else {
+                            throw new EntityNotFoundException("Not found:" + fid_ft_id);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (em.getTransaction().isActive()) {
+                            em.getTransaction().rollback();
+                        }
+                        if (em.isOpen()) {
+                            em.close();
+                        }
+                        return Response.serverError().entity(e.getMessage()).build();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -235,7 +332,7 @@ public class FeatureResourceBean {
                 FeatureDbEntity feature = FeatureDbEntity.findByGuid(fid_ft_id, em);
                 try {
                     if (feature != null) {
-                        if (AuthorizationFactory.isSandboxOwner(lMember, sContext, auth_token, sandbox)) {
+                        if (AuthorizationFactory.hasWriteAccess(lMember, sContext, auth_token, sandbox)) {
                             Feature pojoBefore = feature.toPojo();
                             em.getTransaction().begin();
                             VersionsFactory.addVersion(VersionEvent.UPDATE, pojoBefore, em, lMember);
@@ -250,7 +347,7 @@ public class FeatureResourceBean {
                             return Response.ok(pojo).build();
                         } else {
                             em.close();
-                            return Response.status(Response.Status.UNAUTHORIZED).entity("User is not the author of the note nor the sandbox owner: " + sandbox).build();
+                            return Response.status(Response.Status.UNAUTHORIZED).entity("User do not have write access in : " + sandbox).build();
                         }
                     } else {
                         throw new EntityNotFoundException("Not found:" + fid_ft_id);
