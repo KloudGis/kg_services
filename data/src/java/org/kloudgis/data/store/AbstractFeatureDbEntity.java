@@ -282,7 +282,7 @@ public abstract class AbstractFeatureDbEntity implements Serializable {
         pojo.text6 = text6;
         pojo.text7 = text7;
         pojo.text8 = text8;
-        pojo.text9 = text1;
+        pojo.text9 = text9;
         pojo.text10 = text10;
         pojo.text11 = text11;
         pojo.text12 = text12;
