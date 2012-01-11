@@ -384,7 +384,7 @@ public abstract class GeoserverFactory {
         strXML.append("<type>");
         strXML.append(type);
         strXML.append("</type>");
-        strXML.append("<threadCount>1</threadCount>");
+        strXML.append("<threadCount>2</threadCount>");
         strXML.append("</seedRequest>");
         StringRequestEntity entity = new StringRequestEntity(strXML.toString(), "application/xml", "UTF-8");
         HttpClient htc = new HttpClient();
