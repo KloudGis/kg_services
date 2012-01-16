@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -45,6 +46,8 @@ public class SandboxDbEntity implements Serializable {
     @Column
     private Long owner;
     @Column
+    private String owner_descriptor;
+    @Column
     private Timestamp date_create;
     @Column
     @Type(type = "org.hibernatespatial.GeometryUserType")
@@ -60,6 +63,7 @@ public class SandboxDbEntity implements Serializable {
         pojo.name = name;
         pojo.key = unique_key;
         pojo.owner = owner;
+        pojo.ownerDescriptor = owner_descriptor;
         pojo.date_create = date_create != null ? date_create.getTime() : null;
         if (geo != null) {
             pojo.lon = geo.getCoordinate().x;
@@ -84,7 +88,10 @@ public class SandboxDbEntity implements Serializable {
     public void setOwnerId(Long id) {
         this.owner = id;
     }
-
+    
+    public void setOwnerDesc(String descr) {
+        this.owner_descriptor = descr;
+    }
     public void setUniqueKey(String key) {
         this.unique_key = key;
     }
@@ -94,6 +101,9 @@ public class SandboxDbEntity implements Serializable {
     }
 
     public void addUser(UserSandboxDbEntity us) {
+        if(users == null){
+            users = new ArrayList();
+        }
         this.users.add(us);
     }
 
