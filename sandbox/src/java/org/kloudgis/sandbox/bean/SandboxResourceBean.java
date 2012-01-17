@@ -158,29 +158,29 @@ public class SandboxResourceBean {
             return Response.notModified().entity("Sandbox name is mandatory").build();
         }
 
-        if (sandbox.key == null || sandbox.key.length() == 0) {
-            sandbox.key = sandbox.name + "_sb";
+        if (sandbox.guid == null || sandbox.guid.length() == 0) {
+            sandbox.guid = sandbox.name + "_sb";
         }
-        sandbox.key =  StringTools.replaceUnicodeChars(sandbox.key.replace(" ", "_"), '_');
-        sandbox.key = "u_" + usr.id + "_" + sandbox.key;
+        sandbox.guid = StringTools.replaceUnicodeChars(sandbox.guid.replace(" ", "_"), '_').toLowerCase();
+        sandbox.guid = "u_" + usr.id + "_" + sandbox.guid;
         HibernateEntityManager em = PersistenceManager.getInstance().getAdminEntityManager();
         try {
-            SandboxDbEntity entity = AuthorizationFactory.getSandboxFromKey(sandbox.key, em);
+            SandboxDbEntity entity = AuthorizationFactory.getSandboxFromKey(sandbox.guid, em);
             if (entity != null) {
                 em.close();
-                return Response.notModified().entity("Sandbox key is already taken").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Sandbox key is already taken").build();
             }
         } catch (Exception e) {
             em.close();
             return Response.serverError().entity(e.getMessage()).build();
         }
         try {
-            String[] ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/create_db", KGConfig.getConfiguration().api_key, sandbox.key);
+            String[] ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/create_db", KGConfig.getConfiguration().api_key, sandbox.guid);
             if (ret != null && ret[1].equals("200")) {
                 em.getTransaction().begin();
                 SandboxDbEntity entity = new SandboxDbEntity();
                 entity.setName(sandbox.name);
-                entity.setUniqueKey(sandbox.key);
+                entity.setUniqueKey(sandbox.guid);
                 entity.setOwnerId(usr.id);
                 entity.setOwnerDesc(usr.name);
                 entity.setDateCreate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
@@ -193,16 +193,16 @@ public class SandboxResourceBean {
                 em.persist(u);
                 entity.addUser(u);
                 em.persist(entity);
-                ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/workspace", KGConfig.getConfiguration().api_key, sandbox.key);
+                ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/workspace", KGConfig.getConfiguration().api_key, sandbox.guid);
                 if (ret != null && ret[1].equals("200")) {
                     ret = ApiFactory.apiGet(auth_token, KGConfig.getConfiguration().data_url + "/database_prop", KGConfig.getConfiguration().api_key);
                     if (ret != null && ret[1].equals("200")) {
                         ObjectMapper mapper = new ObjectMapper();
                         Map prop = mapper.readValue(ret[0], HashMap.class);
-                        prop.put("name", sandbox.key);
-                        ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/" + sandbox.key + "/store", KGConfig.getConfiguration().api_key, prop);
+                        prop.put("name", sandbox.guid);
+                        ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().map_url + "/" + sandbox.guid + "/store", KGConfig.getConfiguration().api_key, prop);
                         if (ret != null && ret[1].equals("200")) {
-                            ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/add_owner_member?sandbox=" + sandbox.key, KGConfig.getConfiguration().api_key, usr.id);
+                            ret = ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/add_owner_member?sandbox=" + sandbox.guid, KGConfig.getConfiguration().api_key, usr.id);
                         }
                         if (ret != null && ret[1].equals("200")) {
                             em.getTransaction().commit();
@@ -211,21 +211,21 @@ public class SandboxResourceBean {
                         } else {
                             em.getTransaction().rollback();
                             em.close();
-                            ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.key);
-                            ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandbox.key, KGConfig.getConfiguration().api_key);
+                            ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.guid);
+                            ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandbox.guid, KGConfig.getConfiguration().api_key);
                             return Response.serverError().entity("Could not add the geoserver store:" + ret == null ? "?" : ret[0]).build();
                         }
                     } else {
                         em.getTransaction().rollback();
                         em.close();
-                        ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.key);
-                        ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandbox.key, KGConfig.getConfiguration().api_key);
+                        ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.guid);
+                        ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().map_url + "/workspace/" + sandbox.guid, KGConfig.getConfiguration().api_key);
                         return Response.serverError().entity("Could not get the database setting from api data:" + ret == null ? "?" : ret[0]).build();
                     }
                 } else {
                     em.getTransaction().rollback();
                     em.close();
-                    ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.key);
+                    ApiFactory.apiPost(auth_token, KGConfig.getConfiguration().data_url + "/drop_db", KGConfig.getConfiguration().api_key, sandbox.guid);
                     return Response.serverError().entity("Could not add the geoserver workspace:" + ret == null ? "?" : ret[0]).build();
                 }
             }
@@ -276,8 +276,16 @@ public class SandboxResourceBean {
                         return Response.serverError().entity("Could drop the sandbox db (" + ret != null ? ret[0] : "?" + ")").build();
                     }
                 } else {
+                    //not owner ?  Just remove the current user from the sandbox.
+                    em.getTransaction().begin();
+                    List<UserSandboxDbEntity> listBiding = em.getSession().createCriteria(UserSandboxDbEntity.class).add(Restrictions.eq("user_id", id)).add(Restrictions.eq("sandbox", entity)).list();
+                    for (UserSandboxDbEntity bind : listBiding) {
+                        em.remove(bind);
+                    }
+                    String[] ret = ApiFactory.apiDelete(auth_token, KGConfig.getConfiguration().data_url + "/members/current_user?sandbox=" + sandboxKey, null);
+                    em.getTransaction().commit();
                     em.close();
-                    return Response.status(Response.Status.UNAUTHORIZED).entity("Only the sandbox owner can drop the sandbox.").build();
+                    return Response.ok().build();
                 }
             } else {
                 em.close();

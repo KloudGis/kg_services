@@ -10,9 +10,8 @@ package org.kloudgis.sandbox.pojo;
  */
 public class Sandbox {
     
-    public Long guid;
+    public String guid;
     public String name;
-    public String key;
     public Long owner;
     public String ownerDescriptor;
     public Long date_create;

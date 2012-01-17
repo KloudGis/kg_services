@@ -59,9 +59,8 @@ public class SandboxDbEntity implements Serializable {
 
     public Sandbox toPojo() {
         Sandbox pojo = new Sandbox();
-        pojo.guid = id;
         pojo.name = name;
-        pojo.key = unique_key;
+        pojo.guid = unique_key;
         pojo.owner = owner;
         pojo.ownerDescriptor = owner_descriptor;
         pojo.date_create = date_create != null ? date_create.getTime() : null;

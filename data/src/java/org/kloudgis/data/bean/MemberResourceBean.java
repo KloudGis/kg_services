@@ -11,13 +11,7 @@ import java.util.Calendar;
 import java.util.List;
 import javassist.NotFoundException;
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -89,10 +83,10 @@ public class MemberResourceBean {
                 long block_size = 100000000;
                 long startIdBlock;
                 Number retMax = (Number) em.createNativeQuery("select max(seq_id_max) from members;").getSingleResult();
-                if(retMax == null || retMax.longValue() == 0){
+                if (retMax == null || retMax.longValue() == 0) {
                     //2 Billion + 1
                     startIdBlock = 2000000001L;
-                }else{
+                } else {
                     startIdBlock = retMax.longValue() + 1;
                 }
                 em.getTransaction().begin();
@@ -138,6 +132,32 @@ public class MemberResourceBean {
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User is not a the owner of sandbox: " + sandbox).build();
 
+            }
+        } else {
+            throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
+        }
+    }
+
+    @DELETE
+    @Path("current_user")
+    public Response removeFromMembers(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox) throws NotFoundException {
+        HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
+        if (em != null) {
+            MemberDbEntity lMember = null;
+            try {
+                lMember = AuthorizationFactory.getMember(sContext, em, sandbox, auth_token);
+            } catch (IOException ex) {
+                em.close();
+                return Response.serverError().entity(ex.getMessage()).build();
+            }
+            if(lMember != null){
+                em.getTransaction().begin();
+                em.remove(lMember);
+                em.getTransaction().commit();
+                em.close();
+                return Response.ok().build(); 
+            }else{
+                return Response.status(Response.Status.BAD_REQUEST).entity("Current user is not a member of the sandbox.").build();
             }
         } else {
             throw new NotFoundException("Sandbox entity manager not found for:" + sandbox + ".");
