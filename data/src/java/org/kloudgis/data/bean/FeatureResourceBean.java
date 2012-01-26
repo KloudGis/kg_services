@@ -373,7 +373,8 @@ public class FeatureResourceBean {
     @GET
     @Path("search")
     @Produces({"application/json"})
-    public Response search(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox) {
+    public Response search(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("search_string") String search, @QueryParam("category") String cat, @QueryParam("sandbox") String sandbox, 
+    @DefaultValue("0") @QueryParam("start") Integer start, @DefaultValue("10") @QueryParam("max_size") Integer max) {
         if (search == null || search.length() == 0) {
             return Response.ok().build();
         }
@@ -408,6 +409,10 @@ public class FeatureResourceBean {
                 sem.close();
                 return Response.serverError().entity("Could'nt build query for: " + search).build();
             }
+            if(start > 0){
+                query.setFirstResult(start);
+            }
+            query.setMaxResults(max);
             List<FeatureDbEntity> lstR = query.getResultList();
             for (FeatureDbEntity f : lstR) {
                 if (f.getFeatureTypeId() != null && f.getFeatureTypeId().toString().equals(cat)) {

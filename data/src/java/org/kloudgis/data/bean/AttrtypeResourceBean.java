@@ -63,7 +63,7 @@ public class AttrtypeResourceBean {
     
     
     @GET
-    @Path("{ftId}")
+    @Path("{atId}")
     public Response getAttrtype(@Context ServletContext sContext, @HeaderParam(value = "X-Kloudgis-Authentication") String auth_token, @QueryParam("sandbox") String sandbox, @PathParam("atId") Long atId) throws NotFoundException {
         HibernateEntityManager em = PersistenceManager.getInstance().getEntityManager(sandbox);
         if (em != null) {
